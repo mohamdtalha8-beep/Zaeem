@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-image: url('IMG_6458.jpeg'); /* صورتك الخاصة */
+            background-image: url('IMG_6458.jpeg'); 
             background-color: #0f0f0f; 
             background-size: cover;
             background-position: center;
@@ -77,21 +77,42 @@
             transform: translateY(-2px);
         }
 
-        /* تصميم القائمة المنسدلة للمسلسل */
-        .series-container {
-            background: rgba(30, 30, 30, 0.8);
+        /* تصميم قائمة M3U */
+        .m3u-container {
+            background: rgba(30, 30, 30, 0.9);
             padding: 20px;
             border-radius: 12px;
-            max-width: 500px;
+            max-width: 600px;
             margin: 20px auto;
             border: 1px solid #444;
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
 
-        .series-container p {
-            color: #aaa;
-            margin-top: 0;
-            margin-bottom: 15px;
+        .m3u-container input {
+            width: 80%;
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: 1px solid #FFD700;
+            background-color: #111;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .m3u-container button {
+            padding: 12px 20px;
+            background-color: #FFD700;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .m3u-container button:hover {
+            background-color: #fff;
         }
 
         .series-select {
@@ -106,20 +127,7 @@
             cursor: pointer;
             outline: none;
             text-align: center;
-            appearance: none; /* إخفاء السهم الافتراضي */
-            -webkit-appearance: none;
-            -moz-appearance: none;
-        }
-
-        .series-select option {
-            background-color: #222;
-            color: white;
-            font-size: 16px;
-            padding: 10px;
-        }
-
-        .series-select:focus {
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+            margin-top: 15px;
         }
     </style>
 </head>
@@ -133,8 +141,20 @@
         <iframe id="ytPlayer" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
     </div>
 
-    <!-- قسم القنوات المباشرة -->
-    <h2>📺 القنوات المباشرة</h2>
+    <!-- قسم قنوات M3U -->
+    <h2>🌐 قنوات M3U (الإنترنت)</h2>
+    <div class="m3u-container">
+        <p style="margin-top:0; color:#aaa;">ضع رابط M3U هنا لجلب القنوات:</p>
+        <!-- يمكنك وضع رابطك الافتراضي هنا في value -->
+        <input type="text" id="m3uUrlInput" placeholder="ضع رابط M3U هنا..." value="https://iptv-org.github.io/iptv/countries/sy.m3u">
+        <button onclick="loadM3U()">تحميل القنوات</button>
+        <select class="series-select" id="m3uSelect" onchange="playM3UChannel(this.value)">
+            <option value="" disabled selected>-- اضغط تحميل لجلب القنوات --</option>
+        </select>
+    </div>
+
+    <!-- قسم القنوات المباشرة الثابتة -->
+    <h2>📺 القنوات المباشرة (الثابتة)</h2>
     <div class="channels-grid">
         <button class="channel-btn" onclick="playChannel('https://svs.itworkscdn.net/syriatvlive/syriatv.smil/playlist_dvr.m3u8', this)">التلفزيون السوري</button>
         <button class="channel-btn" onclick="playChannel('https://svs.itworkscdn.net/syriadramalive/syriadrama.smil/playlist_dvr.m3u8', this)">سوريا دراما</button>
@@ -143,9 +163,8 @@
 
     <!-- قسم المسلسل -->
     <h2>🎬 مسلسل الإمام أحمد بن حنبل</h2>
-    <div class="series-container">
-        <p>اختر الحلقة التي تريد مشاهدتها من القائمة:</p>
-        <select class="series-select" id="episodeSelect" onchange="playYouTube(this.value)">
+    <div class="m3u-container" style="max-width: 500px;">
+        <select class="series-select" id="episodeSelect" onchange="playYouTube(this.value)" style="margin-top:0;">
             <option value="" disabled selected>-- اختر الحلقة --</option>
             <option value="rAOJZMPjxLc">الحلقة 1</option>
             <option value="e8jh0NfoUxQ">الحلقة 2</option>
@@ -185,34 +204,87 @@
         const ytPlayer = document.getElementById('ytPlayer');
         const episodeSelect = document.getElementById('episodeSelect');
         
-        // دالة تشغيل القنوات المباشرة
+        // 1. تشغيل القنوات المباشرة
         function playChannel(url, btnElement) {
             ytPlayer.style.display = 'none';
             video.style.display = 'block';
             video.src = url;
             video.play();
             
-            // إزالة التحديد من الأزرار
             document.querySelectorAll('.channel-btn').forEach(btn => btn.classList.remove('active'));
             if (btnElement) btnElement.classList.add('active');
             
-            // إعادة القائمة المنسدلة للخيار الافتراضي
             episodeSelect.selectedIndex = 0;
+            document.getElementById('m3uSelect').selectedIndex = 0;
         }
 
-        // دالة تشغيل فيديوهات يوتيوب (المسلسل)
+        // 2. تشغيل فيديوهات يوتيوب (المسلسل)
         function playYouTube(videoId) {
-            if(!videoId) return; // إذا لم يتم اختيار شيء
-            
+            if(!videoId) return; 
             video.style.display = 'none';
-            video.pause(); // إيقاف القناة المباشرة إذا كانت تعمل
+            video.pause(); 
             ytPlayer.style.display = 'block';
-            
-            // تشغيل تلقائي مع كتم الصوت (للهواتف)
             ytPlayer.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&mute=1`;
-            
-            // إزالة التحديد من أزرار القنوات
             document.querySelectorAll('.channel-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('m3uSelect').selectedIndex = 0;
+        }
+
+        // 3. دالة تحميل قنوات M3U
+        function loadM3U() {
+            const url = document.getElementById('m3uUrlInput').value;
+            const select = document.getElementById('m3uSelect');
+            
+            if (!url) {
+                alert("الرجاء وضع رابط M3U أولاً");
+                return;
+            }
+
+            select.innerHTML = '<option value="" disabled selected>جاري التحميل...</option>';
+
+            // جلب الملف من الرابط
+            fetch(url)
+                .then(response => response.text())
+                .then(data => {
+                    select.innerHTML = '<option value="" disabled selected>-- اختر القناة --</option>';
+                    const lines = data.split('\n');
+                    let currentChannelName = "";
+
+                    for (let i = 0; i < lines.length; i++) {
+                        let line = lines[i].trim();
+                        
+                        // استخراج اسم القناة
+                        if (line.startsWith('#EXTINF:')) {
+                            let commaIndex = line.lastIndexOf(',');
+                            if (commaIndex !== -1) {
+                                currentChannelName = line.substring(commaIndex + 1).trim();
+                            }
+                        } 
+                        // استخراج رابط القناة
+                        else if (line.startsWith('http') && currentChannelName !== "") {
+                            let option = document.createElement('option');
+                            option.value = line;
+                            option.text = currentChannelName;
+                            select.appendChild(option);
+                            currentChannelName = ""; // تصفير الاسم للقناة القادمة
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error("خطأ في التحميل:", error);
+                    select.innerHTML = '<option value="" disabled selected>حدث خطأ في التحميل</option>';
+                });
+        }
+
+        // 4. تشغيل قناة من قائمة M3U
+        function playM3UChannel(url) {
+            if(!url) return;
+            ytPlayer.style.display = 'none';
+            video.style.display = 'block';
+            video.src = url;
+            video.play();
+            
+            document.querySelectorAll('.channel-btn').forEach(btn => btn.classList.remove('active'));
+            episodeSelect.selectedIndex = 0;
         }
 
         // تشغيل أول قناة عند فتح الصفحة
