@@ -5,89 +5,131 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الزعيم - IPTV</title>
     <style>
+        /* إعدادات عامة للصفحة */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #121212;
+            background-color: #0f0f0f; /* أسود عميق */
             color: white;
             text-align: center;
             margin: 0;
-            padding: 20px;
+            padding: 20px 10px;
         }
+
+        /* عنوان التطبيق */
         h1 { 
-            color: #FFD700; /* لون ذهبي يناسب اسم "الزعيم" */
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            color: #FFD700; /* لون ذهبي */
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            font-size: 28px;
+            margin-bottom: 5px;
         }
-        .controls { margin: 20px 0; }
-        select {
-            padding: 12px;
-            font-size: 16px;
-            border-radius: 8px;
-            border: 1px solid #FFD700;
-            background-color: #222;
-            color: white;
-            width: 85%;
-            max-width: 350px;
-            font-weight: bold;
+        p.subtitle {
+            color: #aaa;
+            margin-top: 0;
+            margin-bottom: 20px;
         }
+        
+        /* حاوية المشغل (الفيديو) */
         .player-container {
             max-width: 800px;
-            margin: 0 auto;
+            margin: 0 auto 20px auto;
             background: #000;
-            border-radius: 10px;
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.6);
-            border: 2px solid #333;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.8);
+            border: 2px solid #222;
+            position: relative;
         }
         video {
             width: 100%;
             height: auto;
             display: block;
         }
+
+        /* حاوية القنوات (الأزرار) */
+        .channels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        /* تصميم زر القناة */
+        .channel-btn {
+            background-color: #1e1e1e;
+            color: white;
+            border: 1px solid #333;
+            padding: 12px 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* تأثير عند تمرير الماوس أو الضغط */
+        .channel-btn:hover, .channel-btn.active {
+            background-color: #FFD700;
+            color: #000;
+            border-color: #FFD700;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+        }
+
     </style>
 </head>
 <body>
 
     <h1>👑 الزعيم IPTV 👑</h1>
-    <p>أهلاً بك في برنامجك الخاص</p>
+    <p class="subtitle">اختر قناتك المفضلة للمشاهدة</p>
     
-    <!-- القائمة المنسدلة -->
-    <div class="controls">
-        <select id="channelSelect">
-            <option value="" disabled selected>-- اختر القناة --</option>
-            
-            <!-- القنوات السورية -->
-            <optgroup label="القنوات السورية">
-                <option value="http://82.137.248.16:1935/Sat/SatLive3/playlist.m3u8">التلفزيون السوري</option>
-                <option value="https://svs.itworkscdn.net/syriatvlive/syriatv.smil/playlist_dvr.m3u8">التلفزيون السوري</option>
-                <option value="http://82.137.248.16:1935/Snews/SnewLive3/playlist.m3u8">الأخبارية السورية</option>
-                <option value="http://82.137.248.21:1935/Aloula/AloulaLive3/playlist.m3u8">القناة الأولى</option>
-            </optgroup<optgroup label="قنوات أخرى">
-    <option value="https://live-hls-web-aja.getaj.net/AJA/01.m3u8">الجزيرة</option>
-</optgroup>
-            
-            <!-- قناة تجريبية للتأكد من عمل المشغل دائماً -->
-            <optgroup label="قنوات أخرى">
-                <option value="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8">قناة تجريبية</option>
-            </optgroup>
-        </select>
-    </div>
-
     <!-- مشغل الفيديو -->
     <div class="player-container">
-        <video id="videoPlayer" controls></video>
+        <video id="videoPlayer" controls autoplay></video>
+    </div>
+
+    <!-- أزرار القنوات (الشبكة) -->
+    <div class="channels-grid">
+        <!-- القنوات السورية -->
+        <button class="channel-btn" onclick="playChannel('https://svs.itworkscdn.net/syriatvlive/syriatv.smil/playlist_dvr.m3u8', this)">التلفزيون السوري</button>
+        <button class="channel-btn" onclick="playChannel('https://svs.itworkscdn.net/syriadramalive/syriadrama.smil/playlist_dvr.m3u8', this)">سوريا دراما</button>
+        <button class="channel-btn" onclick="playChannel('https://svs.itworkscdn.net/syrianews/syrianews.smil/playlist_dvr.m3u8', this)">الأخبارية السورية</button>
+        
+        <!-- قنوات عربية أخرى -->
+        <button class="channel-btn" onclick="playChannel('https://live-hls-web-aja.getaj.net/AJA/01.m3u8', this)">الجزيرة</button>
+        <button class="channel-btn" onclick="playChannel('https://live.alarabiya.net/alarabiapublish/alarabiya.smil/playlist.m3u8', this)">العربية</button>
+        <button class="channel-btn" onclick="playChannel('https://stream.skynewsarabia.com/hls/sna.m3u8', this)">سكاي نيوز</button>
     </div>
 
     <script>
         const video = document.getElementById('videoPlayer');
-        const select = document.getElementById('channelSelect');
+        
+        // دالة تشغيل القناة عند الضغط على الزر
+        function playChannel(url, btnElement) {
+            // 1. تغيير رابط الفيديو
+            video.src = url;
+            video.play();
 
-        // تغيير القناة وتشغيلها عند الاختيار
-        select.addEventListener('change', function() {
-            if(this.value) {
-                video.src = this.value;
-                video.play();
+            // 2. إزالة التحديد (اللون الذهبي) من جميع الأزرار
+            const buttons = document.querySelectorAll('.channel-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            // 3. إضافة التحديد للزر الذي تم الضغط عليه
+            if (btnElement) {
+                btnElement.classList.add('active');
             }
-        });
+        }
+
+        // تشغيل القناة الأولى تلقائياً عند فتح الصفحة
+        window.onload = function() {
+            const firstBtn = document.querySelector('.channel-btn');
+            if (firstBtn) {
+                firstBtn.click();
+            }
+        };
     </script>
 
 </body>
