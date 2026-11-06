@@ -5,31 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الزعيم - IPTV</title>
     <style>
-        /* إعدادات عامة للصفحة */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            /* هنا وضعنا صورة خلفية من الإنترنت مباشرة لكي تظهر فوراً */
-            background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop'); 
+            /* الخلفية التي ظهرت معك بنجاح */
+            background-image: url('https://images.pexels.com/photos/7135037/pexels-photo-7135037.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'); 
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
-            background-color: #0f0f0f;
+            background-color: #000;
             color: white;
             text-align: center;
             margin: 0;
             padding: 20px 10px;
         }
 
-        /* طبقة التعتيم لكي تظهر العناصر بوضوح */
         body::before {
             content: "";
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.8); /* تعتيم 80% */
+            background: rgba(0, 0, 0, 0.85);
             z-index: -1;
         }
 
-        /* عنوان التطبيق */
         h1 { 
             color: #FFD700;
             text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
@@ -42,7 +39,6 @@
             margin-bottom: 20px;
         }
         
-        /* حاوية المشغل (الفيديو) */
         .player-container {
             max-width: 800px;
             margin: 0 auto 20px auto;
@@ -51,7 +47,6 @@
             overflow: hidden;
             box-shadow: 0 10px 20px rgba(0,0,0,0.8);
             border: 2px solid #333;
-            position: relative;
         }
         video {
             width: 100%;
@@ -59,45 +54,30 @@
             display: block;
         }
 
-        /* حاوية القنوات (الأزرار) */
         .channels-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 12px;
             max-width: 800px;
             margin: 0 auto;
             padding: 10px;
         }
 
-        /* تصميم زر القناة */
         .channel-btn {
             background-color: rgba(30, 30, 30, 0.9);
             color: white;
             border: 1px solid #444;
-            padding: 10px;
+            padding: 15px 10px;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
-            flex-direction: row;
             align-items: center;
             justify-content: center;
-            gap: 8px;
         }
 
-        /* تصميم الصورة داخل الزر */
-        .channel-btn img {
-            width: 30px;
-            height: 30px;
-            object-fit: contain;
-            border-radius: 4px;
-            background-color: white; /* خلفية بيضاء للشعارات */
-            padding: 2px;
-        }
-
-        /* تأثير عند تمرير الماوس أو الضغط */
         .channel-btn:hover, .channel-btn.active {
             background-color: #FFD700;
             color: #000;
@@ -105,7 +85,6 @@
             box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
             transform: translateY(-2px);
         }
-
     </style>
 </head>
 <body>
@@ -113,51 +92,18 @@
     <h1>👑 الزعيم IPTV 👑</h1>
     <p class="subtitle">اختر قناتك المفضلة للمشاهدة</p>
     
-    <!-- مشغل الفيديو -->
     <div class="player-container">
         <video id="videoPlayer" controls autoplay></video>
     </div>
 
-    <!-- أزرار القنوات (الشبكة) -->
+    <!-- أزرار القنوات (نصية فقط، بدون صور مكسورة) -->
     <div class="channels-grid">
-        
-        <!-- التلفزيون السوري -->
-        <button class="channel-btn" onclick="playChannel('https://svs.itworkscdn.net/syriatvlive/syriatv.smil/playlist_dvr.m3u8', this)">
-            <!-- استخدمنا صورة عامة من الإنترنت كشعار مؤقت -->
-            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/0/05/Syria_TV_logo.svg/240px-Syria_TV_logo.svg.png" alt="شعار">
-            التلفزيون السوري
-        </button>
-
-        <!-- سوريا دراما -->
-        <button class="channel-btn" onclick="playChannel('https://svs.itworkscdn.net/syriadramalive/syriadrama.smil/playlist_dvr.m3u8', this)">
-            <img src="https://upload.wikimedia.org/wikipedia/ar/thumb/e/e5/Syria_Drama_logo.png/120px-Syria_Drama_logo.png" alt="شعار">
-            سوريا دراما
-        </button>
-
-        <!-- الأخبارية السورية -->
-        <button class="channel-btn" onclick="playChannel('https://svs.itworkscdn.net/syrianews/syrianews.smil/playlist_dvr.m3u8', this)">
-            <img src="https://upload.wikimedia.org/wikipedia/ar/thumb/1/1e/Syria_News_logo.png/120px-Syria_News_logo.png" alt="شعار">
-            الأخبارية السورية
-        </button>
-        
-        <!-- الجزيرة -->
-        <button class="channel-btn" onclick="playChannel('https://live-hls-web-aja.getaj.net/AJA/01.m3u8', this)">
-            <img src="https://upload.wikimedia.org/wikipedia/ar/thumb/8/8d/Al_Jazeera_Logo.png/120px-Al_Jazeera_Logo.png" alt="شعار">
-            الجزيرة
-        </button>
-
-        <!-- العربية -->
-        <button class="channel-btn" onclick="playChannel('https://live.alarabiya.net/alarabiapublish/alarabiya.smil/playlist.m3u8', this)">
-            <img src="https://upload.wikimedia.org/wikipedia/ar/thumb/2/2a/Al_Arabiya_logo.png/120px-Al_Arabiya_logo.png" alt="شعار">
-            العربية
-        </button>
-
-        <!-- سكاي نيوز -->
-        <button class="channel-btn" onclick="playChannel('https://stream.skynewsarabia.com/hls/sna.m3u8', this)">
-            <img src="https://upload.wikimedia.org/wikipedia/ar/thumb/0/0a/Sky_News_Arabia_Logo.png/120px-Sky_News_Arabia_Logo.png" alt="شعار">
-            سكاي نيوز
-        </button>
-
+        <button class="channel-btn" onclick="playChannel('https://svs.itworkscdn.net/syriatvlive/syriatv.smil/playlist_dvr.m3u8', this)">التلفزيون السوري</button>
+        <button class="channel-btn" onclick="playChannel('https://svs.itworkscdn.net/syriadramalive/syriadrama.smil/playlist_dvr.m3u8', this)">سوريا دراما</button>
+        <button class="channel-btn" onclick="playChannel('https://svs.itworkscdn.net/syrianews/syrianews.smil/playlist_dvr.m3u8', this)">الأخبارية السورية</button>
+        <button class="channel-btn" onclick="playChannel('https://live-hls-web-aja.getaj.net/AJA/01.m3u8', this)">الجزيرة</button>
+        <button class="channel-btn" onclick="playChannel('https://live.alarabiya.net/alarabiapublish/alarabiya.smil/playlist.m3u8', this)">العربية</button>
+        <button class="channel-btn" onclick="playChannel('https://stream.skynewsarabia.com/hls/sna.m3u8', this)">سكاي نيوز</button>
     </div>
 
     <script>
@@ -166,16 +112,13 @@
         function playChannel(url, btnElement) {
             video.src = url;
             video.play();
-
             const buttons = document.querySelectorAll('.channel-btn');
             buttons.forEach(btn => btn.classList.remove('active'));
-
             if (btnElement) {
                 btnElement.classList.add('active');
             }
         }
 
-        // تشغيل القناة الأولى تلقائياً
         window.onload = function() {
             const firstBtn = document.querySelector('.channel-btn');
             if (firstBtn) {
@@ -183,6 +126,5 @@
             }
         };
     </script>
-
 </body>
 </html>
