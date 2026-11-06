@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-image: url('IMG_6458.jpeg'); /* صورتك الخاصة */
+            background-image: url('IMG_6458.jpeg');
             background-color: #0f0f0f; 
             background-size: cover;
             background-position: center;
@@ -48,7 +48,6 @@
 
         #ytPlayer { display: none; }
 
-        /* تصميم أزرار القنوات الثابتة */
         .channels-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -81,12 +80,11 @@
             transform: translateY(-2px);
         }
 
-        /* تصميم قوائم الاختيار */
         .selector-container {
             background: rgba(30, 30, 30, 0.9);
             padding: 20px;
             border-radius: 12px;
-            max-width: 600px;
+            max-width: 800px;
             margin: 20px auto;
             border: 1px solid #444;
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
@@ -121,17 +119,41 @@
             text-align: center;
         }
 
-        .search-box::placeholder { color: #aaa; }
+        /* تصميم أزرار الأقسام (Categories) */
+        .categories-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 15px;
+            display: none; /* مخفي حتى يتم التحميل */
+        }
 
-        /* قائمة القنوات المخصصة (لعرض الشعارات) */
+        .category-btn {
+            background-color: #222;
+            color: #FFD700;
+            border: 1px solid #FFD700;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .category-btn:hover, .category-btn.active {
+            background-color: #FFD700;
+            color: #000;
+        }
+
+        /* حاوية القنوات */
         .channel-list-container {
             max-height: 400px;
             overflow-y: auto;
             background-color: #111;
             border: 1px solid #FFD700;
             border-radius: 8px;
-            margin-top: 10px;
-            display: none; /* مخفي حتى يتم التحميل */
+            display: none; 
         }
 
         .channel-item {
@@ -151,8 +173,8 @@
             width: 40px;
             height: 40px;
             object-fit: contain;
-            margin-left: 15px; /* المسافة بين الصورة والاسم */
-            background-color: white; /* خلفية بيضاء للشعارات الشفافة */
+            margin-left: 15px;
+            background-color: white;
             border-radius: 5px;
             padding: 2px;
         }
@@ -162,13 +184,27 @@
             font-weight: bold;
             color: #ddd;
         }
+
+        .series-select {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #FFD700;
+            background-color: #111;
+            border: 2px solid #FFD700;
+            border-radius: 8px;
+            cursor: pointer;
+            outline: none;
+            text-align: center;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
 
     <h1>👑 الزعيم IPTV 👑</h1>
     
-    <!-- المشغل -->
     <div class="player-container">
         <video id="videoPlayer" controls autoplay></video>
         <iframe id="ytPlayer" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
@@ -183,25 +219,23 @@
         
         <input type="text" id="searchInput" class="search-box" placeholder="🔍 ابحث عن قناة هنا..." onkeyup="filterChannels()">
         
-        <!-- بدلاً من القائمة المنسدلة، سنستخدم حاوية لعرض القنوات بالصور -->
-        <div class="channel-list-container" id="channelListContainer">
-            <!-- سيتم إضافة القنوات هنا بواسطة الجافاسكريبت -->
-        </div>
+        <!-- حاوية أزرار الأقسام -->
+        <div class="categories-container" id="categoriesContainer"></div>
+
+        <!-- حاوية القنوات -->
+        <div class="channel-list-container" id="channelListContainer"></div>
     </div>
 
-    <!-- قسم القنوات المباشرة الثابتة -->
     <h2>📺 القنوات المباشرة (المضمونة)</h2>
     <div class="channels-grid">
         <button class="channel-btn" onclick="playChannel('https://svs.itworkscdn.net/syriatvlive/syriatv.smil/playlist_dvr.m3u8', this)">التلفزيون السوري</button>
         <button class="channel-btn" onclick="playChannel('https://svs.itworkscdn.net/syriadramalive/syriadrama.smil/playlist_dvr.m3u8', this)">سوريا دراما</button>
         <button class="channel-btn" onclick="playChannel('https://live-hls-web-aja.getaj.net/AJA/01.m3u8', this)">الجزيرة</button>
-        <button class="channel-btn" onclick="playChannel('https://mn-nl.mncdn.com/alkass/live/alkass1/index.m3u8', this)">الكأس 1</button>
     </div>
 
-    <!-- قسم المسلسل -->
     <h2>🎬 مسلسل الإمام أحمد بن حنبل</h2>
     <div class="selector-container">
-        <select class="series-select" id="episodeSelect" onchange="playYouTube(this.value)" style="margin-top:0; width:100%; padding:15px; font-size:18px; font-weight:bold; color:#FFD700; background-color:#111; border:2px solid #FFD700; border-radius:8px; outline:none; text-align:center;">
+        <select class="series-select" id="episodeSelect" onchange="playYouTube(this.value)" style="margin-top:0;">
             <option value="" disabled selected>-- اختر الحلقة --</option>
             <option value="rAOJZMPjxLc">الحلقة 1</option>
             <option value="e8jh0NfoUxQ">الحلقة 2</option>
@@ -242,23 +276,21 @@
         const episodeSelect = document.getElementById('episodeSelect');
         const searchInput = document.getElementById('searchInput');
         const channelListContainer = document.getElementById('channelListContainer');
+        const categoriesContainer = document.getElementById('categoriesContainer');
         
         let allChannels = [];
+        let currentCategory = "الكل"; // القسم الافتراضي
 
-        // 1. تشغيل القنوات المباشرة الثابتة
         function playChannel(url, btnElement) {
             ytPlayer.style.display = 'none';
             video.style.display = 'block';
             video.src = url;
             video.play();
-            
             document.querySelectorAll('.channel-btn').forEach(btn => btn.classList.remove('active'));
             if (btnElement) btnElement.classList.add('active');
-            
             episodeSelect.selectedIndex = 0;
         }
 
-        // 2. تشغيل فيديوهات يوتيوب (المسلسل)
         function playYouTube(videoId) {
             if(!videoId) return; 
             video.style.display = 'none';
@@ -268,51 +300,57 @@
             document.querySelectorAll('.channel-btn').forEach(btn => btn.classList.remove('active'));
         }
 
-        // 3. دالة تحميل قنوات M3U (مع الشعارات)
         function loadM3U() {
             const url = document.getElementById('m3uUrlInput').value;
             
-            if (!url) {
-                alert("الرجاء وضع رابط M3U أولاً");
-                return;
-            }
-
             channelListContainer.innerHTML = '<p style="padding:10px;">جاري تحميل القنوات...</p>';
             channelListContainer.style.display = 'block';
             searchInput.style.display = 'block';
+            categoriesContainer.style.display = 'flex';
 
             fetch(url)
                 .then(response => response.text())
                 .then(data => {
-                    channelListContainer.innerHTML = ''; // تفريغ الحاوية
+                    channelListContainer.innerHTML = ''; 
+                    categoriesContainer.innerHTML = ''; 
                     const lines = data.split('\n');
                     let currentChannelName = "";
                     let currentChannelLogo = "";
+                    let currentChannelGroup = "";
                     allChannels = [];
+                    let groups = new Set(); // لتجميع الأقسام بدون تكرار
 
                     for (let i = 0; i < lines.length; i++) {
                         let line = lines[i].trim();
                         
-                        // استخراج الاسم والشعار
                         if (line.startsWith('#EXTINF:')) {
-                            // استخراج الشعار
                             let logoMatch = line.match(/tvg-logo="([^"]+)"/);
-                            currentChannelLogo = logoMatch ? logoMatch[1] : "https://via.placeholder.com/40/333/FFD700?text=TV"; // صورة افتراضية
+                            currentChannelLogo = logoMatch ? logoMatch[1] : "https://via.placeholder.com/40/333/FFD700?text=TV";
                             
-                            // استخراج الاسم
+                            let groupMatch = line.match(/group-title="([^"]+)"/);
+                            currentChannelGroup = groupMatch ? groupMatch[1] : "غير مصنف";
+                            
                             let commaIndex = line.lastIndexOf(',');
                             if (commaIndex !== -1) {
                                 currentChannelName = line.substring(commaIndex + 1).trim();
                             }
                         } 
-                        // استخراج الرابط
                         else if (line.startsWith('http') && currentChannelName !== "") {
-                            allChannels.push({ name: currentChannelName, url: line, logo: currentChannelLogo });
+                            allChannels.push({ 
+                                name: currentChannelName, 
+                                url: line, 
+                                logo: currentChannelLogo,
+                                group: currentChannelGroup 
+                            });
+                            groups.add(currentChannelGroup);
                             currentChannelName = ""; 
                             currentChannelLogo = "";
                         }
                     }
-                    renderChannels(allChannels); // عرض القنوات
+                    
+                    // إنشاء أزرار الأقسام
+                    createCategoryButtons(groups);
+                    renderChannels(allChannels); // عرض كل القنوات في البداية
                 })
                 .catch(error => {
                     console.error("خطأ في التحميل:", error);
@@ -320,11 +358,47 @@
                 });
         }
 
-        // 4. دالة عرض القنوات في الحاوية
+        // دالة إنشاء أزرار التصنيفات
+        function createCategoryButtons(groups) {
+            // زر "الكل"
+            let allBtn = document.createElement('button');
+            allBtn.className = 'category-btn active';
+            allBtn.innerText = 'الكل';
+            allBtn.onclick = () => filterByCategory('الكل', allBtn);
+            categoriesContainer.appendChild(allBtn);
+
+            // باقي الأقسام
+            groups.forEach(group => {
+                let btn = document.createElement('button');
+                btn.className = 'category-btn';
+                btn.innerText = group;
+                btn.onclick = () => filterByCategory(group, btn);
+                categoriesContainer.appendChild(btn);
+            });
+        }
+
+        // دالة التصفية حسب القسم
+        function filterByCategory(category, btnElement) {
+            currentCategory = category;
+            // تغيير الزر النشط
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+            if (btnElement) btnElement.classList.add('active');
+
+            // تفريغ مربع البحث عند تغيير القسم
+            searchInput.value = '';
+
+            if (category === 'الكل') {
+                renderChannels(allChannels);
+            } else {
+                const filtered = allChannels.filter(channel => channel.group === category);
+                renderChannels(filtered);
+            }
+        }
+
         function renderChannels(channels) {
             channelListContainer.innerHTML = '';
             if (channels.length === 0) {
-                channelListContainer.innerHTML = '<p style="padding:10px;">لا توجد قنوات</p>';
+                channelListContainer.innerHTML = '<p style="padding:10px;">لا توجد قنوات في هذا القسم</p>';
                 return;
             }
             
@@ -332,8 +406,6 @@
                 let item = document.createElement('div');
                 item.className = 'channel-item';
                 item.onclick = function() { playM3UChannel(channel.url); };
-                
-                // وضع الصورة والاسم
                 item.innerHTML = `
                     <img src="${channel.logo}" class="channel-logo" onerror="this.src='https://via.placeholder.com/40/333/FFD700?text=TV'">
                     <span class="channel-name">${channel.name}</span>
@@ -342,30 +414,34 @@
             });
         }
 
-        // 5. دالة البحث والتصفية (تعديل لتشمل الصور)
+        // دالة البحث (تأخذ بعين الاعتبار القسم المختار)
         function filterChannels() {
             const filter = searchInput.value.toLowerCase();
             
-            const filtered = allChannels.filter(channel => 
+            let filtered = allChannels;
+            // إذا كان هناك قسم محدد، نبحث داخله فقط
+            if (currentCategory !== 'الكل') {
+                filtered = filtered.filter(channel => channel.group === currentCategory);
+            }
+
+            // تصفية حسب النص
+            filtered = filtered.filter(channel => 
                 channel.name.toLowerCase().includes(filter)
             );
 
-            renderChannels(filtered); // عرض النتائج المفلترة
+            renderChannels(filtered);
         }
 
-        // 6. تشغيل قناة من القائمة
         function playM3UChannel(url) {
             if(!url) return;
             ytPlayer.style.display = 'none';
             video.style.display = 'block';
             video.src = url;
             video.play();
-            
             document.querySelectorAll('.channel-btn').forEach(btn => btn.classList.remove('active'));
             episodeSelect.selectedIndex = 0;
         }
 
-        // تشغيل أول قناة عند فتح الصفحة
         window.onload = function() {
             const firstBtn = document.querySelector('.channel-btn');
             if (firstBtn) firstBtn.click();
