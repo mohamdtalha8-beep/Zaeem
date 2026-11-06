@@ -81,7 +81,7 @@
             transform: translateY(-2px);
         }
 
-        /* تصميم قوائم الاختيار (M3U والمسلسل) */
+        /* تصميم قوائم الاختيار */
         .selector-container {
             background: rgba(30, 30, 30, 0.9);
             padding: 20px;
@@ -90,17 +90,6 @@
             margin: 20px auto;
             border: 1px solid #444;
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-        }
-
-        .selector-container input[type="text"] {
-            width: 85%;
-            padding: 12px;
-            font-size: 16px;
-            border-radius: 8px;
-            border: 1px solid #FFD700;
-            background-color: #111;
-            color: white;
-            margin-bottom: 10px;
         }
 
         .load-btn {
@@ -113,9 +102,27 @@
             font-weight: bold;
             cursor: pointer;
             transition: 0.3s;
+            width: 100%;
+            margin-bottom: 15px;
         }
         
         .load-btn:hover { background-color: #fff; }
+
+        /* مربع البحث الجديد */
+        .search-box {
+            width: 90%;
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: 1px solid #FFD700;
+            background-color: #222;
+            color: white;
+            margin-bottom: 15px;
+            display: none; /* يظهر فقط عند تحميل القنوات */
+            text-align: center;
+        }
+
+        .search-box::placeholder { color: #aaa; }
 
         .series-select {
             width: 100%;
@@ -143,13 +150,16 @@
         <iframe id="ytPlayer" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
     </div>
 
-    <!-- قسم قنوات M3U (الـ 300 قناة) -->
+    <!-- قسم قنوات M3U -->
     <h2>🌐 القنوات العربية (M3U)</h2>
     <div class="selector-container">
-        <p style="margin-top:0; color:#aaa;">اضغط لتحميل مئات القنوات العربية:</p>
-        <!-- رابط القنوات العربية الشامل -->
+        <!-- الرابط مخفي في الكود -->
         <input type="text" id="m3uUrlInput" value="https://iptv-org.github.io/iptv/regions/arab.m3u" style="display:none;"> 
+        
         <button class="load-btn" onclick="loadM3U()">تحميل القنوات العربية</button>
+        
+        <!-- مربع البحث (مخفي في البداية) -->
+        <input type="text" id="searchInput" class="search-box" placeholder="🔍 ابحث عن قناة هنا..." onkeyup="filterChannels()">
         
         <select class="series-select" id="m3uSelect" onchange="playM3UChannel(this.value)">
             <option value="" disabled selected>-- اضغط تحميل لجلب القنوات --</option>
@@ -208,7 +218,11 @@
         const ytPlayer = document.getElementById('ytPlayer');
         const episodeSelect = document.getElementById('episodeSelect');
         const m3uSelect = document.getElementById('m3uSelect');
+        const searchInput = document.getElementById('searchInput');
         
+        // مصفوفة لحفظ كل القنوات التي تم تحميلها
+        let allChannels = [];
+
         // 1. تشغيل القنوات المباشرة الثابتة
         function playChannel(url, btnElement) {
             ytPlayer.style.display = 'none';
@@ -234,7 +248,7 @@
             m3uSelect.selectedIndex = 0;
         }
 
-        // 3. دالة تحميل قنوات M3U (الـ 300 قناة)
+        // 3. دالة تحميل قنوات M3U
         function loadM3U() {
             const url = document.getElementById('m3uUrlInput').value;
             
@@ -244,6 +258,7 @@
             }
 
             m3uSelect.innerHTML = '<option value="" disabled selected>جاري تحميل القنوات... (قد يستغرق ثواني)</option>';
+            searchInput.style.display = 'none';
 
             fetch(url)
                 .then(response => response.text())
@@ -251,6 +266,7 @@
                     m3uSelect.innerHTML = '<option value="" disabled selected>-- اختر القناة --</option>';
                     const lines = data.split('\n');
                     let currentChannelName = "";
+                    allChannels = []; // تصفير المصفوفة
 
                     for (let i = 0; i < lines.length; i++) {
                         let line = lines[i].trim();
@@ -264,6 +280,9 @@
                         } 
                         // استخراج رابط القناة
                         else if (line.startsWith('http') && currentChannelName !== "") {
+                            // حفظ القناة في المصفوفة
+                            allChannels.push({ name: currentChannelName, url: line });
+                            
                             let option = document.createElement('option');
                             option.value = line;
                             option.text = currentChannelName;
@@ -271,6 +290,9 @@
                             currentChannelName = ""; 
                         }
                     }
+                    
+                    // إظهار مربع البحث بعد التحميل
+                    searchInput.style.display = 'block';
                 })
                 .catch(error => {
                     console.error("خطأ في التحميل:", error);
@@ -278,7 +300,29 @@
                 });
         }
 
-        // 4. تشغيل قناة من قائمة M3U
+        // 4. دالة البحث والتصفية (الميزة الجديدة)
+        function filterChannels() {
+            const filter = searchInput.value.toLowerCase();
+            m3uSelect.innerHTML = '<option value="" disabled selected>-- نتائج البحث --</option>';
+            
+            // تصفية القنوات بناءً على النص المكتوب
+            const filtered = allChannels.filter(channel => 
+                channel.name.toLowerCase().includes(filter)
+            );
+
+            if (filtered.length === 0) {
+                m3uSelect.innerHTML = '<option value="" disabled selected>لا توجد قنوات بهذا الاسم</option>';
+            } else {
+                filtered.forEach(channel => {
+                    let option = document.createElement('option');
+                    option.value = channel.url;
+                    option.text = channel.name;
+                    m3uSelect.appendChild(option);
+                });
+            }
+        }
+
+        // 5. تشغيل قناة من قائمة M3U
         function playM3UChannel(url) {
             if(!url) return;
             ytPlayer.style.display = 'none';
