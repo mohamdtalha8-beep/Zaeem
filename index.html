@@ -3,57 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مشروع Zaeem - IPTV</title>
+    <title>الزعيم - IPTV</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #1a1a1a;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
             color: white;
             text-align: center;
             margin: 0;
             padding: 20px;
         }
-        h1 { color: #4CAF50; }
+        h1 { 
+            color: #FFD700; /* لون ذهبي يناسب اسم "الزعيم" */
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .controls { margin: 20px 0; }
+        select {
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: 1px solid #FFD700;
+            background-color: #222;
+            color: white;
+            width: 85%;
+            max-width: 350px;
+            font-weight: bold;
+        }
         .player-container {
             max-width: 800px;
             margin: 0 auto;
             background: #000;
             border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.6);
+            border: 2px solid #333;
         }
         video {
             width: 100%;
             height: auto;
             display: block;
         }
-        .note {
-            margin-top: 15px;
-            font-size: 14px;
-            color: #aaa;
-        }
     </style>
 </head>
 <body>
 
-    <h1>مرحباً بك في برنامج IPTV الخاص بي</h1>
-    <p>هذا البرنامج الأول من أجل التعلم</p>
-
-    <div class="player-container">
-        <video id="videoPlayer" controls autoplay></video>
-    </div>
+    <h1>👑 الزعيم IPTV 👑</h1>
+    <p>أهلاً بك في برنامجك الخاص</p>
     
-    <div class="note">
-        <p>القناة التجريبية تعمل الآن (قد تحتاج للضغط على زر التشغيل).</p>
+    <!-- القائمة المنسدلة -->
+    <div class="controls">
+        <select id="channelSelect">
+            <option value="" disabled selected>-- اختر القناة --</option>
+            
+            <!-- القنوات السورية -->
+            <optgroup label="القنوات السورية">
+                <!-- ملاحظة: الروابط أدناه هي روابط تجريبية، يجب استبدالها بروابط القنوات الحقيقية -->
+                <option value="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8">التلفزيون السوري</option>
+                <option value="https://test-streams.mux.dev/tos_ismc/main.m3u8">قناة سوريا دراما</option>
+                <option value="https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8">قناة سوريا tv</option>
+            </optgroup>
+            
+            <!-- قسم آخر للتجربة -->
+            <optgroup label="قنوات أخرى">
+                <option value="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8">قناة تجريبية</option>
+            </optgroup>
+        </select>
+    </div>
+
+    <!-- مشغل الفيديو -->
+    <div class="player-container">
+        <video id="videoPlayer" controls></video>
     </div>
 
     <script>
-        // رابط قناة تجريبية مفتوحة المصدر
-        const channelUrl = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8";
-        
-        // ربط المشغل بالفيديو
         const video = document.getElementById('videoPlayer');
-        video.src = channelUrl;
+        const select = document.getElementById('channelSelect');
+
+        // تغيير القناة وتشغيلها عند الاختيار
+        select.addEventListener('change', function() {
+            if(this.value) {
+                video.src = this.value;
+                video.play();
+            }
+        });
     </script>
 
 </body>
