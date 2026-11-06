@@ -22,14 +22,13 @@
             content: "";
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85); /* تعتيم لكي تظهر العناصر */
+            background: rgba(0, 0, 0, 0.85);
             z-index: -1;
         }
 
         h1 { color: #FFD700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); font-size: 28px; margin-bottom: 20px; }
         h2 { color: #FFD700; text-align: right; padding-right: 10px; font-size: 20px; margin-top: 30px; border-right: 4px solid #FFD700; padding-right: 15px; }
 
-        /* حاوية المشغل */
         .player-container {
             max-width: 800px;
             margin: 0 auto 20px auto;
@@ -49,7 +48,6 @@
 
         #ytPlayer { display: none; }
 
-        /* شبكة أزرار القنوات */
         .channels-grid {
             display: flex;
             justify-content: center;
@@ -79,57 +77,49 @@
             transform: translateY(-2px);
         }
 
-        /* شبكة البوسترات (المسلسل) */
-        .poster-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-            gap: 15px;
-            max-width: 900px;
-            margin: 0 auto;
+        /* تصميم القائمة المنسدلة للمسلسل */
+        .series-container {
+            background: rgba(30, 30, 30, 0.8);
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 500px;
+            margin: 20px auto;
+            border: 1px solid #444;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        .series-container p {
+            color: #aaa;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .series-select {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #FFD700;
+            background-color: #111;
+            border: 2px solid #FFD700;
+            border-radius: 8px;
+            cursor: pointer;
+            outline: none;
+            text-align: center;
+            appearance: none; /* إخفاء السهم الافتراضي */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+        }
+
+        .series-select option {
+            background-color: #222;
+            color: white;
+            font-size: 16px;
             padding: 10px;
         }
 
-        .poster-item {
-            position: relative;
-            cursor: pointer;
-            border-radius: 8px;
-            overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            background-color: #222;
-            border: 2px solid transparent;
-        }
-
-        .poster-item img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            display: block;
-        }
-
-        .poster-item:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
-            border-color: #FFD700;
-        }
-
-        .poster-title {
-            background: rgba(0, 0, 0, 0.85);
-            color: white;
-            padding: 8px 5px;
-            font-size: 13px;
-            font-weight: bold;
-            text-align: center;
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        
-        /* تمييز البوستر الذي يعمل حالياً */
-        .poster-item.active-poster {
-            border-color: #FFD700;
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
-            transform: scale(1.05);
+        .series-select:focus {
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
         }
     </style>
 </head>
@@ -153,75 +143,76 @@
 
     <!-- قسم المسلسل -->
     <h2>🎬 مسلسل الإمام أحمد بن حنبل</h2>
-    <div class="poster-grid">
-        <!-- تم تجميع جميع الحلقات الـ 30 هنا -->
-        <div class="poster-item" onclick="playYouTube('rAOJZMPjxLc', this)"><img src="https://i.ytimg.com/vi/rAOJZMPjxLc/maxresdefault.jpg" alt="ح1"><div class="poster-title">الحلقة 1</div></div>
-        <div class="poster-item" onclick="playYouTube('e8jh0NfoUxQ', this)"><img src="https://i.ytimg.com/vi/e8jh0NfoUxQ/maxresdefault.jpg" alt="ح2"><div class="poster-title">الحلقة 2</div></div>
-        <div class="poster-item" onclick="playYouTube('nN5A1RGBF3c', this)"><img src="https://i.ytimg.com/vi/nN5A1RGBF3c/maxresdefault.jpg" alt="ح3"><div class="poster-title">الحلقة 3</div></div>
-        <div class="poster-item" onclick="playYouTube('UI6qR865ehg', this)"><img src="https://i.ytimg.com/vi/UI6qR865ehg/maxresdefault.jpg" alt="ح4"><div class="poster-title">الحلقة 4</div></div>
-        <div class="poster-item" onclick="playYouTube('8NJE5yb_lqw', this)"><img src="https://i.ytimg.com/vi/8NJE5yb_lqw/maxresdefault.jpg" alt="ح5"><div class="poster-title">الحلقة 5</div></div>
-        <div class="poster-item" onclick="playYouTube('g5FrTDkth1I', this)"><img src="https://i.ytimg.com/vi/g5FrTDkth1I/maxresdefault.jpg" alt="ح6"><div class="poster-title">الحلقة 6</div></div>
-        <div class="poster-item" onclick="playYouTube('_9Q7Nf1Ui7Q', this)"><img src="https://i.ytimg.com/vi/_9Q7Nf1Ui7Q/maxresdefault.jpg" alt="ح7"><div class="poster-title">الحلقة 7</div></div>
-        <div class="poster-item" onclick="playYouTube('zNcIpZu5Yhw', this)"><img src="https://i.ytimg.com/vi/zNcIpZu5Yhw/maxresdefault.jpg" alt="ح8"><div class="poster-title">الحلقة 8</div></div>
-        <div class="poster-item" onclick="playYouTube('AAMwQCeeVZI', this)"><img src="https://i.ytimg.com/vi/AAMwQCeeVZI/maxresdefault.jpg" alt="ح9"><div class="poster-title">الحلقة 9</div></div>
-        <div class="poster-item" onclick="playYouTube('dDHnvmGSemw', this)"><img src="https://i.ytimg.com/vi/dDHnvmGSemw/maxresdefault.jpg" alt="ح10"><div class="poster-title">الحلقة 10</div></div>
-        <div class="poster-item" onclick="playYouTube('AjS0rtLjX8A', this)"><img src="https://i.ytimg.com/vi/AjS0rtLjX8A/maxresdefault.jpg" alt="ح11"><div class="poster-title">الحلقة 11</div></div>
-        <div class="poster-item" onclick="playYouTube('dAtMZ-U9taA', this)"><img src="https://i.ytimg.com/vi/dAtMZ-U9taA/maxresdefault.jpg" alt="ح12"><div class="poster-title">الحلقة 12</div></div>
-        <div class="poster-item" onclick="playYouTube('EtE8uK22X-w', this)"><img src="https://i.ytimg.com/vi/EtE8uK22X-w/maxresdefault.jpg" alt="ح13"><div class="poster-title">الحلقة 13</div></div>
-        <div class="poster-item" onclick="playYouTube('qsNdkdS81Q0', this)"><img src="https://i.ytimg.com/vi/qsNdkdS81Q0/maxresdefault.jpg" alt="ح14"><div class="poster-title">الحلقة 14</div></div>
-        <div class="poster-item" onclick="playYouTube('8I5TxMoAcOQ', this)"><img src="https://i.ytimg.com/vi/8I5TxMoAcOQ/maxresdefault.jpg" alt="ح15"><div class="poster-title">الحلقة 15</div></div>
-        <div class="poster-item" onclick="playYouTube('5pPYjrfbkuw', this)"><img src="https://i.ytimg.com/vi/5pPYjrfbkuw/maxresdefault.jpg" alt="ح16"><div class="poster-title">الحلقة 16</div></div>
-        <div class="poster-item" onclick="playYouTube('ty516Uh3xP8', this)"><img src="https://i.ytimg.com/vi/ty516Uh3xP8/maxresdefault.jpg" alt="ح17"><div class="poster-title">الحلقة 17</div></div>
-        <div class="poster-item" onclick="playYouTube('P82rEDYDozU', this)"><img src="https://i.ytimg.com/vi/P82rEDYDozU/maxresdefault.jpg" alt="ح18"><div class="poster-title">الحلقة 18</div></div>
-        <div class="poster-item" onclick="playYouTube('tq_SBbmJJ8A', this)"><img src="https://i.ytimg.com/vi/tq_SBbmJJ8A/maxresdefault.jpg" alt="ح19"><div class="poster-title">الحلقة 19</div></div>
-        <div class="poster-item" onclick="playYouTube('d1fns8LG3uo', this)"><img src="https://i.ytimg.com/vi/d1fns8LG3uo/maxresdefault.jpg" alt="ح20"><div class="poster-title">الحلقة 20</div></div>
-        <div class="poster-item" onclick="playYouTube('V6yPHEXN1fg', this)"><img src="https://i.ytimg.com/vi/V6yPHEXN1fg/maxresdefault.jpg" alt="ح21"><div class="poster-title">الحلقة 21</div></div>
-        <div class="poster-item" onclick="playYouTube('VtJuAWosqM4', this)"><img src="https://i.ytimg.com/vi/VtJuAWosqM4/maxresdefault.jpg" alt="ح22"><div class="poster-title">الحلقة 22</div></div>
-        <div class="poster-item" onclick="playYouTube('hNXkpfyPi_Q', this)"><img src="https://i.ytimg.com/vi/hNXkpfyPi_Q/maxresdefault.jpg" alt="ح23"><div class="poster-title">الحلقة 23</div></div>
-        <div class="poster-item" onclick="playYouTube('zCJWST2u6Vw', this)"><img src="https://i.ytimg.com/vi/zCJWST2u6Vw/maxresdefault.jpg" alt="ح24"><div class="poster-title">الحلقة 24</div></div>
-        <div class="poster-item" onclick="playYouTube('E41YElDToHw', this)"><img src="https://i.ytimg.com/vi/E41YElDToHw/maxresdefault.jpg" alt="ح25"><div class="poster-title">الحلقة 25</div></div>
-        <div class="poster-item" onclick="playYouTube('JHgGELihZjs', this)"><img src="https://i.ytimg.com/vi/JHgGELihZjs/maxresdefault.jpg" alt="ح26"><div class="poster-title">الحلقة 26</div></div>
-        <div class="poster-item" onclick="playYouTube('ofkmmFBkx4o', this)"><img src="https://i.ytimg.com/vi/ofkmmFBkx4o/maxresdefault.jpg" alt="ح27"><div class="poster-title">الحلقة 27</div></div>
-        <div class="poster-item" onclick="playYouTube('4thw1O2Ql-k', this)"><img src="https://i.ytimg.com/vi/4thw1O2Ql-k/maxresdefault.jpg" alt="ح28"><div class="poster-title">الحلقة 28</div></div>
-        <div class="poster-item" onclick="playYouTube('D-eeoZP5Ido', this)"><img src="https://i.ytimg.com/vi/D-eeoZP5Ido/maxresdefault.jpg" alt="ح29"><div class="poster-title">الحلقة 29</div></div>
-        <div class="poster-item" onclick="playYouTube('RDPSiRV4TxY', this)"><img src="https://i.ytimg.com/vi/RDPSiRV4TxY/maxresdefault.jpg" alt="ح30"><div class="poster-title">الحلقة 30</div></div>
+    <div class="series-container">
+        <p>اختر الحلقة التي تريد مشاهدتها من القائمة:</p>
+        <select class="series-select" id="episodeSelect" onchange="playYouTube(this.value)">
+            <option value="" disabled selected>-- اختر الحلقة --</option>
+            <option value="rAOJZMPjxLc">الحلقة 1</option>
+            <option value="e8jh0NfoUxQ">الحلقة 2</option>
+            <option value="nN5A1RGBF3c">الحلقة 3</option>
+            <option value="UI6qR865ehg">الحلقة 4</option>
+            <option value="8NJE5yb_lqw">الحلقة 5</option>
+            <option value="g5FrTDkth1I">الحلقة 6</option>
+            <option value="_9Q7Nf1Ui7Q">الحلقة 7</option>
+            <option value="zNcIpZu5Yhw">الحلقة 8</option>
+            <option value="AAMwQCeeVZI">الحلقة 9</option>
+            <option value="dDHnvmGSemw">الحلقة 10</option>
+            <option value="AjS0rtLjX8A">الحلقة 11</option>
+            <option value="dAtMZ-U9taA">الحلقة 12</option>
+            <option value="EtE8uK22X-w">الحلقة 13</option>
+            <option value="qsNdkdS81Q0">الحلقة 14</option>
+            <option value="8I5TxMoAcOQ">الحلقة 15</option>
+            <option value="5pPYjrfbkuw">الحلقة 16</option>
+            <option value="ty516Uh3xP8">الحلقة 17</option>
+            <option value="P82rEDYDozU">الحلقة 18</option>
+            <option value="tq_SBbmJJ8A">الحلقة 19</option>
+            <option value="d1fns8LG3uo">الحلقة 20</option>
+            <option value="V6yPHEXN1fg">الحلقة 21</option>
+            <option value="VtJuAWosqM4">الحلقة 22</option>
+            <option value="hNXkpfyPi_Q">الحلقة 23</option>
+            <option value="zCJWST2u6Vw">الحلقة 24</option>
+            <option value="E41YElDToHw">الحلقة 25</option>
+            <option value="JHgGELihZjs">الحلقة 26</option>
+            <option value="ofkmmFBkx4o">الحلقة 27</option>
+            <option value="4thw1O2Ql-k">الحلقة 28</option>
+            <option value="D-eeoZP5Ido">الحلقة 29</option>
+            <option value="RDPSiRV4TxY">الحلقة 30 (الأخيرة)</option>
+        </select>
     </div>
 
     <script>
         const video = document.getElementById('videoPlayer');
         const ytPlayer = document.getElementById('ytPlayer');
+        const episodeSelect = document.getElementById('episodeSelect');
         
-        // تشغيل القنوات
+        // دالة تشغيل القنوات المباشرة
         function playChannel(url, btnElement) {
-            // إخفاء مشغل يوتيوب وإظهار مشغل الفيديو
             ytPlayer.style.display = 'none';
             video.style.display = 'block';
             video.src = url;
             video.play();
             
-            // إزالة التحديد الذهبي من الأزرار والبوسترات
+            // إزالة التحديد من الأزرار
             document.querySelectorAll('.channel-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.poster-item').forEach(p => p.classList.remove('active-poster'));
-            
             if (btnElement) btnElement.classList.add('active');
+            
+            // إعادة القائمة المنسدلة للخيار الافتراضي
+            episodeSelect.selectedIndex = 0;
         }
 
-        // تشغيل فيديوهات يوتيوب (المسلسل)
-        function playYouTube(videoId, posterElement) {
-            // إخفاء مشغل الفيديو وإظهار مشغل يوتيوب
+        // دالة تشغيل فيديوهات يوتيوب (المسلسل)
+        function playYouTube(videoId) {
+            if(!videoId) return; // إذا لم يتم اختيار شيء
+            
             video.style.display = 'none';
-            video.pause();
+            video.pause(); // إيقاف القناة المباشرة إذا كانت تعمل
             ytPlayer.style.display = 'block';
             
-            // إضافة mute=1 لتشغيل الفيديو تلقائياً على الهواتف
+            // تشغيل تلقائي مع كتم الصوت (للهواتف)
             ytPlayer.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&mute=1`;
             
-            // إزالة التحديد الذهبي من الأزرار والبوسترات
+            // إزالة التحديد من أزرار القنوات
             document.querySelectorAll('.channel-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.poster-item').forEach(p => p.classList.remove('active-poster'));
-            
-            // تمييز البوستر الذي تم الضغط عليه
-            if (posterElement) posterElement.classList.add('active-poster');
         }
 
         // تشغيل أول قناة عند فتح الصفحة
