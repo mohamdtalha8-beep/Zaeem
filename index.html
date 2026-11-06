@@ -41,12 +41,10 @@
             padding-top: 56.25%;
         }
 
-        video, iframe {
+        video {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%; border: none;
         }
-
-        #ytPlayer { display: none; }
 
         .channels-grid {
             display: grid;
@@ -70,6 +68,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            text-decoration: none;
         }
 
         .channel-btn:hover, .channel-btn.active {
@@ -80,18 +79,14 @@
             transform: translateY(-2px);
         }
 
-        /* تصميم القائمة المنسدلة للمسلسل */
-        .series-select {
-            padding: 12px;
-            font-size: 16px;
-            border-radius: 8px;
-            border: 2px solid #FFD700;
-            background-color: #222;
+        /* تصميم أزرار يوتيوب */
+        .yt-btn {
+            background-color: rgba(200, 0, 0, 0.8);
+            border-color: #f00;
+        }
+        .yt-btn:hover {
+            background-color: #f00;
             color: white;
-            width: 90%;
-            max-width: 400px;
-            font-weight: bold;
-            margin-top: 10px;
         }
     </style>
 </head>
@@ -101,7 +96,6 @@
     
     <div class="player-container">
         <video id="videoPlayer" controls autoplay></video>
-        <iframe id="ytPlayer" allow="autoplay; encrypted-media" allowfullscreen></iframe>
     </div>
 
     <!-- قسم القنوات المباشرة -->
@@ -114,80 +108,27 @@
 
     <!-- قسم المسلسل -->
     <h2 style="color: #FFD700; margin-top: 30px;">🎬 مسلسل الإمام أحمد بن حنبل</h2>
-    <p style="color: #aaa; font-size: 14px;">اختر الحلقة من القائمة للمشاهدة</p>
+    <p style="color: #aaa; font-size: 14px;">اضغط على الحلقة لتفتح في تطبيق يوتيوب</p>
     
-    <select class="series-select" id="seriesSelect" onchange="playYouTube(this.value)">
-        <option value="" disabled selected>-- اختر الحلقة --</option>
-        <option value="kYt1w0f7V0o">الحلقة 1</option>
-        <option value="2p1b6sVq7F4">الحلقة 2</option>
-        <option value="gK2s9Vq7F4A">الحلقة 3</option>
-        <option value="L4p1b6sVq7F">الحلقة 4</option>
-        <option value="R8x2T5yW9q">الحلقة 5</option>
-        <option value="M3n7B1vC5x">الحلقة 6</option>
-        <option value="P9j4K2wL6z">الحلقة 7</option>
-        <option value="T5y8R1wN4m">الحلقة 8</option>
-        <option value="B2v6M9xQ3p">الحلقة 9</option>
-        <option value="H7k3L8wJ5r">الحلقة 10</option>
-        <option value="V1n5T9yC7s">الحلقة 11</option>
-        <option value="F4w8P2mK6d">الحلقة 12</option>
-        <option value="J9x3R7vB1q">الحلقة 13</option>
-        <option value="N6m1K5wT8z">الحلقة 14</option>
-        <option value="Q2p7L4yV9x">الحلقة 15</option>
-        <option value="W8k3J6mR2n">الحلقة 16</option>
-        <option value="C5v9T1pL4w">الحلقة 17</option>
-        <option value="Y3r7M2xK8b">الحلقة 18</option>
-        <option value="D1w6P5vJ3m">الحلقة 19</option>
-        <option value="Z9x2R8yT5k">الحلقة 20</option>
-        <option value="G4m8K3wL7p">الحلقة 21</option>
-        <option value="S7v1T6yB9x">الحلقة 22</option>
-        <option value="K5p9L4mN2w">الحلقة 23</option>
-        <option value="X2y8R3vJ6t">الحلقة 24</option>
-        <option value="A6w1M7xK4p">الحلقة 25</option>
-        <option value="E9v5T2yL8n">الحلقة 26</option>
-        <option value="U3m7K1wR5x">الحلقة 27</option>
-        <option value="I8p4L9vN3b">الحلقة 28</option>
-        <option value="O1x6R2yT7m">الحلقة 29</option>
-        <option value="Y5w9K3vJ1p">الحلقة 30</option>
-    </select>
+    <div class="channels-grid">
+        <!-- الأزرار جاهزة، كل ما عليك فعله هو وضع الرابط الحقيقي مكان علامة # -->
+        <a href="#" target="_blank" class="channel-btn yt-btn">الحلقة 1</a>
+        <a href="#" target="_blank" class="channel-btn yt-btn">الحلقة 2</a>
+        <a href="#" target="_blank" class="channel-btn yt-btn">الحلقة 3</a>
+        <a href="#" target="_blank" class="channel-btn yt-btn">الحلقة 4</a>
+        <a href="#" target="_blank" class="channel-btn yt-btn">الحلقة 5</a>
+    </div>
 
     <script>
         const video = document.getElementById('videoPlayer');
-        const ytPlayer = document.getElementById('ytPlayer');
         
-        // دالة تشغيل القنوات
         function playChannel(url, btnElement) {
-            ytPlayer.style.display = 'none';
-            video.style.display = 'block';
             video.src = url;
             video.play();
-            
-            // إزالة التحديد عن الأزرار الأخرى
             const buttons = document.querySelectorAll('.channel-btn');
             buttons.forEach(btn => btn.classList.remove('active'));
             if (btnElement) btnElement.classList.add('active');
         }
-
-        // دالة تشغيل فيديوهات يوتيوب (المسلسل)
-        function playYouTube(videoId) {
-            if(!videoId) return; // إذا لم يتم اختيار شيء
-            
-            video.style.display = 'none';
-            video.pause(); // إيقاف القناة المباشرة إذا كانت تعمل
-            ytPlayer.style.display = 'block';
-            // إضافة &mute=0 لضمان تشغيل الصوت
-            ytPlayer.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
-            
-            // إزالة التحديد الذهبي عن أزرار القنوات
-            const buttons = document.querySelectorAll('.channel-btn');
-            buttons.forEach(btn => btn.classList.remove('active'));
-        }
-        
-        // عند اختيار قناة، نرجع القائمة المنسدلة للخيار الافتراضي
-        document.querySelectorAll('.channel-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.getElementById('seriesSelect').selectedIndex = 0;
-            });
-        });
     </script>
 </body>
 </html>
