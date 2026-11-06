@@ -8,7 +8,8 @@
         /* إعدادات عامة للصفحة */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-image: url('background.jpg'); /* تأكد أنك رفعت الصورة بهذا الاسم */
+            /* هنا وضعنا صورة خلفية من الإنترنت مباشرة لكي تظهر فوراً */
+            background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop'); 
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -24,7 +25,7 @@
             content: "";
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.75);
+            background: rgba(0, 0, 0, 0.8); /* تعتيم 80% */
             z-index: -1;
         }
 
@@ -61,14 +62,14 @@
         /* حاوية القنوات (الأزرار) */
         .channels-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* تكبير الأزرار قليلاً */
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 12px;
             max-width: 800px;
             margin: 0 auto;
             padding: 10px;
         }
 
-        /* تصميم زر القناة مع الصورة */
+        /* تصميم زر القناة */
         .channel-btn {
             background-color: rgba(30, 30, 30, 0.9);
             color: white;
@@ -80,18 +81,20 @@
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
-            flex-direction: row; /* الصورة بجانب النص */
+            flex-direction: row;
             align-items: center;
-            justify-content: center; /* توسيط المحتوى */
-            gap: 8px; /* مسافة بين الصورة والنص */
+            justify-content: center;
+            gap: 8px;
         }
 
         /* تصميم الصورة داخل الزر */
         .channel-btn img {
-            width: 25px; /* حجم الشعار */
-            height: 25px;
-            object-fit: contain; /* لضمان عدم تشوه الصورة */
+            width: 30px;
+            height: 30px;
+            object-fit: contain;
             border-radius: 4px;
+            background-color: white; /* خلفية بيضاء للشعارات */
+            padding: 2px;
         }
 
         /* تأثير عند تمرير الماوس أو الضغط */
@@ -100,7 +103,7 @@
             color: #000;
             border-color: #FFD700;
             box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
-            transform: translateY(-2px); /* حركة بسيطة للأعلى */
+            transform: translateY(-2px);
         }
 
     </style>
@@ -120,37 +123,38 @@
         
         <!-- التلفزيون السوري -->
         <button class="channel-btn" onclick="playChannel('https://svs.itworkscdn.net/syriatvlive/syriatv.smil/playlist_dvr.m3u8', this)">
-            <img src="https://upload.wikimedia.org/wikipedia/ar/thumb/8/8c/Syria_TV_logo.png/120px-Syria_TV_logo.png" alt="Syria TV">
+            <!-- استخدمنا صورة عامة من الإنترنت كشعار مؤقت -->
+            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/0/05/Syria_TV_logo.svg/240px-Syria_TV_logo.svg.png" alt="شعار">
             التلفزيون السوري
         </button>
 
         <!-- سوريا دراما -->
         <button class="channel-btn" onclick="playChannel('https://svs.itworkscdn.net/syriadramalive/syriadrama.smil/playlist_dvr.m3u8', this)">
-            <img src="https://upload.wikimedia.org/wikipedia/ar/thumb/e/e5/Syria_Drama_logo.png/120px-Syria_Drama_logo.png" alt="Syria Drama">
+            <img src="https://upload.wikimedia.org/wikipedia/ar/thumb/e/e5/Syria_Drama_logo.png/120px-Syria_Drama_logo.png" alt="شعار">
             سوريا دراما
         </button>
 
         <!-- الأخبارية السورية -->
         <button class="channel-btn" onclick="playChannel('https://svs.itworkscdn.net/syrianews/syrianews.smil/playlist_dvr.m3u8', this)">
-            <img src="https://upload.wikimedia.org/wikipedia/ar/thumb/1/1e/Syria_News_logo.png/120px-Syria_News_logo.png" alt="Syria News">
+            <img src="https://upload.wikimedia.org/wikipedia/ar/thumb/1/1e/Syria_News_logo.png/120px-Syria_News_logo.png" alt="شعار">
             الأخبارية السورية
         </button>
         
         <!-- الجزيرة -->
         <button class="channel-btn" onclick="playChannel('https://live-hls-web-aja.getaj.net/AJA/01.m3u8', this)">
-            <img src="https://upload.wikimedia.org/wikipedia/ar/thumb/8/8d/Al_Jazeera_Logo.png/120px-Al_Jazeera_Logo.png" alt="Al Jazeera">
+            <img src="https://upload.wikimedia.org/wikipedia/ar/thumb/8/8d/Al_Jazeera_Logo.png/120px-Al_Jazeera_Logo.png" alt="شعار">
             الجزيرة
         </button>
 
         <!-- العربية -->
         <button class="channel-btn" onclick="playChannel('https://live.alarabiya.net/alarabiapublish/alarabiya.smil/playlist.m3u8', this)">
-            <img src="https://upload.wikimedia.org/wikipedia/ar/thumb/2/2a/Al_Arabiya_logo.png/120px-Al_Arabiya_logo.png" alt="Al Arabiya">
+            <img src="https://upload.wikimedia.org/wikipedia/ar/thumb/2/2a/Al_Arabiya_logo.png/120px-Al_Arabiya_logo.png" alt="شعار">
             العربية
         </button>
 
         <!-- سكاي نيوز -->
         <button class="channel-btn" onclick="playChannel('https://stream.skynewsarabia.com/hls/sna.m3u8', this)">
-            <img src="https://upload.wikimedia.org/wikipedia/ar/thumb/0/0a/Sky_News_Arabia_Logo.png/120px-Sky_News_Arabia_Logo.png" alt="Sky News">
+            <img src="https://upload.wikimedia.org/wikipedia/ar/thumb/0/0a/Sky_News_Arabia_Logo.png/120px-Sky_News_Arabia_Logo.png" alt="شعار">
             سكاي نيوز
         </button>
 
