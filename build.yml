@@ -1,0 +1,274 @@
+name: Build Zaeem APK
+on:
+  push:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.9
+      - name: Create project files
+        run: |
+          mkdir -p proj && cd proj
+          cat > settings.gradle.kts <<'EOF_FILE'
+          pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
+          dependencyResolutionManagement { repositories { google(); mavenCentral() } }
+          rootProject.name = "IPTVTV"
+          include(":app")
+          EOF_FILE
+          cat > build.gradle.kts <<'EOF_FILE'
+          plugins {
+              id("com.android.application") version "8.5.2" apply false
+              id("org.jetbrains.kotlin.android") version "1.9.24" apply false
+          }
+          EOF_FILE
+          cat > gradle.properties <<'EOF_FILE'
+          android.useAndroidX=true
+          org.gradle.jvmargs=-Xmx2048m
+          EOF_FILE
+          mkdir -p app
+          cat > app/build.gradle.kts <<'EOF_FILE'
+          plugins {
+              id("com.android.application")
+              id("org.jetbrains.kotlin.android")
+          }
+
+          android {
+              namespace = "com.example.iptvtv"
+              compileSdk = 34
+              defaultConfig {
+                  applicationId = "com.example.iptvtv"
+                  minSdk = 21
+                  targetSdk = 34
+                  versionCode = 1
+                  versionName = "1.0"
+              }
+              compileOptions {
+                  sourceCompatibility = JavaVersion.VERSION_17
+                  targetCompatibility = JavaVersion.VERSION_17
+              }
+              kotlinOptions { jvmTarget = "17" }
+          }
+
+          dependencies {
+              implementation("androidx.media3:media3-exoplayer:1.3.1")
+              implementation("androidx.media3:media3-exoplayer-hls:1.3.1")
+              implementation("androidx.media3:media3-ui:1.3.1")
+          }
+          EOF_FILE
+          mkdir -p app/src/main
+          cat > app/src/main/AndroidManifest.xml <<'EOF_FILE'
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <uses-permission android:name="android.permission.INTERNET" />
+              <uses-feature android:name="android.software.leanback" android:required="false" />
+              <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+
+              <application
+                  android:label="زعيم"
+                  android:usesCleartextTraffic="true"
+                  android:theme="@android:style/Theme.Material.NoActionBar">
+                  <activity android:name=".MainActivity" android:exported="true">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                          <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+                      </intent-filter>
+                  </activity>
+              </application>
+          </manifest>
+          EOF_FILE
+          mkdir -p app/src/main/res/layout
+          cat > app/src/main/res/layout/activity_main.xml <<'EOF_FILE'
+          <?xml version="1.0" encoding="utf-8"?>
+          <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="horizontal">
+
+              <LinearLayout
+                  android:layout_width="0dp"
+                  android:layout_height="match_parent"
+                  android:layout_weight="1"
+                  android:orientation="vertical"
+                  android:padding="16dp">
+
+                  <EditText
+                      android:id="@+id/urlInput"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:hint="M3U URL"
+                      android:inputType="textUri"
+                      android:singleLine="true" />
+
+                  <Button
+                      android:id="@+id/loadBtn"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:text="Load" />
+
+                  <TextView
+                      android:id="@+id/status"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:paddingTop="8dp"
+                      android:paddingBottom="8dp" />
+
+                  <ListView
+                      android:id="@+id/channelList"
+                      android:layout_width="match_parent"
+                      android:layout_height="0dp"
+                      android:layout_weight="1" />
+              </LinearLayout>
+
+              <androidx.media3.ui.PlayerView
+                  android:id="@+id/playerView"
+                  android:layout_width="0dp"
+                  android:layout_height="match_parent"
+                  android:layout_weight="2" />
+          </LinearLayout>
+          EOF_FILE
+          mkdir -p app/src/main/java/com/example/iptvtv
+          cat > app/src/main/java/com/example/iptvtv/M3uParser.kt <<'EOF_FILE'
+          package com.example.iptvtv
+
+          data class Channel(val name: String, val url: String, val group: String)
+
+          object M3uParser {
+              private val groupRegex = Regex("group-title=\"([^\"]*)\"")
+
+              fun parse(text: String): List<Channel> {
+                  val out = mutableListOf<Channel>()
+                  var name = ""
+                  var group = ""
+                  for (raw in text.lineSequence()) {
+                      val line = raw.trim()
+                      when {
+                          line.startsWith("#EXTINF") -> {
+                              name = line.substringAfterLast(",").trim()
+                              group = groupRegex.find(line)?.groupValues?.get(1) ?: ""
+                          }
+                          line.isNotEmpty() && !line.startsWith("#") -> {
+                              out += Channel(name.ifEmpty { line }, line, group)
+                              name = ""
+                              group = ""
+                          }
+                      }
+                  }
+                  return out
+              }
+          }
+          EOF_FILE
+          mkdir -p app/src/main/java/com/example/iptvtv
+          cat > app/src/main/java/com/example/iptvtv/MainActivity.kt <<'EOF_FILE'
+          package com.example.iptvtv
+
+          import android.app.Activity
+          import android.os.Bundle
+          import android.widget.ArrayAdapter
+          import android.widget.Button
+          import android.widget.EditText
+          import android.widget.ListView
+          import android.widget.TextView
+          import androidx.media3.common.MediaItem
+          import androidx.media3.exoplayer.ExoPlayer
+          import androidx.media3.ui.PlayerView
+          import java.net.HttpURLConnection
+          import java.net.URL
+          import kotlin.concurrent.thread
+
+          class MainActivity : Activity() {
+              companion object {
+                  // Community-maintained list of publicly available Syrian channels
+                  const val SYRIA_PLAYLIST = "https://iptv-org.github.io/iptv/countries/sy.m3u"
+              }
+
+              private var player: ExoPlayer? = null
+              private var channels: List<Channel> = emptyList()
+
+              override fun onCreate(savedInstanceState: Bundle?) {
+                  super.onCreate(savedInstanceState)
+                  setContentView(R.layout.activity_main)
+
+                  val urlInput = findViewById<EditText>(R.id.urlInput)
+                  val loadBtn = findViewById<Button>(R.id.loadBtn)
+                  val list = findViewById<ListView>(R.id.channelList)
+                  val status = findViewById<TextView>(R.id.status)
+                  val playerView = findViewById<PlayerView>(R.id.playerView)
+                  val prefs = getSharedPreferences("iptv", MODE_PRIVATE)
+
+                  urlInput.setText(prefs.getString("url", SYRIA_PLAYLIST))
+                  player = ExoPlayer.Builder(this).build().also { playerView.player = it }
+
+                  list.setOnItemClickListener { _, _, pos, _ ->
+                      val ch = channels[pos]
+                      player?.apply {
+                          setMediaItem(MediaItem.fromUri(ch.url))
+                          prepare()
+                          play()
+                      }
+                      status.text = ch.name
+                  }
+
+                  fun load() {
+                      val url = urlInput.text.toString().trim().ifEmpty { SYRIA_PLAYLIST }
+                      prefs.edit().putString("url", url).apply()
+                      status.text = "جاري التحميل..."
+                      thread {
+                          try {
+                              val parsed = M3uParser.parse(download(url))
+                              runOnUiThread {
+                                  channels = parsed
+                                  list.adapter = ArrayAdapter(
+                                      this, android.R.layout.simple_list_item_1, parsed.map { it.name }
+                                  )
+                                  status.text = "${parsed.size} قناة"
+                                  list.requestFocus()
+                              }
+                          } catch (e: Exception) {
+                              runOnUiThread { status.text = "خطأ: ${e.message}" }
+                          }
+                      }
+                  }
+
+                  loadBtn.setOnClickListener { load() }
+                  load() // auto-load Syrian channels on startup
+              }
+
+              private fun download(url: String): String {
+                  val c = URL(url).openConnection() as HttpURLConnection
+                  c.connectTimeout = 15000
+                  c.readTimeout = 30000
+                  return c.inputStream.bufferedReader().use { it.readText() }
+              }
+
+              override fun onStop() {
+                  super.onStop()
+                  player?.pause()
+              }
+
+              override fun onDestroy() {
+                  super.onDestroy()
+                  player?.release()
+                  player = null
+              }
+          }
+          EOF_FILE
+      - name: Build APK
+        run: |
+          cd proj
+          gradle assembleDebug --no-daemon
+      - name: Publish APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp proj/app/build/outputs/apk/debug/app-debug.apk zaeem.apk
+          gh release create "v${{ github.run_number }}" zaeem.apk --repo "${{ github.repository }}" --title "Zaeem v${{ github.run_number }}" --notes "Debug APK"
