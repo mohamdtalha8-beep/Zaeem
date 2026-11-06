@@ -7,23 +7,25 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            /* هنا استخدمنا اسم صورتك التي رفعتها */
+            
+            /* هذا هو السطر الأهم الذي يربط صورتك */
             background-image: url('background.jpg'); 
+            background-color: #1a1a1a; 
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
-            background-color: #000;
             color: white;
             text-align: center;
             margin: 0;
             padding: 20px 10px;
         }
 
+        /* طبقة التعتيم لكي تظهر الكلمات فوق الصورة */
         body::before {
             content: "";
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.8); /* تعتيم 80% لكي تظهر الكلمات */
+            background: rgba(0, 0, 0, 0.7); /* تعتيم 70% */
             z-index: -1;
         }
 
