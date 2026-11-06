@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-image: url('IMG_6458.jpeg'); 
+            background-image: url('IMG_6458.jpeg'); /* صورتك الخاصة */
             background-color: #0f0f0f; 
             background-size: cover;
             background-position: center;
@@ -48,25 +48,29 @@
 
         #ytPlayer { display: none; }
 
+        /* تصميم أزرار القنوات الثابتة */
         .channels-grid {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
             gap: 10px;
             max-width: 800px;
             margin: 0 auto;
+            padding: 10px;
         }
 
         .channel-btn {
             background-color: rgba(30, 30, 30, 0.9);
             color: white;
             border: 1px solid #444;
-            padding: 12px 20px;
+            padding: 15px 5px;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .channel-btn:hover, .channel-btn.active {
@@ -77,8 +81,8 @@
             transform: translateY(-2px);
         }
 
-        /* تصميم قائمة M3U */
-        .m3u-container {
+        /* تصميم قوائم الاختيار (M3U والمسلسل) */
+        .selector-container {
             background: rgba(30, 30, 30, 0.9);
             padding: 20px;
             border-radius: 12px;
@@ -88,8 +92,8 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
 
-        .m3u-container input {
-            width: 80%;
+        .selector-container input[type="text"] {
+            width: 85%;
             padding: 12px;
             font-size: 16px;
             border-radius: 8px;
@@ -99,7 +103,7 @@
             margin-bottom: 10px;
         }
 
-        .m3u-container button {
+        .load-btn {
             padding: 12px 20px;
             background-color: #FFD700;
             color: #000;
@@ -111,9 +115,7 @@
             transition: 0.3s;
         }
         
-        .m3u-container button:hover {
-            background-color: #fff;
-        }
+        .load-btn:hover { background-color: #fff; }
 
         .series-select {
             width: 100%;
@@ -127,7 +129,7 @@
             cursor: pointer;
             outline: none;
             text-align: center;
-            margin-top: 15px;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -141,29 +143,31 @@
         <iframe id="ytPlayer" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
     </div>
 
-    <!-- قسم قنوات M3U -->
-    <h2>🌐 قنوات M3U (الإنترنت)</h2>
-    <div class="m3u-container">
-        <p style="margin-top:0; color:#aaa;">ضع رابط M3U هنا لجلب القنوات:</p>
-        <!-- يمكنك وضع رابطك الافتراضي هنا في value -->
-        <input type="text" id="m3uUrlInput" placeholder="ضع رابط M3U هنا..." value="https://iptv-org.github.io/iptv/countries/sy.m3u">
-        <button onclick="loadM3U()">تحميل القنوات</button>
+    <!-- قسم قنوات M3U (الـ 300 قناة) -->
+    <h2>🌐 القنوات العربية (M3U)</h2>
+    <div class="selector-container">
+        <p style="margin-top:0; color:#aaa;">اضغط لتحميل مئات القنوات العربية:</p>
+        <!-- رابط القنوات العربية الشامل -->
+        <input type="text" id="m3uUrlInput" value="https://iptv-org.github.io/iptv/regions/arab.m3u" style="display:none;"> 
+        <button class="load-btn" onclick="loadM3U()">تحميل القنوات العربية</button>
+        
         <select class="series-select" id="m3uSelect" onchange="playM3UChannel(this.value)">
             <option value="" disabled selected>-- اضغط تحميل لجلب القنوات --</option>
         </select>
     </div>
 
     <!-- قسم القنوات المباشرة الثابتة -->
-    <h2>📺 القنوات المباشرة (الثابتة)</h2>
+    <h2>📺 القنوات المباشرة (المضمونة)</h2>
     <div class="channels-grid">
         <button class="channel-btn" onclick="playChannel('https://svs.itworkscdn.net/syriatvlive/syriatv.smil/playlist_dvr.m3u8', this)">التلفزيون السوري</button>
         <button class="channel-btn" onclick="playChannel('https://svs.itworkscdn.net/syriadramalive/syriadrama.smil/playlist_dvr.m3u8', this)">سوريا دراما</button>
         <button class="channel-btn" onclick="playChannel('https://live-hls-web-aja.getaj.net/AJA/01.m3u8', this)">الجزيرة</button>
+        <button class="channel-btn" onclick="playChannel('https://mn-nl.mncdn.com/alkass/live/alkass1/index.m3u8', this)">الكأس 1</button>
     </div>
 
     <!-- قسم المسلسل -->
     <h2>🎬 مسلسل الإمام أحمد بن حنبل</h2>
-    <div class="m3u-container" style="max-width: 500px;">
+    <div class="selector-container">
         <select class="series-select" id="episodeSelect" onchange="playYouTube(this.value)" style="margin-top:0;">
             <option value="" disabled selected>-- اختر الحلقة --</option>
             <option value="rAOJZMPjxLc">الحلقة 1</option>
@@ -203,8 +207,9 @@
         const video = document.getElementById('videoPlayer');
         const ytPlayer = document.getElementById('ytPlayer');
         const episodeSelect = document.getElementById('episodeSelect');
+        const m3uSelect = document.getElementById('m3uSelect');
         
-        // 1. تشغيل القنوات المباشرة
+        // 1. تشغيل القنوات المباشرة الثابتة
         function playChannel(url, btnElement) {
             ytPlayer.style.display = 'none';
             video.style.display = 'block';
@@ -215,7 +220,7 @@
             if (btnElement) btnElement.classList.add('active');
             
             episodeSelect.selectedIndex = 0;
-            document.getElementById('m3uSelect').selectedIndex = 0;
+            m3uSelect.selectedIndex = 0;
         }
 
         // 2. تشغيل فيديوهات يوتيوب (المسلسل)
@@ -226,26 +231,24 @@
             ytPlayer.style.display = 'block';
             ytPlayer.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&mute=1`;
             document.querySelectorAll('.channel-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById('m3uSelect').selectedIndex = 0;
+            m3uSelect.selectedIndex = 0;
         }
 
-        // 3. دالة تحميل قنوات M3U
+        // 3. دالة تحميل قنوات M3U (الـ 300 قناة)
         function loadM3U() {
             const url = document.getElementById('m3uUrlInput').value;
-            const select = document.getElementById('m3uSelect');
             
             if (!url) {
                 alert("الرجاء وضع رابط M3U أولاً");
                 return;
             }
 
-            select.innerHTML = '<option value="" disabled selected>جاري التحميل...</option>';
+            m3uSelect.innerHTML = '<option value="" disabled selected>جاري تحميل القنوات... (قد يستغرق ثواني)</option>';
 
-            // جلب الملف من الرابط
             fetch(url)
                 .then(response => response.text())
                 .then(data => {
-                    select.innerHTML = '<option value="" disabled selected>-- اختر القناة --</option>';
+                    m3uSelect.innerHTML = '<option value="" disabled selected>-- اختر القناة --</option>';
                     const lines = data.split('\n');
                     let currentChannelName = "";
 
@@ -264,14 +267,14 @@
                             let option = document.createElement('option');
                             option.value = line;
                             option.text = currentChannelName;
-                            select.appendChild(option);
-                            currentChannelName = ""; // تصفير الاسم للقناة القادمة
+                            m3uSelect.appendChild(option);
+                            currentChannelName = ""; 
                         }
                     }
                 })
                 .catch(error => {
                     console.error("خطأ في التحميل:", error);
-                    select.innerHTML = '<option value="" disabled selected>حدث خطأ في التحميل</option>';
+                    m3uSelect.innerHTML = '<option value="" disabled selected>حدث خطأ، جرب مرة أخرى</option>';
                 });
         }
 
