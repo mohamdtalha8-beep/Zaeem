@@ -57,7 +57,7 @@ h2{color:#FFD700;text-align:right;font-size:20px;margin-top:30px;border-right:4p
 
 <div id="app-content" style="display:none">
   <h1>👑 الزعيم IPTV 👑</h1>
-  <div class="ver">الإصدار 9.2 (يفتح على الأخبارية السورية)</div>
+  <div class="ver">الإصدار 9.3 (يفتح على التلفزيون السوري)</div>
 
   <div class="player-wrapper">
     <div class="player-container" id="playerBox">
@@ -231,8 +231,8 @@ window.addEventListener('load', () => {
       allChannels = parseM3U(customChannelsList);
       applyFilters();
 
-      // 🚨 التعديل هنا: فتح قناة "الأخبارية السورية" دائماً عند الدخول
-      let defaultChannel = allChannels.find(c => c.name.includes('Syria News') || c.name.includes('الأخبارية السورية'));
+      // 🚨 التعديل هنا: فتح قناة "Syria TV" (التلفزيون السوري) دائماً عند الدخول
+      let defaultChannel = allChannels.find(c => c.name.includes('Syria TV') || c.name.includes('التلفزيون السوري'));
       if(defaultChannel) {
           playChannel(defaultChannel, false);
       } else if(allChannels.length > 0) {
