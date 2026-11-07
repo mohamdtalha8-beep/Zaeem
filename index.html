@@ -150,26 +150,18 @@ const categories = [
   {id:'أطفال',name:'🧸 أطفال'},{id:'دينية',name:'🕌 دينية'},{id:'موسيقى',name:'🎵 موسيقى'},{id:'منوعة',name:'🌟 منوعة'}
 ];
 
-// *** مسلسل الإمام أحمد بن حنبل ***
 const epIds = ["rAOJZMPjxLc","e8jh0NfoUxQ","nN5A1RGBF3c","UI6qR865ehg","8NJE5yb_lqw","g5FrTDkth1I","_9Q7Nf1Ui7Q","zNcIpZu5Yhw","AAMwQCeeVZI","dDHnvmGSemw","AjS0rtLjX8A","dAtMZ-U9taA","EtE8uK22X-w","qsNdkdS81Q0","8I5TxMoAcOQ","5pPYjrfbkuw","ty516Uh3xP8","P82rEDYDozU","tq_SBbmJJ8A","d1fns8LG3uo","V6yPHEXN1fg","VtJuAWosqM4","hNXkpfyPi_Q","zCJWST2u6Vw","E41YElDToHw","JHgGELihZjs","ofkmmFBkx4o","4thw1O2Ql-k","D-eeoZP5Ido","RDPSiRV4TxY"];
 const episodes = epIds.map((id, i) => ({
   yt: id, name: 'الحلقة ' + (i + 1) + (i === epIds.length - 1 ? ' (الأخيرة)' : ''),
   thumb: 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg'
 }));
 
-// *** مسلسل بقلة ذوق وكثرة غلبة ***
-// الحلقات التي أضفناها (1، 2، 3، 4، 5)
 const epIds_baqla = [
-  "6Q3LHKD-OQE", // 1
-  "G6scQ2IHiHc", // 2
-  "Sk3uDpQRu6w", // 3
-  "AM6qKx3kyTE", // 4
-  "_5pWUphmekU"  // 5
+  "6Q3LHKD-OQE", "G6scQ2IHiHc", "Sk3uDpQRu6w", "AM6qKx3kyTE", "_5pWUphmekU"
 ];
 
 const episodes_baqla = epIds_baqla.map((id, i) => ({
-  yt: id, 
-  name: 'بقلة ذوق - الحلقة ' + (i + 1),
+  yt: id, name: 'بقلة ذوق - الحلقة ' + (i + 1),
   thumb: 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg'
 }));
 
@@ -424,7 +416,13 @@ function play(item, list) {
     video.pause();
     video.style.display = 'none';
     ytPlayer.style.display = 'block';
-    ytPlayer.src = 'https://www.youtube.com/embed/' + encodeURIComponent(item.yt) + '?autoplay=1&rel=0';
+    
+    // ميزة التشغيل التلقائي للحلقة التالية:
+    // نقوم بتشغيل الفيديو وإضافة قائمة تشغيل (Playlist) بكود الحلقة الحالية والحلقات التالية
+    let playlist = curList.map(e => e.yt).join(',');
+    let currentIndex = curIdx;
+    ytPlayer.src = `https://www.youtube.com/embed/${item.yt}?autoplay=1&rel=0&playlist=${playlist}&index=${currentIndex}`;
+    
     showHud(item.name);
     return;
   }
