@@ -376,7 +376,6 @@
         let currentCategory = "الكل";
         let sleepTimeout;
 
-        // --- إخفاء شاشة الترحيب وإظهار التطبيق (بدون تشغيل تلقائي) ---
         window.addEventListener('load', () => {
             setTimeout(() => {
                 const splash = document.getElementById('splash-screen');
@@ -384,7 +383,6 @@
                 setTimeout(() => {
                     splash.style.display = 'none';
                     document.getElementById('app-content').style.display = 'block';
-                    // تم إزالة أمر التشغيل التلقائي هنا
                 }, 1000); 
             }, 3000); 
         });
@@ -419,9 +417,15 @@
             video.style.display = 'block';
             video.src = url;
             video.play();
+            
             document.querySelectorAll('.channel-btn').forEach(btn => btn.classList.remove('active'));
             if (btnElement) btnElement.classList.add('active');
             episodeSelect.selectedIndex = 0;
+
+            // النزول تلقائياً لعرض الأزرار
+            setTimeout(() => {
+                document.querySelector('.channels-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 500);
         }
 
         function playYouTube(videoId) {
@@ -441,9 +445,13 @@
             video.play();
             document.querySelectorAll('.channel-btn').forEach(btn => btn.classList.remove('active'));
             episodeSelect.selectedIndex = 0;
+
+            // النزول تلقائياً لعرض القنوات
+            setTimeout(() => {
+                document.querySelector('.channel-list-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 500);
         }
 
-        // --- وظائف M3U ---
         function loadM3U() {
             const url = document.getElementById('m3uUrlInput').value;
             channelListContainer.innerHTML = '<p style="padding:10px;">جاري تحميل قنوات الأخبار...</p>';
