@@ -15,7 +15,6 @@
         --gold: #FFD700;
         --dark: #0f0f0f;
         --card-bg: rgba(30, 30, 30, 0.7);
-        --glass: rgba(20, 20, 20, 0.85);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
@@ -36,9 +35,8 @@
         justify-content: center; align-items: center; z-index: 9999; transition: all 1s ease-in-out;
     }
     .splash-logo { width: 200px; animation: pulse 2s infinite alternate; filter: drop-shadow(0 0 30px rgba(255,215,0,0.5)); border-radius: 20px;}
-    .splash-title { color: var(--gold); font-size: 40px; font-weight: 900; letter-spacing: 2px; margin-top: 20px; animation: slideUp 1s ease-out; }
+    .splash-title { color: var(--gold); font-size: 40px; font-weight: 900; letter-spacing: 2px; margin-top: 20px; }
     @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
     .sidebar {
         width: 220px; height: 100vh; background: rgba(10, 10, 10, 0.95); border-left: 1px solid #222;
@@ -48,9 +46,8 @@
     .tab-btn {
         background: transparent; color: #aaa; border: none; padding: 15px 20px; font-size: 16px;
         text-align: right; cursor: pointer; transition: 0.3s; width: 100%; font-weight: bold;
-        border-right: 4px solid transparent;
+        border-right: 4px solid transparent; outline: none;
     }
-    /* تمييز التصنيف عند الوقوف عليه بالريموت */
     .tab-btn:hover, .tab-btn:focus, .tab-btn.active {
         background: rgba(255, 215, 0, 0.1); color: var(--gold); border-right-color: var(--gold); outline: none;
     }
@@ -77,7 +74,7 @@
     .player-controls { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
     .ctrl-btn {
         background: #1a1a1a; color: #fff; border: 1px solid #333; padding: 10px 20px;
-        border-radius: 50px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.3s;
+        border-radius: 50px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.3s; outline: none;
     }
     .ctrl-btn:hover, .ctrl-btn:focus { background: var(--gold); color: #000; border-color: var(--gold); outline: none; transform: scale(1.05); }
 
@@ -98,7 +95,7 @@
     .channel-card {
         background: var(--card-bg); backdrop-filter: blur(10px); border-radius: 12px;
         border: 1px solid #333; padding: 15px; text-align: center; cursor: pointer;
-        transition: all 0.3s ease; position: relative;
+        transition: all 0.3s ease; position: relative; outline: none;
         display: flex; flex-direction: column; align-items: center; justify-content: center;
     }
     
@@ -234,6 +231,13 @@
                 playChannel(0);
                 
                 loadAllPlaylists();
+
+                // 🚨 هذا السطر هو السر: يضع مؤشر الريموت على القائمة فوراً 🚨
+                setTimeout(() => {
+                    const firstTab = document.querySelector('.tab-btn');
+                    if (firstTab) firstTab.focus();
+                }, 500);
+
             }, 1000);
         }, 3000);
     });
@@ -305,8 +309,7 @@
             let btn = document.createElement('button');
             btn.className = `tab-btn ${cat.id === 'all' ? 'active' : ''}`;
             btn.textContent = cat.name;
-            // إضافة tabIndex لتتمكن من الوقوف عليه بالريموت
-            btn.tabIndex = 0; 
+            btn.tabIndex = 0; // ضروري جداً
             btn.onclick = () => {
                 currentCategory = cat.id;
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -403,29 +406,6 @@
       ytPlayer.src = 'https://www.youtube.com/embed/' + encodeURIComponent(id) + '?autoplay=1&rel=0&mute=1';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-
-    // --- كود خاص بالتحكم بالريموت (لجعل الريموت ينزل في القائمة الجانبية) ---
-    document.addEventListener('keydown', (e) => {
-        const tabs = document.querySelectorAll('.tab-btn');
-        const activeTab = document.activeElement;
-        
-        // إذا كان المؤشر واقفاً على أحد أزرار التصنيفات
-        if (activeTab && activeTab.classList.contains('tab-btn')) {
-            let currentIndex = Array.from(tabs).indexOf(activeTab);
-            
-            if (e.key === 'ArrowDown') {
-                e.preventDefault(); // منع المتصفح من التصرف الافتراضي
-                if (currentIndex < tabs.length - 1) {
-                    tabs[currentIndex + 1].focus(); // الانتقال للتصنيف الذي تحته
-                }
-            } else if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                if (currentIndex > 0) {
-                    tabs[currentIndex - 1].focus(); // الانتقال للتصنيف الذي فوقه
-                }
-            }
-        }
-    });
 </script>
 </body>
 </html>
