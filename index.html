@@ -27,7 +27,7 @@
         /* --- محتوى التطبيق --- */
         #app-content { display: none; padding: 20px 20px; }
         
-        h2 { color: #fff; font-size: 22px; margin: 20px 0 15px 0; font-weight: bold; }
+        h2 { color: #fff; font-size: 18px; margin: 20px 0 15px 0; font-weight: bold; }
         
         /* --- شبكة البطاقات (Posters Grid) --- */
         .poster-grid {
@@ -89,7 +89,7 @@
             transition: 0.3s;
         }
         .nav-btn:hover, .nav-btn:focus, .nav-btn.active { color: #FFD700; outline: none; }
-        .nav-btn i { font-size: 24px; font-style: normal; } /* رموز بسيطة */
+        .nav-btn i { font-size: 24px; font-style: normal; } 
 
         /* --- المشغل --- */
         #player-section { display: none; }
@@ -99,8 +99,7 @@
         
         .player-controls { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 10px; background: #1a1a1a; border-radius: 8px; border: 1px solid #333; }
         .ctrl-btn { background-color: #FFD700; color: #000; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; }
-        .sleep-timer-select { background-color: #222; color: #FFD700; border: 1px solid #FFD700; padding: 10px; border-radius: 5px; font-weight: bold; }
-
+        
         /* --- قائمة المسلسل --- */
         .episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 15px; }
         .episode-btn {
@@ -119,8 +118,10 @@
         <div class="splash-title">👑 الزعيم IPTV 👑</div>
     </div>
 
-    <!-- المشغل (يظهر عند اختيار فيديو) -->
+    <!-- محتوى التطبيق -->
     <div id="app-content">
+        
+        <!-- المشغل (يظهر عند اختيار فيديو) -->
         <div id="player-section">
             <div class="player-container" id="playerBox">
                 <video id="videoPlayer" controls autoplay></video>
@@ -136,19 +137,25 @@
         <div id="main-menu">
             <h2>📺 القنوات السورية</h2>
             <div class="poster-grid">
-                <!-- استخدمنا صور شعارات وهمية، يمكنك تغيير روابط الصور -->
+                
+                <!-- القناة الأولى -->
                 <div class="poster-card" tabindex="0" onclick="playChannel('https://svs.itworkscdn.net/syriatvlive/syriatv.smil/playlist_dvr.m3u8')">
-                    <img src="https://upload.wikimedia.org/wikipedia/ar/thumb/1/1a/Syria_TV_logo.png/220px-Syria_TV_logo.png" class="poster-img">
+                    <img src="https://i.imgur.com/3Vq5qJb.jpg" class="poster-img" onerror="this.src='https://via.placeholder.com/220x300/333/FFD700?text=Syria+TV'">
                     <div class="poster-title">التلفزيون السوري</div>
                 </div>
+
+                <!-- القناة الثانية -->
                 <div class="poster-card" tabindex="0" onclick="playChannel('https://svs.itworkscdn.net/syriadramalive/syriadrama.smil/playlist_dvr.m3u8')">
-                    <img src="https://upload.wikimedia.org/wikipedia/ar/thumb/9/9f/Syria_Drama_logo.png/220px-Syria_Drama_logo.png" class="poster-img">
+                    <img src="https://i.imgur.com/z8G0w6x.jpg" class="poster-img" onerror="this.src='https://via.placeholder.com/220x300/333/FFD700?text=Syria+Drama'">
                     <div class="poster-title">سوريا دراما</div>
                 </div>
+
+                <!-- القناة الثالثة -->
                 <div class="poster-card" tabindex="0" onclick="playChannel('https://svs.itworkscdn.net/syrianews/syrianews.smil/playlist_dvr.m3u8')">
-                    <img src="https://upload.wikimedia.org/wikipedia/ar/thumb/e/e1/Syria_News_logo.png/220px-Syria_News_logo.png" class="poster-img">
+                    <img src="https://i.imgur.com/7p4n5r2.jpg" class="poster-img" onerror="this.src='https://via.placeholder.com/220x300/333/FFD700?text=Syria+News'">
                     <div class="poster-title">الأخبارية السورية</div>
                 </div>
+
             </div>
 
             <h2>🎬 مسلسل الإمام أحمد بن حنبل</h2>
@@ -210,7 +217,6 @@
         function showPlayer() {
             playerSection.style.display = 'block';
             mainMenu.style.display = 'none';
-            // التمرير لأعلى الصفحة لرؤية الفيديو
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
