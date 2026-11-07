@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الزعيم IPTV</title>
     <style>
-        /* --- تصميم شاشة الترحيب بالصورة --- */
+        /* --- تصميم شاشة الترحيب (الصورة + الاسم) --- */
         #splash-screen {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background-color: #050505; 
             display: flex;
+            flex-direction: column; /* لترتيب العناصر فوق بعضها */
             justify-content: center;
             align-items: center;
             z-index: 9999; 
@@ -18,16 +19,33 @@
         }
 
         .splash-image {
-            width: 80%; 
-            max-width: 400px; 
+            width: 70%; 
+            max-width: 300px; 
             border-radius: 20px; 
             box-shadow: 0 0 30px rgba(255, 215, 0, 0.4); 
             animation: zoomIn 2s ease-in-out infinite alternate; 
+            margin-bottom: 20px; /* مسافة بين الصورة والاسم */
+        }
+
+        .splash-title {
+            color: #FFD700;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 36px;
+            font-weight: bold;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.4);
+            animation: pulse 2s infinite;
+            text-align: center;
         }
 
         @keyframes zoomIn {
             from { transform: scale(1); }
             to { transform: scale(1.05); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
         }
 
         /* --- بقية تصميم التطبيق --- */
@@ -57,8 +75,7 @@
         h2 { color: #FFD700; text-align: right; padding-right: 10px; font-size: 20px; margin-top: 30px; border-right: 4px solid #FFD700; padding-right: 15px; }
 
         .player-wrapper {
-            /* تم تصغير حجم المشغل هنا */
-            max-width: 500px; 
+            max-width: 500px; /* الحجم الصغير */
             margin: 0 auto 20px auto;
             position: relative;
         }
@@ -271,9 +288,10 @@
 </head>
 <body>
 
-    <!-- شاشة الترحيب بالصورة -->
+    <!-- شاشة الترحيب (الصورة + الاسم) -->
     <div id="splash-screen">
-        <img src="splash.png" alt="الزعيم IPTV" class="splash-image">
+        <img src="splash.png" alt="شعار الزعيم" class="splash-image">
+        <div class="splash-title">👑 الزعيم IPTV 👑</div>
     </div>
 
     <!-- محتوى التطبيق -->
@@ -375,16 +393,12 @@
                     splash.style.display = 'none';
                     document.getElementById('app-content').style.display = 'block';
                     
-                    // تشغيل أول قناة تلقائياً بمجرد فتح التطبيق (بدون النزول للأسفل)
-                    const firstBtn = document.querySelector('.channel-btn');
-                    if (firstBtn) {
-                        // نستدعي دالة التشغيل ولكن نعطل النزول للأسفل مؤقتاً
-                        ytPlayer.style.display = 'none';
-                        video.style.display = 'block';
-                        video.src = 'https://svs.itworkscdn.net/syriatvlive/syriatv.smil/playlist_dvr.m3u8';
-                        video.play();
-                        firstBtn.classList.add('active');
-                    }
+                    // تشغيل أول قناة تلقائياً (التلفزيون السوري)
+                    ytPlayer.style.display = 'none';
+                    video.style.display = 'block';
+                    video.src = 'https://svs.itworkscdn.net/syriatvlive/syriatv.smil/playlist_dvr.m3u8';
+                    video.play();
+                    document.querySelector('.channel-btn').classList.add('active');
                 }, 1000); 
             }, 3000); 
         });
@@ -414,7 +428,6 @@
             }
         }
 
-        // دالة تشغيل القنوات (بدون نزول للأسفل)
         function playChannel(url, btnElement) {
             ytPlayer.style.display = 'none';
             video.style.display = 'block';
