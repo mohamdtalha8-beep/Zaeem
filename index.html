@@ -126,7 +126,6 @@ html.tv .rail,html.tv .grid,html.tv .chips{padding-right:2.6rem;padding-left:2.6
 </div>
 
 <script>
-// وضع الشاشة: تلقائي، أو يدوي بإضافة ?tv=1 (شاشة) أو ?tv=0 (تلفون) للرابط
 (function(){
   const q = new URLSearchParams(location.search).get('tv');
   const auto = /TV|Tizen|Web0S|AFT|BRAVIA|SMART|Android(?!.*Mobile)/i.test(navigator.userAgent);
@@ -170,7 +169,6 @@ function addChannels(list) {
   });
 }
 
-// ---------- البداية ----------
 window.addEventListener('load', () => {
   addChannels(baseChannels);
   render();
@@ -186,7 +184,6 @@ window.addEventListener('load', () => {
   }, 1500);
 });
 
-// يفتح آخر قناة شاهدتها (أو أول قناة) تلقائياً عند فتح التطبيق
 function autoStart() {
   if (!autoOn()) return;
   let saved = null;
@@ -196,7 +193,7 @@ function autoStart() {
   if (ch) play(ch, allChannels.filter(c => c.cat === ch.cat));
 }
 
-// *** تحديث دالة جلب القنوات مع الفلترة ***
+// *** الفلترة الموسعة ***
 function loadAllPlaylists() {
   const lists = [
     {url:"https://iptv-org.github.io/iptv/countries/sy.m3u",cat:'سوريا'},
@@ -206,19 +203,15 @@ function loadAllPlaylists() {
   lists.forEach(p =>
     fetch(p.url, {cache:'no-store'}).then(r => r.text())
       .then(t => { 
-          // جلب القنوات وفلترتها
           const parsed = parseM3U(t, p.cat);
           
-          // **الفلترة الذكية**: نحتفظ فقط بالقنوات العربية والسورية والأفلام
+          // فلترة مرنة: نقبل أي قناة سورية، أو أفلام، أو أي قناة من رابط اللغة العربية
           const filtered = parsed.filter(ch => {
-              return ch.cat === 'سوريا' || 
-                     ch.cat === 'أفلام' || 
-                     ch.cat === 'أخبار' ||
-                     ch.cat === 'رياضة' ||
-                     ch.name.toLowerCase().includes('arab') ||
-                     ch.name.includes('عربية') ||
-                     ch.name.includes('الجزيرة') ||
-                     ch.name.includes('العربية');
+              // إذا كانت من رابط سوريا أو أفلام، نقبلها فوراً
+              if (p.cat === 'سوريا' || p.cat === 'أفلام') return true;
+              
+              // إذا كانت من رابط اللغة العربية، نقبلها
+              return true; // جلب كل ما في ملف اللغة العربية
           });
           
           addChannels(filtered); 
@@ -257,7 +250,6 @@ function parseM3U(text, defaultCat) {
   return out;
 }
 
-// ---------- الواجهة ----------
 function chCard(ch, list) {
   const d = document.createElement('div');
   d.className = 'card' + (ch.id === currentId ? ' live' : '') + (VOD.includes(ch.cat) ? ' poster' : '');
@@ -401,7 +393,6 @@ searchInput.addEventListener('input', () => {
   render();
 });
 
-// ---------- التشغيل ----------
 function stopYouTube() { ytPlayer.src = 'about:blank'; ytPlayer.style.display = 'none'; }
 function stopHls() { if (hls) { hls.destroy(); hls = null; } }
 
@@ -484,7 +475,6 @@ function closePlayer() {
 }
 $('closeBtn').onclick = closePlayer;
 
-// ---------- التحكم بالريموت (تنقل مكاني) ----------
 function focusables() {
   return Array.from(document.querySelectorAll('.card,.chip,.dock button,.search-box,.more-btn'))
     .filter(el => el.offsetParent !== null);
