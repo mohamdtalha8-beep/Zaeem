@@ -193,7 +193,6 @@ function autoStart() {
   if (ch) play(ch, allChannels.filter(c => c.cat === ch.cat));
 }
 
-// *** الفلترة الموسعة ***
 function loadAllPlaylists() {
   const lists = [
     {url:"https://iptv-org.github.io/iptv/countries/sy.m3u",cat:'سوريا'},
@@ -204,17 +203,7 @@ function loadAllPlaylists() {
     fetch(p.url, {cache:'no-store'}).then(r => r.text())
       .then(t => { 
           const parsed = parseM3U(t, p.cat);
-          
-          // فلترة مرنة: نقبل أي قناة سورية، أو أفلام، أو أي قناة من رابط اللغة العربية
-          const filtered = parsed.filter(ch => {
-              // إذا كانت من رابط سوريا أو أفلام، نقبلها فوراً
-              if (p.cat === 'سوريا' || p.cat === 'أفلام') return true;
-              
-              // إذا كانت من رابط اللغة العربية، نقبلها
-              return true; // جلب كل ما في ملف اللغة العربية
-          });
-          
-          addChannels(filtered); 
+          addChannels(parsed); 
           if (!viewEl.contains(document.activeElement)) render(); 
       })
       .catch(() => console.log('فشل جلب: ' + p.url))
@@ -342,6 +331,18 @@ function render() {
     addRow('🎬 أحدث الأفلام', byCat('أفلام').slice(0, 20), chCard);
     addRow('📺 أحدث المسلسلات', byCat('مسلسلات').slice(0, 20), chCard);
     addRow('🎬 مسلسل الإمام أحمد بن حنبل', episodes, epCard);
+    
+    // إضافة قسم مسلسل بقلة ذوق وكثرة غلبة في الرئيسية
+    const bqlaRowHome = document.createElement('section');
+    bqlaRowHome.className = 'row';
+    bqlaRowHome.innerHTML = `
+      <h2>🎬 مسلسل بقلة ذوق وكثرة غلبة</h2>
+      <div style="padding: 10px 20px;">
+        <button class="more-btn" onclick="window.open('https://youtube.com/playlist?list=PLSBW2fS7td73uXgPx044dD15G_g_m4Aje', '_blank')">▶️ مشاهدة المسلسل كاملاً (40 حلقة)</button>
+      </div>
+    `;
+    viewEl.appendChild(bqlaRowHome);
+
     categories.slice(1).forEach(c => {
       if (!VOD.includes(c.id)) addRow(c.name, byCat(c.id).slice(0, 20), chCard);
     });
@@ -363,7 +364,21 @@ function render() {
   } else if (view === 'movies') {
     showGrid(byCat('أفلام'), chCard, 'جاري جلب الأفلام...');
   } else if (view === 'series') {
+    // مسلسل الإمام
     addRow('🎬 مسلسل الإمام أحمد بن حنبل', episodes, epCard);
+    
+    // إضافة زر مسلسل بقلة ذوق وكثرة غلبة في قسم المسلسلات
+    const bqlaRow = document.createElement('section');
+    bqlaRow.className = 'row';
+    bqlaRow.innerHTML = `
+      <h2>🎬 مسلسل بقلة ذوق وكثرة غلبة</h2>
+      <div style="padding: 10px 20px;">
+        <button class="more-btn" onclick="window.open('https://youtube.com/playlist?list=PLSBW2fS7td73uXgPx044dD15G_g_m4Aje', '_blank')">▶️ مشاهدة المسلسل كاملاً (40 حلقة)</button>
+      </div>
+    `;
+    viewEl.appendChild(bqlaRow);
+
+    // عرض باقي المسلسلات
     showGrid(byCat('مسلسلات'), chCard);
   } else {
     const st = document.createElement('div');
