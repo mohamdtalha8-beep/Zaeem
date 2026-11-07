@@ -29,9 +29,14 @@
         h1 { color: #FFD700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); font-size: 28px; margin-bottom: 20px; }
         h2 { color: #FFD700; text-align: right; padding-right: 10px; font-size: 20px; margin-top: 30px; border-right: 4px solid #FFD700; padding-right: 15px; }
 
-        .player-container {
+        /* حاوية المشغل والأدوات */
+        .player-wrapper {
             max-width: 800px;
             margin: 0 auto 20px auto;
+            position: relative;
+        }
+
+        .player-container {
             background: #000;
             border-radius: 12px;
             overflow: hidden;
@@ -47,6 +52,46 @@
         }
 
         #ytPlayer { display: none; }
+
+        /* أزرار التحكم تحت الفيديو */
+        .player-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(30, 30, 30, 0.9);
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+
+        .ctrl-btn {
+            background-color: #FFD700;
+            color: #000;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .ctrl-btn:hover { background-color: #fff; }
+
+        .sleep-timer-select {
+            background-color: #222;
+            color: #FFD700;
+            border: 1px solid #FFD700;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            outline: none;
+        }
 
         /* أزرار القنوات الثابتة */
         .channels-grid {
@@ -120,7 +165,6 @@
             text-align: center;
         }
 
-        /* أزرار الأقسام */
         .categories-container {
             display: flex;
             flex-wrap: wrap;
@@ -147,7 +191,6 @@
             color: #000;
         }
 
-        /* حاوية القنوات */
         .channel-list-container {
             max-height: 400px;
             overflow-y: auto;
@@ -198,7 +241,6 @@
             cursor: pointer;
             outline: none;
             text-align: center;
-            margin-top: 10px;
         }
     </style>
 </head>
@@ -206,12 +248,28 @@
 
     <h1>👑 الزعيم IPTV 👑</h1>
     
-    <div class="player-container">
-        <video id="videoPlayer" controls autoplay></video>
-        <iframe id="ytPlayer" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
+    <!-- المشغل وأدوات التحكم -->
+    <div class="player-wrapper">
+        <div class="player-container" id="playerBox">
+            <video id="videoPlayer" controls autoplay></video>
+            <iframe id="ytPlayer" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
+        </div>
+        
+        <!-- شريط التحكم الجديد (ملء الشاشة + مؤقت النوم) -->
+        <div class="player-controls">
+            <button class="ctrl-btn" onclick="toggleFullScreen()">
+                ⛶ ملء الشاشة
+            </button>
+            <select class="sleep-timer-select" id="sleepTimer" onchange="setSleepTimer(this.value)">
+                <option value="0">⏱️ مؤقت النوم (إيقاف)</option>
+                <option value="15">15 دقيقة</option>
+                <option value="30">30 دقيقة</option>
+                <option value="60">60 دقيقة</option>
+            </select>
+        </div>
     </div>
 
-    <!-- قسم القنوات السورية المضمونة -->
+    <!-- قسم القنوات السورية -->
     <h2>🇸🇾 القنوات السورية</h2>
     <div class="channels-grid">
         <button class="channel-btn" onclick="playChannel('https://svs.itworkscdn.net/syriatvlive/syriatv.smil/playlist_dvr.m3u8', this)">التلفزيون السوري</button>
@@ -228,17 +286,14 @@
         
         <input type="text" id="searchInput" class="search-box" placeholder="🔍 ابحث عن قناة إخبارية..." onkeyup="filterChannels()">
         
-        <!-- حاوية أزرار الأقسام -->
         <div class="categories-container" id="categoriesContainer"></div>
-
-        <!-- حاوية القنوات -->
         <div class="channel-list-container" id="channelListContainer"></div>
     </div>
 
     <!-- قسم المسلسل -->
     <h2>🎬 مسلسل الإمام أحمد بن حنبل</h2>
     <div class="selector-container">
-        <select class="series-select" id="episodeSelect" onchange="playYouTube(this.value)" style="margin-top:0;">
+        <select class="series-select" id="episodeSelect" onchange="playYouTube(this.value)">
             <option value="" disabled selected>-- اختر الحلقة --</option>
             <option value="rAOJZMPjxLc">الحلقة 1</option>
             <option value="e8jh0NfoUxQ">الحلقة 2</option>
@@ -280,33 +335,92 @@
         const searchInput = document.getElementById('searchInput');
         const channelListContainer = document.getElementById('channelListContainer');
         const categoriesContainer = document.getElementById('categoriesContainer');
+        const playerBox = document.getElementById('playerBox');
         
         let allChannels = [];
         let currentCategory = "الكل";
+        let sleepTimeout;
 
-        function playChannel(url, btnElement) {
+        // --- الميزة 1: ملء الشاشة ---
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                if (playerBox.requestFullscreen) {
+                    playerBox.requestFullscreen();
+                } else if (playerBox.webkitRequestFullscreen) { /* Safari */
+                    playerBox.webkitRequestFullscreen();
+                } else if (playerBox.msRequestFullscreen) { /* IE11 */
+                    playerBox.msRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // --- الميزة 2: مؤقت النوم ---
+        function setSleepTimer(minutes) {
+            clearTimeout(sleepTimeout); // إلغاء أي مؤقت سابق
+            if (minutes > 0) {
+                let ms = minutes * 60 * 1000;
+                sleepTimeout = setTimeout(() => {
+                    video.pause();
+                    ytPlayer.src = ""; // إيقاف يوتيوب
+                    alert("تم إيقاف التشغيل بواسطة مؤقت النوم. تصبح على خير!");
+                    document.getElementById('sleepTimer').value = "0"; // إعادة القائمة للوضع الافتراضي
+                }, ms);
+                alert(`تم ضبط مؤقت النوم على ${minutes} دقيقة.`);
+            } else {
+                alert("تم إلغاء مؤقت النوم.");
+            }
+        }
+
+        // --- الميزة 3: حفظ آخر قناة (يتم استدعاؤها عند التشغيل) ---
+        function saveLastWatched(type, url_or_id) {
+            localStorage.setItem('lastWatchedType', type);
+            localStorage.setItem('lastWatchedSrc', url_or_id);
+        }
+
+        // دوال التشغيل
+        function playChannel(url, btnElement, save = true) {
             ytPlayer.style.display = 'none';
             video.style.display = 'block';
             video.src = url;
             video.play();
+            
             document.querySelectorAll('.channel-btn').forEach(btn => btn.classList.remove('active'));
             if (btnElement) btnElement.classList.add('active');
             episodeSelect.selectedIndex = 0;
-            // إعادة تعيين قسم الأخبار
-            if(categoriesContainer.style.display === 'flex'){
-                document.querySelector('.category-btn').click(); // يرجع لقسم الكل
-            }
+            
+            // حفظ القناة
+            if(save) saveLastWatched('channel', url);
         }
 
-        function playYouTube(videoId) {
+        function playYouTube(videoId, save = true) {
             if(!videoId) return; 
             video.style.display = 'none';
             video.pause(); 
             ytPlayer.style.display = 'block';
             ytPlayer.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&mute=1`;
             document.querySelectorAll('.channel-btn').forEach(btn => btn.classList.remove('active'));
+            
+            // حفظ الحلقة
+            if(save) saveLastWatched('youtube', videoId);
         }
 
+        function playM3UChannel(url, save = true) {
+            if(!url) return;
+            ytPlayer.style.display = 'none';
+            video.style.display = 'block';
+            video.src = url;
+            video.play();
+            document.querySelectorAll('.channel-btn').forEach(btn => btn.classList.remove('active'));
+            episodeSelect.selectedIndex = 0;
+            
+            if(save) saveLastWatched('channel', url);
+        }
+
+        // --- دوال M3U والبحث ---
         function loadM3U() {
             const url = document.getElementById('m3uUrlInput').value;
             
@@ -343,7 +457,7 @@
                             }
                         } 
                         else if (line.startsWith('http') && currentChannelName !== "") {
-                            // *** فلتر الأخبار: نضيف فقط القنوات التي تحتوي على كلمة News أو إخبارية ***
+                            // فلتر الأخبار
                             if (currentChannelGroup.toLowerCase().includes('news') || currentChannelName.toLowerCase().includes('news') || currentChannelName.includes('إخبار')) {
                                 allChannels.push({ 
                                     name: currentChannelName, 
@@ -431,19 +545,22 @@
             renderChannels(filtered);
         }
 
-        function playM3UChannel(url) {
-            if(!url) return;
-            ytPlayer.style.display = 'none';
-            video.style.display = 'block';
-            video.src = url;
-            video.play();
-            document.querySelectorAll('.channel-btn').forEach(btn => btn.classList.remove('active'));
-            episodeSelect.selectedIndex = 0;
-        }
-
+        // --- عند تحميل الصفحة: تشغيل آخر قناة أو القناة الأولى ---
         window.onload = function() {
-            const firstBtn = document.querySelector('.channel-btn');
-            if (firstBtn) firstBtn.click();
+            const lastType = localStorage.getItem('lastWatchedType');
+            const lastSrc = localStorage.getItem('lastWatchedSrc');
+
+            if (lastType === 'youtube' && lastSrc) {
+                playYouTube(lastSrc, false); // لا تحفظ مجدداً
+                // لتمييز الحلقة في القائمة
+                episodeSelect.value = lastSrc;
+            } else if (lastType === 'channel' && lastSrc) {
+                playChannel(lastSrc, null, false);
+            } else {
+                // إذا كان يفتح لأول مرة، شغل أول قناة
+                const firstBtn = document.querySelector('.channel-btn');
+                if (firstBtn) firstBtn.click();
+            }
         };
     </script>
 </body>
