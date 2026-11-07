@@ -58,8 +58,11 @@
         .channel-item {
             display: flex; align-items: center; padding: 12px 15px; border-bottom: 1px solid #222; cursor: pointer; outline: none; transition: 0.2s;
         }
-        .channel-item:hover, .channel-item:focus { background-color: #FFD700; }
-        .channel-item:hover .channel-name, .channel-item:focus .channel-name { color: #000; font-weight: bold; }
+        /* تمييز القناة عند الوقوف عليها بالريموت */
+        .channel-item:hover, .channel-item:focus, .channel-item.selected {
+            background-color: #FFD700;
+        }
+        .channel-item:hover .channel-name, .channel-item:focus .channel-name, .channel-item.selected .channel-name { color: #000; font-weight: bold; }
         
         .channel-logo { width: 50px; height: 50px; object-fit: contain; margin-left: 15px; background-color: white; border-radius: 8px; padding: 3px; }
         .channel-name { font-size: 18px; font-weight: bold; color: #ddd; }
@@ -105,10 +108,10 @@
         <div class="selector-container">
             <!-- زر البحث الذكي -->
             <div class="fake-search-btn" id="fakeSearchBtn" tabindex="0" onclick="activateSearch()">🔍 اضغط هنا للبحث عن قناة...</div>
-            <input type="text" id="searchInput" class="search-box" placeholder="اكتب اسم القناة..." onkeyup="filterChannels()" onblur="hideSearchKeyboard()">
+            <input type="text" id="searchInput" class="search-box" placeholder="اكتب اسم القناة..." onkeyup="filterChannels()">
             
-            <!-- قائمة القنوات -->
-            <div class="channel-list-container" id="channelListContainer">
+            <!-- قائمة القنوات (مع معرف للتحكم بها) -->
+            <div class="channel-list-container" id="channelListContainer" tabindex="-1">
                 <div class="loading-text">جاري تحميل القنوات... يرجى الانتظار</div>
             </div>
         </div>
@@ -164,14 +167,12 @@
         let allChannels = [];
         let sleepTimeout;
 
-        // 1. القنوات السورية الثابتة (تظهر دائماً في البداية)
         const syrianChannels = [
             { name: "التلفزيون السوري", url: "https://svs.itworkscdn.net/syriatvlive/syriatv.smil/playlist_dvr.m3u8", logo: "https://i.imgur.com/3Vq5qJb.jpg" },
             { name: "سوريا دراما", url: "https://svs.itworkscdn.net/syriadramalive/syriadrama.smil/playlist_dvr.m3u8", logo: "https://i.imgur.com/z8G0w6x.jpg" },
             { name: "الأخبارية السورية", url: "https://svs.itworkscdn.net/syrianews/syrianews.smil/playlist_dvr.m3u8", logo: "https://i.imgur.com/7p4n5r2.jpg" }
         ];
 
-        // إخفاء شاشة الترحيب وتشغيل أول قناة وجلب باقي القنوات
         window.addEventListener('load', () => {
             setTimeout(() => {
                 const splash = document.getElementById('splash-screen');
@@ -180,19 +181,16 @@
                     splash.style.display = 'none';
                     document.getElementById('app-content').style.display = 'block';
                     
-                    // تشغيل القناة الأولى تلقائياً
                     ytPlayer.style.display = 'none';
                     video.style.display = 'block';
                     video.src = syrianChannels[0].url;
                     video.play();
                     
-                    // جلب القنوات العربية من الإنترنت
                     fetchChannelsFromInternet();
                 }, 1000); 
             }, 3000); 
         });
 
-        // دالة جلب القنوات من ملف M3U (أكثر من 100 قناة أخبار عربية)
         function fetchChannelsFromInternet() {
             const m3uUrl = "https://iptv-org.github.io/iptv/regions/arab.m3u";
             
@@ -210,62 +208,41 @@
                         if (line.startsWith('#EXTINF:')) {
                             let logoMatch = line.match(/tvg-logo="([^"]+)"/);
                             currentChannelLogo = logoMatch ? logoMatch[1] : "https://via.placeholder.com/50/333/FFD700?text=TV";
-                            
                             let groupMatch = line.match(/group-title="([^"]+)"/);
                             currentChannelGroup = groupMatch ? groupMatch[1] : "عام";
-                            
                             let commaIndex = line.lastIndexOf(',');
                             if (commaIndex !== -1) currentChannelName = line.substring(commaIndex + 1).trim();
                         } 
                         else if (line.startsWith('http') && currentChannelName !== "") {
-                            // تصفية القنوات لتكون عربية أو إخبارية فقط لتقليل العدد
                             if (currentChannelGroup.toLowerCase().includes('news') || currentChannelName.includes('إخبار') || currentChannelName.includes('عربية')) {
-                                fetchedChannels.push({ 
-                                    name: currentChannelName, 
-                                    url: line, 
-                                    logo: currentChannelLogo 
-                                });
+                                fetchedChannels.push({ name: currentChannelName, url: line, logo: currentChannelLogo });
                             }
                             currentChannelName = ""; 
                             currentChannelLogo = "";
                         }
                     }
                     
-                    // دمج القنوات السورية مع القنوات التي تم تحميلها
                     allChannels = [...syrianChannels, ...fetchedChannels];
-                    
-                    // عرض جميع القنوات في القائمة
                     renderChannels(allChannels);
                 })
                 .catch(error => {
-                    console.error("خطأ في جلب القنوات:", error);
-                    // إذا فشل الإنترنت، نعرض القنوات السورية فقط
                     allChannels = syrianChannels;
                     renderChannels(allChannels);
-                    channelListContainer.innerHTML += '<p style="padding:10px; color:red;">فشل جلب القنوات العربية، تأكد من الإنترنت.</p>';
                 });
         }
-
-        // --- التمرير التلقائي بالريموت ---
-        document.addEventListener('focusin', function(e) {
-            if (e.target.classList.contains('channel-item')) {
-                e.target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }
-        });
 
         // --- التحكم في زر البحث ---
         function activateSearch() {
             fakeSearchBtn.style.display = 'none';
             searchInput.style.display = 'block';
-            searchInput.focus(); // فتح الكيبورد فقط عند الضغط
+            searchInput.focus(); 
         }
 
+        // إخفاء البحث وإرجاع زر البحث، ونقل التركيز إلى القائمة
         function hideSearchKeyboard() {
-            setTimeout(() => {
-                searchInput.style.display = 'none';
-                fakeSearchBtn.style.display = 'block';
-                fakeSearchBtn.focus();
-            }, 200);
+            searchInput.style.display = 'none';
+            fakeSearchBtn.style.display = 'block';
+            fakeSearchBtn.focus();
         }
 
         // --- دوال المشاهدة ---
@@ -297,7 +274,7 @@
             video.src = url;
             video.play();
             episodeSelect.selectedIndex = 0;
-            window.scrollTo({ top: 0, behavior: 'smooth' }); // العودة لأعلى الصفحة لمشاهدة الفيديو
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function playYouTube(videoId) {
@@ -334,6 +311,34 @@
             const filtered = allChannels.filter(channel => channel.name.toLowerCase().includes(filter));
             renderChannels(filtered);
         }
+
+        // =====================================================================
+        // 🚨 خدعة التحكم بالريموت (لجعل الريموت ينزل من البحث إلى القائمة) 🚨
+        // =====================================================================
+        document.addEventListener('keydown', function(e) {
+            // إذا كان المستخدم واقفاً على زر البحث وضغط على سهم الأسفل
+            if (document.activeElement === fakeSearchBtn && e.key === 'ArrowDown') {
+                e.preventDefault(); // منع المتصفح من عمل أي شيء افتراضي
+                // نقل التركيز (المؤشر) إلى أول قناة في القائمة
+                const firstChannel = document.querySelector('.channel-item');
+                if (firstChannel) firstChannel.focus();
+            }
+            // إذا كان المستخدم واقفاً على أول قناة وضغط على سهم الأعلى
+            else if (document.activeElement === document.querySelector('.channel-item') && e.key === 'ArrowUp') {
+                e.preventDefault();
+                fakeSearchBtn.focus(); // إرجاع المؤشر لزر البحث
+            }
+            
+            // دعم زر "الرجوع/Back" في الريموت لإغلاق الكيبورد
+            if (e.key === 'Escape' || e.key === 'Backspace') {
+                if (searchInput.style.display === 'block') {
+                    hideSearchKeyboard();
+                    // مسح البحث وإظهار كل القنوات
+                    searchInput.value = "";
+                    filterChannels();
+                }
+            }
+        });
     </script>
 </body>
 </html>
