@@ -15,31 +15,27 @@
         --gold: #FFD700;
         --dark: #0f0f0f;
         --card-bg: rgba(30, 30, 30, 0.7);
-        --glass: rgba(20, 20, 20, 0.85);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
     
     body {
         background-color: var(--dark);
-        background-image: 
-            radial-gradient(circle at 10% 20%, rgba(255, 215, 0, 0.05) 0%, transparent 40%),
-            radial-gradient(circle at 90% 80%, rgba(255, 215, 0, 0.05) 0%, transparent 40%);
+        background-image: radial-gradient(circle at 10% 20%, rgba(255, 215, 0, 0.05) 0%, transparent 40%),
+                          radial-gradient(circle at 90% 80%, rgba(255, 215, 0, 0.05) 0%, transparent 40%);
         color: #fff;
         overflow: hidden;
         height: 100vh;
         display: flex;
     }
 
-    /* --- شاشة الترحيب --- */
     #splash-screen {
         position: fixed; inset: 0; background: #000; display: flex; flex-direction: column;
         justify-content: center; align-items: center; z-index: 9999; transition: all 1s ease-in-out;
     }
     .splash-logo { width: 200px; animation: pulse 2s infinite alternate; filter: drop-shadow(0 0 30px rgba(255,215,0,0.5)); border-radius: 20px;}
-    .splash-title { color: var(--gold); font-size: 40px; font-weight: 900; letter-spacing: 2px; margin-top: 20px; animation: slideUp 1s ease-out; }
+    .splash-title { color: var(--gold); font-size: 40px; font-weight: 900; letter-spacing: 2px; margin-top: 20px; }
     @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
     /* --- الشريط الجانبي --- */
     .sidebar {
@@ -69,12 +65,16 @@
     }
     .search-box:focus { border-color: var(--gold); box-shadow: 0 0 15px rgba(255, 215, 0, 0.2); }
 
-    /* المشغل - تم إصلاحه ليظهر دائماً */
+    /* 🚨 تم إصلاح المشغل ليظهر دائماً وبحجم ثابت 🚨 */
     .player-container {
         background: #000; border-radius: 16px; overflow: hidden; position: relative;
-        width: 100%; height: 400px; border: 1px solid #333; box-shadow: 0 20px 50px rgba(0,0,0,0.8); margin-bottom: 10px;
+        width: 100%; height: 400px; /* الارتفاع الثابت الذي يضمن الظهور */
+        border: 1px solid #333; box-shadow: 0 20px 50px rgba(0,0,0,0.8); margin-bottom: 10px;
     }
-    video, iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; object-fit: contain; }
+    video, iframe { 
+        position: absolute; inset: 0; width: 100%; height: 100%; 
+        border: none; object-fit: contain; 
+    }
     #ytPlayer { display: none; }
     #status { position: absolute; inset: auto 0 10px 0; color: var(--gold); font-size: 16px; font-weight: bold; text-align: center; pointer-events: none; text-shadow: 0 2px 4px #000; }
 
@@ -145,7 +145,7 @@
           <input type="text" id="searchInput" class="search-box" placeholder="🔍 ابحث عن قناة أو فيلم..." oninput="renderGrid()">
       </div>
 
-      <!-- المشغل -->
+      <!-- المشغل الثابت -->
       <div class="player-container" id="playerBox">
         <video id="videoPlayer" controls autoplay playsinline></video>
         <iframe id="ytPlayer" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
