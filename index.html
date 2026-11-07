@@ -57,7 +57,7 @@ h2{color:#FFD700;text-align:right;font-size:20px;margin-top:30px;border-right:4p
 
 <div id="app-content" style="display:none">
   <h1>👑 الزعيم IPTV 👑</h1>
-  <div class="ver">الإصدار 10.0 (طيور الجنة)</div>
+  <div class="ver">الإصدار 10.1 (يوتيوب للأطفال)</div>
 
   <div class="player-wrapper">
     <div class="player-container" id="playerBox">
@@ -163,18 +163,18 @@ function categorize(group, name) {
   if (g.includes('news') || name.includes('أخبار') || name.includes('إخبار')) return 'news';
   if (g.includes('sport') || name.includes('رياض') || name.includes('beIN')) return 'sports';
   if (g.includes('movie') || g.includes('series') || g.includes('entertainment') || g.includes('comedy') || name.includes('دراما') || name.includes('أفلام') || name.includes('سينما')) return 'movies';
-  if (g.includes('kid') || g.includes('animation') || name.includes('أطفال') || name.includes('كرتون') || name.includes('طيور') || name.includes('كراميش')) return 'kids';
+  if (g.includes('kid') || g.includes('animation') || name.includes('أطفال') || name.includes('كرتون') || name.includes('طيور') || name.includes('كراميش') || name.includes('Toyor')) return 'kids';
   if (g.includes('relig') || name.includes('قرآن') || name.includes('إسلام') || name.includes('quran')) return 'religious';
   if (g.includes('music') || name.includes('أغاني') || name.includes('موسيقى')) return 'music';
   return 'other';
 }
 
-/* ---- القنوات الخاصة بك (MBC + طيور الجنة + كراميش) ---- */
+/* ---- القنوات الخاصة بك (استخدمنا يوتيوب لطيور الجنة وكراميش لضمان العمل) ---- */
 const customChannelsList = `#EXTM3U
 #EXTINF:-1,AR: طيور الجنة
-https://shls-live-ak.akamaized.net/out/v1/980d0b5b0e8448f8a259a11ce6e5f2e1/index.m3u8
+yt:https://www.youtube.com/embed/live_stream?channel=UC_1zBqv1vX8Kq0OqfA0aM0w
 #EXTINF:-1,AR: كراميش
-https://shls-live-ak.akamaized.net/out/v1/f4f8f4d8f4f8f4d8f4f8f4d8f4f8f4d8/index.m3u8
+yt:https://www.youtube.com/embed/live_stream?channel=UC-g6g1G7qJ1x9Xo5J0P8hKQ
 #EXTINF:-1,AR: MBC 1
 https://shls-mbc1-prod-dub.shahid.net/out/v1/2f9b8d0a5b6c4e3f8d7c6b5a4e3f2d1c/index.m3u8
 #EXTINF:-1,AR: MBC 2
@@ -216,7 +216,7 @@ function parseM3U(text, forceCat) {
       group = g ? g[1] : '';
       const c = line.lastIndexOf(',');
       name = c !== -1 ? line.substring(c + 1).trim() : '';
-    } else if (line.startsWith('http') && name) {
+    } else if (line.startsWith('http') || (line.startsWith('yt:') && name)) {
       out.push({ name, url: line, logo, cat: forceCat || categorize(group, name) });
       name = ''; logo = ''; group = '';
     }
@@ -328,6 +328,17 @@ function setStatus(msg) { statusEl.textContent = msg || ''; }
 
 function playM3UChannel(url, scroll) {
   if (!url) return;
+  
+  if (url.startsWith('yt:')) {
+      // تشغيل قنوات يوتيوب
+      player.pause();
+      document.getElementById('videoPlayer').style.display = 'none';
+      ytPlayer.style.display = 'block';
+      ytPlayer.src = url.replace('yt:', '');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+  }
+
   ytPlayer.src = '';
   ytPlayer.style.display = 'none';
   document.getElementById('videoPlayer').style.display = 'block';
