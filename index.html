@@ -14,7 +14,7 @@
     :root {
         --gold: #FFD700;
         --dark: #0f0f0f;
-        --card-bg: rgba(30, 30, 30, 0.7);
+        --card-bg: #1e1e1e;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
@@ -37,20 +37,18 @@
 
     /* --- الشريط الجانبي --- */
     .sidebar {
-        width: 220px; height: 100vh; background: rgba(10, 10, 10, 0.95); border-left: 1px solid #222;
+        width: 250px; height: 100vh; background: #0a0a0a; border-left: 1px solid #222;
         display: flex; flex-direction: column; padding: 20px 0; overflow-y: auto; flex-shrink: 0;
-        transition: all 0.3s ease-in-out;
+        transition: all 0.3s ease-in-out; z-index: 100;
     }
     
-    /* كلاس الإخفاء */
     .sidebar.closed {
-        margin-right: -220px; /* يزيح الشريط لليمين ليختفي */
-        opacity: 0;
+        margin-right: -250px; opacity: 0;
     }
 
     .sidebar h2 { color: var(--gold); text-align: center; margin-bottom: 20px; font-size: 22px; }
     .tab-btn {
-        background: transparent; color: #aaa; border: none; padding: 15px 20px; font-size: 16px;
+        background: transparent; color: #aaa; border: none; padding: 15px 20px; font-size: 18px;
         text-align: right; cursor: pointer; transition: 0.3s; width: 100%; font-weight: bold;
         border-right: 4px solid transparent; white-space: nowrap;
     }
@@ -60,51 +58,50 @@
 
     /* --- المحتوى الرئيسي --- */
     .main-content {
-        flex-grow: 1; height: 100vh; overflow-y: auto; padding: 20px 30px; display: flex; flex-direction: column;
+        flex-grow: 1; height: 100vh; overflow-y: auto; padding: 20px; display: flex; flex-direction: column;
     }
 
     /* --- شريط البحث والتحكم --- */
     .top-bar { 
-        display: flex; flex-direction: column; align-items: center; justify-content: center; 
-        margin-bottom: 20px; position: relative;
+        display: flex; justify-content: space-between; align-items: center; 
+        margin-bottom: 15px;
     }
     
     .toggle-menu-btn {
-        position: absolute; right: 0; top: 0; background: #222; color: var(--gold);
-        border: 1px solid var(--gold); padding: 10px 15px; border-radius: 8px; font-size: 16px;
-        cursor: pointer; font-weight: bold; outline: none; transition: 0.3s;
+        background: #222; color: var(--gold); border: 1px solid var(--gold); 
+        padding: 10px 15px; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold;
     }
-    .toggle-menu-btn:hover, .toggle-menu-btn:focus { background: var(--gold); color: #000; }
+    .toggle-menu-btn:hover, .toggle-menu-btn:focus { background: var(--gold); color: #000; outline: none; }
 
-    .top-bar h2 { color: var(--gold); margin-bottom: 15px; font-size: 24px; }
     .search-box {
-        width: 100%; max-width: 500px; padding: 12px 20px; font-size: 16px; border-radius: 30px;
+        width: 50%; max-width: 400px; padding: 12px 20px; font-size: 16px; border-radius: 30px;
         border: 1px solid #333; background: #1a1a1a; color: #fff; outline: none; text-align: center;
     }
 
-    /* --- المشغل --- */
+    /* --- المشغل (تم إصلاحه ليكون ظاهراً) --- */
     .player-container {
-        background: #000; border-radius: 16px; overflow: hidden; position: relative;
-        width: 100%; height: 400px; border: 1px solid #333; margin-bottom: 10px;
+        background: #000; border-radius: 12px; overflow: hidden; position: relative;
+        width: 100%; height: 350px; border: 2px solid #333; margin-bottom: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
     video, iframe { 
-        position: absolute; inset: 0; width: 100%; height: 100%; border: none; object-fit: contain; 
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; object-fit: contain; 
     }
     #ytPlayer { display: none; }
-    #status { position: absolute; inset: auto 0 10px 0; color: var(--gold); font-size: 16px; font-weight: bold; text-align: center; text-shadow: 0 2px 4px #000; }
+    #status { position: absolute; bottom: 10px; width: 100%; color: var(--gold); font-size: 18px; font-weight: bold; text-align: center; text-shadow: 0 2px 4px #000; }
 
     /* أزرار التحكم */
-    .player-controls { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+    .player-controls { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
     .ctrl-btn {
-        background: #1a1a1a; color: #fff; border: 1px solid #333; padding: 10px 20px;
-        border-radius: 50px; font-size: 14px; font-weight: bold; cursor: pointer;
+        background: #1a1a1a; color: #fff; border: 1px solid #333; padding: 10px 25px;
+        border-radius: 50px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s;
     }
     .ctrl-btn:hover, .ctrl-btn:focus { background: var(--gold); color: #000; border-color: var(--gold); outline: none; }
 
     /* قسم المسلسل */
     .series-container {
-        background: rgba(20,20,20,0.8); border: 1px solid #333; border-radius: 12px; padding: 15px; margin-bottom: 20px;
-        display: flex; align-items: center; gap: 15px; flex-wrap: wrap;
+        background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 15px; margin-bottom: 20px;
+        display: flex; align-items: center; gap: 15px;
     }
     .series-container h3 { color: var(--gold); font-size: 18px; white-space: nowrap; }
     .series-select {
@@ -114,7 +111,7 @@
 
     /* شبكة البطاقات */
     .grid-container {
-        display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; padding-bottom: 30px;
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; padding-bottom: 30px;
     }
 
     .channel-card {
@@ -123,25 +120,13 @@
     }
     
     .channel-card:hover, .channel-card:focus {
-        transform: translateY(-5px); border-color: var(--gold); background: #222; outline: none;
+        transform: translateY(-5px); border-color: var(--gold); background: #2a2a2a; outline: none;
     }
 
-    .channel-logo { width: 70px; height: 70px; object-fit: contain; margin-bottom: 10px; }
+    .channel-logo { width: 60px; height: 60px; object-fit: contain; margin-bottom: 10px; }
     .channel-name { font-size: 14px; font-weight: 700; color: #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
 
     .loading-text { color: var(--gold); text-align: center; font-size: 20px; width: 100%; grid-column: 1 / -1; padding: 50px; }
-
-    /* التجاوب مع شاشات الهواتف */
-    @media (max-width: 768px) {
-        body { flex-direction: column; overflow-y: auto; height: auto; }
-        .sidebar { width: 100%; height: auto; flex-direction: row; overflow-x: auto; border-bottom: 1px solid #222; border-left: none; }
-        .sidebar.closed { margin-right: 0; margin-top: -80px; opacity: 0; }
-        .sidebar h2 { display: none; }
-        .tab-btn { padding: 10px; border-bottom: 3px solid transparent; border-right: none; }
-        .main-content { height: auto; padding: 15px; }
-        .player-container { height: 250px; }
-        .toggle-menu-btn { position: relative; right: auto; margin-bottom: 10px; }
-    }
 </style>
 </head>
 <body>
@@ -160,11 +145,10 @@
   <div class="main-content">
       <div class="top-bar">
           <button class="toggle-menu-btn" onclick="toggleSidebar()">☰ القائمة</button>
-          
-          <h2>تصفح القنوات</h2>
-          <input type="text" id="searchInput" class="search-box" placeholder="🔍 ابحث عن قناة أو فيلم..." oninput="renderGrid()">
+          <input type="text" id="searchInput" class="search-box" placeholder="🔍 ابحث عن قناة..." oninput="renderGrid()">
       </div>
 
+      <!-- المشغل (شاشة العرض) -->
       <div class="player-container" id="playerBox">
         <video id="videoPlayer" controls autoplay playsinline></video>
         <iframe id="ytPlayer" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
@@ -271,7 +255,6 @@
         }, 2500);
     });
 
-    // دالة إغلاق وفتح القائمة
     function toggleSidebar() {
         sidebar.classList.toggle('closed');
     }
@@ -433,7 +416,6 @@
         }
     }
 
-    // تشغيل المسلسل
     episodeSelect.addEventListener('change', function() {
         let id = this.value;
         if (!id) return;
@@ -443,7 +425,6 @@
         statusEl.textContent = '';
         ytPlayer.style.display = 'block';
         ytPlayer.src = 'https://www.youtube.com/embed/' + encodeURIComponent(id) + '?autoplay=1&rel=0&mute=1';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 </script>
 </body>
