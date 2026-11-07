@@ -4,418 +4,332 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>الزعيم IPTV | الفخم</title>
-
+<title>الزعيم IPTV</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.13/hls.min.js"></script>
-
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
-    
-    :root {
-        --gold: #FFD700;
-        --dark: #0f0f0f;
-        --card-bg: rgba(30, 30, 30, 0.7);
-    }
+        /* --- تصميم شاشة الترحيب --- */
+        #splash-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #050505; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 9999; transition: opacity 1s ease-in-out;
+        }
+        .splash-image { width: 70%; max-width: 300px; border-radius: 20px; box-shadow: 0 0 30px rgba(255, 215, 0, 0.4); animation: zoomIn 2s ease-in-out infinite alternate; margin-bottom: 20px; }
+        .splash-title { color: #FFD700; font-size: 36px; font-weight: bold; text-shadow: 0 0 20px rgba(255, 215, 0, 0.8); animation: pulse 2s infinite; text-align: center; }
+        @keyframes zoomIn { from { transform: scale(1); } to { transform: scale(1.05); } }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
-    
-    body {
-        background-color: var(--dark);
-        background-image: radial-gradient(circle at 10% 20%, rgba(255, 215, 0, 0.05) 0%, transparent 40%),
-                          radial-gradient(circle at 90% 80%, rgba(255, 215, 0, 0.05) 0%, transparent 40%);
-        color: #fff;
-        overflow: hidden;
-        height: 100vh;
-        display: flex;
-    }
+        /* --- بقية تصميم التطبيق --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('IMG_6458.jpeg'); background-color: #0f0f0f; 
+            background-size: cover; background-position: center; background-attachment: fixed;
+            color: white; text-align: center; margin: 0; padding: 20px 10px; overflow-x: hidden;
+        }
+        body::before { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: -1; }
 
-    #splash-screen {
-        position: fixed; inset: 0; background: #000; display: flex; flex-direction: column;
-        justify-content: center; align-items: center; z-index: 9999; transition: all 1s ease-in-out;
-    }
-    .splash-logo { width: 200px; animation: pulse 2s infinite alternate; filter: drop-shadow(0 0 30px rgba(255,215,0,0.5)); border-radius: 20px;}
-    .splash-title { color: var(--gold); font-size: 40px; font-weight: 900; letter-spacing: 2px; margin-top: 20px; }
-    @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
+        h1 { color: #FFD700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); font-size: 28px; margin-bottom: 20px; }
+        h2 { color: #FFD700; text-align: right; font-size: 20px; margin-top: 30px; border-right: 4px solid #FFD700; padding-right: 15px; }
 
-    /* --- الشريط الجانبي --- */
-    .sidebar {
-        width: 220px; height: 100vh; background: rgba(10, 10, 10, 0.95); border-left: 1px solid #222;
-        display: flex; flex-direction: column; padding: 20px 0; overflow-y: auto; flex-shrink: 0;
-    }
-    .sidebar h2 { color: var(--gold); text-align: center; margin-bottom: 20px; font-size: 22px; }
-    .tab-btn {
-        background: transparent; color: #aaa; border: none; padding: 15px 20px; font-size: 16px;
-        text-align: right; cursor: pointer; transition: 0.3s; width: 100%; font-weight: bold;
-        border-right: 4px solid transparent;
-    }
-    .tab-btn:hover, .tab-btn:focus, .tab-btn.active {
-        background: rgba(255, 215, 0, 0.1); color: var(--gold); border-right-color: var(--gold); outline: none;
-    }
+        /* الشاشة (المشغل) */
+        .player-wrapper { max-width: 500px; margin: 0 auto 20px auto; position: relative; }
+        .player-container { background: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.8); border: 2px solid #333; position: relative; padding-top: 56.25%; }
+        video, iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+        #ytPlayer { display: none; }
 
-    /* --- المحتوى الرئيسي --- */
-    .main-content {
-        flex-grow: 1; height: 100vh; overflow-y: auto; padding: 20px 30px; display: flex; flex-direction: column;
-    }
+        .player-controls { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding: 10px; background: rgba(30, 30, 30, 0.9); border-radius: 8px; border: 1px solid #444; }
+        .ctrl-btn { background-color: #FFD700; color: #000; border: none; padding: 10px 15px; border-radius: 5px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 5px; }
+        .ctrl-btn:hover { background-color: #fff; }
+        .sleep-timer-select { background-color: #222; color: #FFD700; border: 1px solid #FFD700; padding: 10px; border-radius: 5px; font-weight: bold; cursor: pointer; outline: none; }
 
-    /* شريط البحث */
-    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-    .search-box {
-        width: 350px; padding: 12px 20px; font-size: 16px; border-radius: 30px;
-        border: 1px solid #333; background: #1a1a1a; color: #fff; outline: none; transition: 0.3s;
-    }
-    .search-box:focus { border-color: var(--gold); box-shadow: 0 0 15px rgba(255, 215, 0, 0.2); }
+        /* القنوات */
+        .channels-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; max-width: 800px; margin: 0 auto; padding: 10px; }
+        .channel-btn { background-color: rgba(30, 30, 30, 0.9); color: white; border: 1px solid #444; padding: 15px 5px; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; }
+        .channel-btn:hover, .channel-btn.active { background-color: #FFD700; color: #000; border-color: #FFD700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.6); transform: translateY(-2px); }
 
-    /* 🚨 تم إصلاح المشغل ليظهر دائماً وبحجم ثابت 🚨 */
-    .player-container {
-        background: #000; border-radius: 16px; overflow: hidden; position: relative;
-        width: 100%; height: 400px; /* الارتفاع الثابت الذي يضمن الظهور */
-        border: 1px solid #333; box-shadow: 0 20px 50px rgba(0,0,0,0.8); margin-bottom: 10px;
-    }
-    video, iframe { 
-        position: absolute; inset: 0; width: 100%; height: 100%; 
-        border: none; object-fit: contain; 
-    }
-    #ytPlayer { display: none; }
-    #status { position: absolute; inset: auto 0 10px 0; color: var(--gold); font-size: 16px; font-weight: bold; text-align: center; pointer-events: none; text-shadow: 0 2px 4px #000; }
+        /* الحاويات */
+        .selector-container { background: rgba(30, 30, 30, 0.9); padding: 20px; border-radius: 12px; max-width: 800px; margin: 20px auto; border: 1px solid #444; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .load-btn { padding: 12px 20px; background-color: #FFD700; color: #000; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%; margin-bottom: 15px; }
+        .load-btn:hover { background-color: #fff; }
 
-    /* أزرار التحكم */
-    .player-controls { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
-    .ctrl-btn {
-        background: #1a1a1a; color: #fff; border: 1px solid #333; padding: 10px 20px;
-        border-radius: 50px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.3s;
-    }
-    .ctrl-btn:hover, .ctrl-btn:focus { background: var(--gold); color: #000; border-color: var(--gold); outline: none; transform: scale(1.05); }
+        .search-box { width: 90%; padding: 12px; font-size: 16px; border-radius: 8px; border: 1px solid #FFD700; background-color: #222; color: white; margin-bottom: 15px; display: none; text-align: center; }
 
-    /* قسم المسلسل */
-    .series-container {
-        background: rgba(20,20,20,0.8); border: 1px solid #333; border-radius: 12px; padding: 15px; margin-bottom: 20px;
-        display: flex; align-items: center; gap: 15px;
-    }
-    .series-container h3 { color: var(--gold); font-size: 18px; white-space: nowrap; }
-    .series-select {
-        flex-grow: 1; padding: 12px; font-size: 16px; font-weight: bold; color: #000; 
-        background: var(--gold); border: none; border-radius: 8px; cursor: pointer; outline: none;
-    }
+        .categories-container { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 15px; display: none; }
+        .category-btn { background-color: #222; color: #FFD700; border: 1px solid #FFD700; padding: 8px 15px; border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .category-btn:hover, .category-btn.active { background-color: #FFD700; color: #000; }
 
-    /* شبكة البطاقات */
-    .grid-container {
-        display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; padding-bottom: 30px;
-    }
+        .channel-list-container { max-height: 400px; overflow-y: auto; background-color: #111; border: 1px solid #FFD700; border-radius: 8px; display: none; }
+        .channel-item { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #333; cursor: pointer; transition: background 0.2s; }
+        .channel-item:hover { background-color: #222; }
+        .channel-logo { width: 40px; height: 40px; object-fit: contain; margin-left: 15px; background-color: white; border-radius: 5px; padding: 2px; }
+        .channel-name { font-size: 16px; font-weight: bold; color: #ddd; }
 
-    .channel-card {
-        background: var(--card-bg); backdrop-filter: blur(10px); border-radius: 12px;
-        border: 1px solid #333; padding: 15px; text-align: center; cursor: pointer;
-        transition: all 0.3s ease; position: relative;
-        display: flex; flex-direction: column; align-items: center; justify-content: center;
-    }
-    
-    .channel-card:hover, .channel-card:focus {
-        transform: translateY(-5px) scale(1.05); border-color: var(--gold);
-        box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2); background: #222; outline: none; z-index: 10;
-    }
-
-    .channel-logo { width: 70px; height: 70px; object-fit: contain; margin-bottom: 10px; }
-    .channel-name { font-size: 14px; font-weight: 700; color: #ddd; text-align: center; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-    .loading-text { color: var(--gold); text-align: center; font-size: 20px; width: 100%; grid-column: 1 / -1; padding: 50px; }
-
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: #0a0a0a; }
-    ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
-
+        /* المسلسل */
+        .series-select { width: 100%; padding: 15px; font-size: 18px; font-weight: bold; color: #FFD700; background-color: #111; border: 2px solid #FFD700; border-radius: 8px; cursor: pointer; outline: none; text-align: center; }
 </style>
 </head>
 <body>
 
-<div id="splash-screen">
-  <img src="63A5AFDB-C33D-4E90-8631-577AD940E645.png" alt="شعار الزعيم" class="splash-logo">
-  <div class="splash-title">👑 الزعيم IPTV 👑</div>
-</div>
+    <!-- شاشة الترحيب -->
+    <div id="splash-screen">
+        <img src="63A5AFDB-C33D-4E90-8631-577AD940E645.png" alt="شعار الزعيم" class="splash-image">
+        <div class="splash-title">👑 الزعيم IPTV 👑</div>
+    </div>
 
-<div id="app-content" style="display:none; width: 100%; height: 100%; display: flex;">
-  
-  <div class="sidebar" id="sidebar">
-      <h2>التصنيفات</h2>
-  </div>
+    <!-- محتوى التطبيق -->
+    <div id="app-content" style="display: none;">
+        <h1>👑 الزعيم IPTV 👑</h1>
+        
+        <!-- شاشة العرض -->
+        <div class="player-wrapper">
+            <div class="player-container" id="playerBox">
+                <video id="videoPlayer" controls autoplay></video>
+                <iframe id="ytPlayer" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
+            </div>
+            
+            <div class="player-controls">
+                <button class="ctrl-btn" onclick="toggleFullScreen()">⛶ ملء الشاشة</button>
+                <select class="sleep-timer-select" id="sleepTimer" onchange="setSleepTimer(this.value)">
+                    <option value="0">⏱️ مؤقت النوم (إيقاف)</option>
+                    <option value="15">15 دقيقة</option>
+                    <option value="30">30 دقيقة</option>
+                    <option value="60">60 دقيقة</option>
+                </select>
+            </div>
+        </div>
 
-  <div class="main-content">
-      <div class="top-bar">
-          <h2 style="color: var(--gold); margin:0;">تصفح القنوات</h2>
-          <input type="text" id="searchInput" class="search-box" placeholder="🔍 ابحث عن قناة أو فيلم..." oninput="renderGrid()">
-      </div>
+        <h2>🇸🇾 القنوات السورية</h2>
+        <div class="channels-grid">
+            <button class="channel-btn" onclick="playChannel('https://svs.itworkscdn.net/syriatvlive/syriatv.smil/playlist_dvr.m3u8', this)">التلفزيون السوري</button>
+            <button class="channel-btn" onclick="playChannel('https://svs.itworkscdn.net/syriadramalive/syriadrama.smil/playlist_dvr.m3u8', this)">سوريا دراما</button>
+            <button class="channel-btn" onclick="playChannel('https://svs.itworkscdn.net/syrianews/syrianews.smil/playlist_dvr.m3u8', this)">الأخبارية السورية</button>
+        </div>
 
-      <!-- المشغل الثابت -->
-      <div class="player-container" id="playerBox">
-        <video id="videoPlayer" controls autoplay playsinline></video>
-        <iframe id="ytPlayer" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
-        <div id="status">جاري التحميل...</div>
-      </div>
-      
-      <!-- أزرار التحكم -->
-      <div class="player-controls">
-          <button class="ctrl-btn" onclick="zap(-1)">⏮ السابقة</button>
-          <button class="ctrl-btn" onclick="zap(1)">التالية ⏭</button>
-          <button class="ctrl-btn" onclick="toggleFullScreen()">⛶ ملء الشاشة</button>
-      </div>
+        <h2>📰 قنوات الأخبار العربية</h2>
+        <div class="selector-container">
+            <input type="text" id="m3uUrlInput" value="https://iptv-org.github.io/iptv/regions/arab.m3u" style="display:none;"> 
+            <button class="load-btn" onclick="loadM3U()">تحميل قنوات الأخبار</button>
+            <input type="text" id="searchInput" class="search-box" placeholder="🔍 ابحث عن قناة إخبارية..." onkeyup="filterChannels()">
+            <div class="categories-container" id="categoriesContainer"></div>
+            <div class="channel-list-container" id="channelListContainer"></div>
+        </div>
 
-      <!-- قسم المسلسل -->
-      <div class="series-container">
-          <h3>🎬 مسلسل الإمام أحمد بن حنبل</h3>
-          <select class="series-select" id="episodeSelect" onchange="playYouTube(this.value)">
-            <option value="" disabled selected>-- اختر الحلقة --</option>
-            <option value="rAOJZMPjxLc">الحلقة 1</option>
-            <option value="e8jh0NfoUxQ">الحلقة 2</option>
-            <option value="nN5A1RGBF3c">الحلقة 3</option>
-            <option value="UI6qR865ehg">الحلقة 4</option>
-            <option value="8NJE5yb_lqw">الحلقة 5</option>
-            <option value="g5FrTDkth1I">الحلقة 6</option>
-            <option value="_9Q7Nf1Ui7Q">الحلقة 7</option>
-            <option value="zNcIpZu5Yhw">الحلقة 8</option>
-            <option value="AAMwQCeeVZI">الحلقة 9</option>
-            <option value="dDHnvmGSemw">الحلقة 10</option>
-            <option value="AjS0rtLjX8A">الحلقة 11</option>
-            <option value="dAtMZ-U9taA">الحلقة 12</option>
-            <option value="EtE8uK22X-w">الحلقة 13</option>
-            <option value="qsNdkdS81Q0">الحلقة 14</option>
-            <option value="8I5TxMoAcOQ">الحلقة 15</option>
-            <option value="5pPYjrfbkuw">الحلقة 16</option>
-            <option value="ty516Uh3xP8">الحلقة 17</option>
-            <option value="P82rEDYDozU">الحلقة 18</option>
-            <option value="tq_SBbmJJ8A">الحلقة 19</option>
-            <option value="d1fns8LG3uo">الحلقة 20</option>
-            <option value="V6yPHEXN1fg">الحلقة 21</option>
-            <option value="VtJuAWosqM4">الحلقة 22</option>
-            <option value="hNXkpfyPi_Q">الحلقة 23</option>
-            <option value="zCJWST2u6Vw">الحلقة 24</option>
-            <option value="E41YElDToHw">الحلقة 25</option>
-            <option value="JHgGELihZjs">الحلقة 26</option>
-            <option value="ofkmmFBkx4o">الحلقة 27</option>
-            <option value="4thw1O2Ql-k">الحلقة 28</option>
-            <option value="D-eeoZP5Ido">الحلقة 29</option>
-            <option value="RDPSiRV4TxY">الحلقة 30 (الأخيرة)</option>
-          </select>
-      </div>
+        <h2>🎬 مسلسل الإمام أحمد بن حنبل</h2>
+        <div class="selector-container">
+            <select class="series-select" id="episodeSelect" onchange="playYouTube(this.value)">
+                <option value="" disabled selected>-- اختر الحلقة --</option>
+                <option value="rAOJZMPjxLc">الحلقة 1</option>
+                <option value="e8jh0NfoUxQ">الحلقة 2</option>
+                <option value="nN5A1RGBF3c">الحلقة 3</option>
+                <option value="UI6qR865ehg">الحلقة 4</option>
+                <option value="8NJE5yb_lqw">الحلقة 5</option>
+                <option value="g5FrTDkth1I">الحلقة 6</option>
+                <option value="_9Q7Nf1Ui7Q">الحلقة 7</option>
+                <option value="zNcIpZu5Yhw">الحلقة 8</option>
+                <option value="AAMwQCeeVZI">الحلقة 9</option>
+                <option value="dDHnvmGSemw">الحلقة 10</option>
+                <option value="AjS0rtLjX8A">الحلقة 11</option>
+                <option value="dAtMZ-U9taA">الحلقة 12</option>
+                <option value="EtE8uK22X-w">الحلقة 13</option>
+                <option value="qsNdkdS81Q0">الحلقة 14</option>
+                <option value="8I5TxMoAcOQ">الحلقة 15</option>
+                <option value="5pPYjrfbkuw">الحلقة 16</option>
+                <option value="ty516Uh3xP8">الحلقة 17</option>
+                <option value="P82rEDYDozU">الحلقة 18</option>
+                <option value="tq_SBbmJJ8A">الحلقة 19</option>
+                <option value="d1fns8LG3uo">الحلقة 20</option>
+                <option value="V6yPHEXN1fg">الحلقة 21</option>
+                <option value="VtJuAWosqM4">الحلقة 22</option>
+                <option value="hNXkpfyPi_Q">الحلقة 23</option>
+                <option value="zCJWST2u6Vw">الحلقة 24</option>
+                <option value="E41YElDToHw">الحلقة 25</option>
+                <option value="JHgGELihZjs">الحلقة 26</option>
+                <option value="ofkmmFBkx4o">الحلقة 27</option>
+                <option value="4thw1O2Ql-k">الحلقة 28</option>
+                <option value="D-eeoZP5Ido">الحلقة 29</option>
+                <option value="RDPSiRV4TxY">الحلقة 30 (الأخيرة)</option>
+            </select>
+        </div>
+    </div>
 
-      <div class="grid-container" id="channelGrid">
-          <div class="loading-text">جاري جلب القنوات... يرجى الانتظار</div>
-      </div>
-  </div>
+    <script>
+        const video = document.getElementById('videoPlayer');
+        const ytPlayer = document.getElementById('ytPlayer');
+        const episodeSelect = document.getElementById('episodeSelect');
+        const searchInput = document.getElementById('searchInput');
+        const channelListContainer = document.getElementById('channelListContainer');
+        const categoriesContainer = document.getElementById('categoriesContainer');
+        const playerBox = document.getElementById('playerBox');
+        
+        let allChannels = [];
+        let currentCategory = "الكل";
+        let sleepTimeout;
 
-</div>
-
-<script>
-    const video = document.getElementById('videoPlayer');
-    const ytPlayer = document.getElementById('ytPlayer');
-    const grid = document.getElementById('channelGrid');
-    const searchInput = document.getElementById('searchInput');
-    const sidebar = document.getElementById('sidebar');
-    const statusEl = document.getElementById('status');
-    
-    let allChannels = [];
-    let currentCategory = 'all';
-    let currentPlayIndex = 0;
-    let hls = null;
-
-    const categories = [
-        { id: 'all', name: '🏠 الرئيسية' },
-        { id: 'سوريا', name: '🇸🇾 سوريا' },
-        { id: 'mbc', name: 'MBC' },
-        { id: 'أخبار', name: '📰 أخبار' },
-        { id: 'رياضة', name: '⚽ رياضة' },
-        { id: 'أفلام ومسلسلات', name: '🎬 أفلام ومسلسلات' },
-        { id: 'أطفال', name: '🧸 أطفال' },
-        { id: 'دينية', name: '🕌 دينية' },
-        { id: 'موسيقى', name: '🎵 موسيقى' },
-        { id: 'منوعة', name: '🌟 منوعة' }
-    ];
-
-    const baseChannels = [
-        { name: "التلفزيون السوري", url: "https://svs.itworkscdn.net/syriatvlive/syriatv.smil/playlist_dvr.m3u8", logo: "https://upload.wikimedia.org/wikipedia/ar/thumb/1/1a/Syria_TV_logo.png/200px-Syria_TV_logo.png", cat: "سوريا" },
-        { name: "سوريا دراما", url: "https://svs.itworkscdn.net/syriadramalive/syriadrama.smil/playlist_dvr.m3u8", logo: "https://upload.wikimedia.org/wikipedia/ar/thumb/9/9f/Syria_Drama_logo.png/200px-Syria_Drama_logo.png", cat: "سوريا" },
-        { name: "الأخبارية السورية", url: "https://svs.itworkscdn.net/syrianews/syrianews.smil/playlist_dvr.m3u8", logo: "https://upload.wikimedia.org/wikipedia/ar/thumb/e/e1/Syria_News_logo.png/200px-Syria_News_logo.png", cat: "سوريا" }
-    ];
-
-    window.addEventListener('load', () => {
-        setTimeout(() => {
-            document.getElementById('splash-screen').style.opacity = '0';
+        window.addEventListener('load', () => {
             setTimeout(() => {
-                document.getElementById('splash-screen').style.display = 'none';
-                document.getElementById('app-content').style.display = 'flex';
-                
-                allChannels = baseChannels;
-                buildSidebar();
-                renderGrid();
-                playChannel(0);
-                
-                loadAllPlaylists();
-            }, 1000);
-        }, 3000);
-    });
-
-    function loadAllPlaylists() {
-        const playlists = [
-            { url: "https://iptv-org.github.io/iptv/countries/sy.m3u", cat: 'سوريا' },
-            { url: "https://iptv-org.github.io/iptv/regions/arab.m3u", cat: 'منوعة' }
-        ];
-        const moviesUrl = "https://www.free-codecs.com/app/iptv-finder/data/ready/movies.m3u";
-
-        Promise.all(playlists.map(p =>
-            fetch(p.url, { cache: 'no-store' }).then(r => r.text()).then(t => parseM3U(t, p.cat)).catch(() => [])
-        )).then(results => {
-            let seen = new Set(allChannels.map(c => c.url));
-            results.flat().forEach(c => {
-                if (!seen.has(c.url)) { seen.add(c.url); allChannels.push(c); }
-            });
-            renderGrid();
+                const splash = document.getElementById('splash-screen');
+                splash.style.opacity = '0';
+                setTimeout(() => {
+                    splash.style.display = 'none';
+                    document.getElementById('app-content').style.display = 'block';
+                    
+                    // تشغيل أول قناة تلقائياً (التلفزيون السوري)
+                    ytPlayer.style.display = 'none';
+                    video.style.display = 'block';
+                    video.src = 'https://svs.itworkscdn.net/syriatvlive/syriatv.smil/playlist_dvr.m3u8';
+                    video.play();
+                    document.querySelector('.channel-btn').classList.add('active');
+                }, 1000); 
+            }, 3000); 
         });
 
-        fetch(moviesUrl, { cache: 'no-store' })
-            .then(r => r.text())
-            .then(t => {
-                let movies = parseM3U(t, 'أفلام ومسلسلات');
-                let seen = new Set(allChannels.map(c => c.url));
-                movies.forEach(m => {
-                    if (!seen.has(m.url)) { seen.add(m.url); allChannels.push(m); }
-                });
-                renderGrid();
-            }).catch(() => console.log("فشل جلب الأفلام."));
-    }
-
-    function parseM3U(text, defaultCat) {
-        const out = [];
-        let name = '', logo = '', group = '';
-        text.split('\n').forEach(raw => {
-            const line = raw.trim();
-            if (line.startsWith('#EXTINF:')) {
-                const l = line.match(/tvg-logo="([^"]*)"/);
-                const g = line.match(/group-title="([^"]*)"/);
-                logo = l && l[1] ? l[1] : '';
-                group = g ? g[1] : '';
-                const c = line.lastIndexOf(',');
-                name = c !== -1 ? line.substring(c + 1).trim() : '';
-            } else if (line.startsWith('http') && name) {
-                let cat = defaultCat;
-                const lowerName = name.toLowerCase();
-                const lowerGroup = group.toLowerCase();
-                
-                if (name.includes('MBC') || /mbc/i.test(name)) cat = 'mbc';
-                else if (lowerGroup.includes('news') || name.includes('أخبار') || name.includes('إخبار')) cat = 'أخبار';
-                else if (lowerGroup.includes('sport') || name.includes('رياض') || /bein/i.test(name)) cat = 'رياضة';
-                else if (lowerGroup.includes('kid') || lowerGroup.includes('animation') || name.includes('أطفال') || name.includes('كرتون')) cat = 'أطفال';
-                else if (lowerGroup.includes('relig') || name.includes('قرآن') || name.includes('إسلام')) cat = 'دينية';
-                else if (lowerGroup.includes('music') || name.includes('أغاني') || name.includes('موسيقى')) cat = 'موسيقى';
-                else if (lowerGroup.includes('movie') || lowerGroup.includes('series') || name.includes('دراما') || name.includes('أفلام')) cat = 'أفلام ومسلسلات';
-                
-                out.push({ name, url: line, logo: logo, cat: cat });
-                name = ''; logo = ''; group = '';
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                if (playerBox.requestFullscreen) playerBox.requestFullscreen();
+                else if (playerBox.webkitRequestFullscreen) playerBox.webkitRequestFullscreen();
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
             }
-        });
-        return out;
-    }
-
-    function buildSidebar() {
-        sidebar.innerHTML = '<h2>التصنيفات</h2>';
-        categories.forEach(cat => {
-            let btn = document.createElement('button');
-            btn.className = `tab-btn ${cat.id === 'all' ? 'active' : ''}`;
-            btn.textContent = cat.name;
-            btn.onclick = () => {
-                currentCategory = cat.id;
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                renderGrid();
-            };
-            sidebar.appendChild(btn);
-        });
-    }
-
-    function renderGrid() {
-        grid.innerHTML = '';
-        let query = searchInput.value.toLowerCase();
-        
-        let filtered = allChannels.filter(c => {
-            let matchCat = currentCategory === 'all' || c.cat === currentCategory;
-            let matchSearch = c.name.toLowerCase().includes(query);
-            return matchCat && matchSearch;
-        });
-
-        if (filtered.length === 0) {
-            grid.innerHTML = '<div class="loading-text">لا توجد نتائج مطابقة</div>';
-            return;
         }
 
-        filtered.slice(0, 100).forEach((ch) => {
-            let originalIndex = allChannels.indexOf(ch);
-            let div = document.createElement('div');
-            div.className = 'channel-card';
-            div.tabIndex = 0;
-            
-            div.innerHTML = `
-                <img src="${ch.logo || 'https://via.placeholder.com/70/222/FFD700?text=TV'}" class="channel-logo" onerror="this.src='https://via.placeholder.com/70/222/FFD700?text=TV'">
-                <div class="channel-name">${ch.name}</div>
-            `;
-            
-            div.onclick = () => playChannel(originalIndex);
-            grid.appendChild(div);
-        });
-    }
-
-    function playChannel(index) {
-        if(index < 0 || index >= allChannels.length) return;
-        
-        currentPlayIndex = index;
-        let ch = allChannels[index];
-        
-        ytPlayer.style.display = 'none';
-        video.style.display = 'block';
-        
-        if(hls) { hls.destroy(); hls = null; }
-        video.pause();
-        
-        statusEl.textContent = "جاري التحميل...";
-        
-        if (Hls.isSupported() && ch.url.includes('.m3u8')) {
-            hls = new Hls();
-            hls.loadSource(ch.url);
-            hls.attachMedia(video);
-            hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                video.play();
-                statusEl.textContent = ch.name;
-                setTimeout(() => { if(statusEl.textContent === ch.name) statusEl.textContent = ""; }, 4000);
-            });
-            hls.on(Hls.Events.ERROR, () => {
-                statusEl.textContent = "⚠️ القناة لا تعمل حالياً";
-            });
-        } else {
-            video.src = ch.url;
-            video.play().catch(e => statusEl.textContent = "⚠️ القناة لا تعمل حالياً");
+        function setSleepTimer(minutes) {
+            clearTimeout(sleepTimeout);
+            if (minutes > 0) {
+                let ms = minutes * 60 * 1000;
+                sleepTimeout = setTimeout(() => {
+                    video.pause();
+                    ytPlayer.src = ""; 
+                    alert("تم إيقاف التشغيل بواسطة مؤقت النوم. تصبح على خير!");
+                    document.getElementById('sleepTimer').value = "0"; 
+                }, ms);
+                alert(`تم ضبط مؤقت النوم على ${minutes} دقيقة.`);
+            } else {
+                alert("تم إلغاء مؤقت النوم.");
+            }
         }
-    }
 
-    function zap(dir) {
-        let next = currentPlayIndex + dir;
-        if(next >= allChannels.length) next = 0;
-        if(next < 0) next = allChannels.length - 1;
-        playChannel(next);
-    }
+        function playChannel(url, btnElement) {
+            ytPlayer.style.display = 'none';
+            video.style.display = 'block';
+            video.src = url;
+            video.play();
+            
+            document.querySelectorAll('.channel-btn').forEach(btn => btn.classList.remove('active'));
+            if (btnElement) btnElement.classList.add('active');
+            episodeSelect.selectedIndex = 0;
+        }
 
-    function toggleFullScreen() {
-        let box = document.getElementById('playerBox');
-        if (!document.fullscreenElement) box.requestFullscreen();
-        else document.exitFullscreen();
-    }
+        function playYouTube(videoId) {
+            if(!videoId) return; 
+            video.style.display = 'none';
+            video.pause(); 
+            ytPlayer.style.display = 'block';
+            ytPlayer.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&mute=1`;
+            document.querySelectorAll('.channel-btn').forEach(btn => btn.classList.remove('active'));
+        }
 
-    function playYouTube(id) {
-      if (!id) return;
-      if (hls) { hls.destroy(); hls = null; }
-      video.pause();
-      video.style.display = 'none';
-      statusEl.textContent = '';
-      ytPlayer.style.display = 'block';
-      ytPlayer.src = 'https://www.youtube.com/embed/' + encodeURIComponent(id) + '?autoplay=1&rel=0&mute=1';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-</script>
+        function playM3UChannel(url) {
+            if(!url) return;
+            ytPlayer.style.display = 'none';
+            video.style.display = 'block';
+            video.src = url;
+            video.play();
+            document.querySelectorAll('.channel-btn').forEach(btn => btn.classList.remove('active'));
+            episodeSelect.selectedIndex = 0;
+        }
+
+        function loadM3U() {
+            const url = document.getElementById('m3uUrlInput').value;
+            channelListContainer.innerHTML = '<p style="padding:10px;">جاري تحميل قنوات الأخبار...</p>';
+            channelListContainer.style.display = 'block';
+            searchInput.style.display = 'block';
+            categoriesContainer.style.display = 'flex';
+
+            fetch(url)
+                .then(response => response.text())
+                .then(data => {
+                    channelListContainer.innerHTML = ''; 
+                    categoriesContainer.innerHTML = ''; 
+                    const lines = data.split('\n');
+                    let currentChannelName = "";
+                    let currentChannelLogo = "";
+                    let currentChannelGroup = "";
+                    allChannels = [];
+                    let groups = new Set();
+
+                    for (let i = 0; i < lines.length; i++) {
+                        let line = lines[i].trim();
+                        if (line.startsWith('#EXTINF:')) {
+                            let logoMatch = line.match(/tvg-logo="([^"]+)"/);
+                            currentChannelLogo = logoMatch ? logoMatch[1] : "https://via.placeholder.com/40/333/FFD700?text=TV";
+                            let groupMatch = line.match(/group-title="([^"]+)"/);
+                            currentChannelGroup = groupMatch ? groupMatch[1] : "غير مصنف";
+                            let commaIndex = line.lastIndexOf(',');
+                            if (commaIndex !== -1) currentChannelName = line.substring(commaIndex + 1).trim();
+                        } 
+                        else if (line.startsWith('http') && currentChannelName !== "") {
+                            if (currentChannelGroup.toLowerCase().includes('news') || currentChannelName.toLowerCase().includes('news') || currentChannelName.includes('إخبار')) {
+                                allChannels.push({ name: currentChannelName, url: line, logo: currentChannelLogo, group: currentChannelGroup });
+                                groups.add(currentChannelGroup);
+                            }
+                            currentChannelName = ""; 
+                            currentChannelLogo = "";
+                        }
+                    }
+                    createCategoryButtons(groups);
+                    renderChannels(allChannels); 
+                })
+                .catch(error => {
+                    channelListContainer.innerHTML = '<p style="padding:10px;">حدث خطأ، جرب مرة أخرى</p>';
+                });
+        }
+
+        function createCategoryButtons(groups) {
+            let allBtn = document.createElement('button');
+            allBtn.className = 'category-btn active';
+            allBtn.innerText = 'كل الأخبار';
+            allBtn.onclick = () => filterByCategory('الكل', allBtn);
+            categoriesContainer.appendChild(allBtn);
+
+            groups.forEach(group => {
+                let btn = document.createElement('button');
+                btn.className = 'category-btn';
+                btn.innerText = group;
+                btn.onclick = () => filterByCategory(group, btn);
+                categoriesContainer.appendChild(btn);
+            });
+        }
+
+        function filterByCategory(category, btnElement) {
+            currentCategory = category;
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+            if (btnElement) btnElement.classList.add('active');
+            searchInput.value = '';
+            if (category === 'الكل') renderChannels(allChannels);
+            else renderChannels(allChannels.filter(channel => channel.group === category));
+        }
+
+        function renderChannels(channels) {
+            channelListContainer.innerHTML = '';
+            if (channels.length === 0) {
+                channelListContainer.innerHTML = '<p style="padding:10px;">لا توجد قنوات إخبارية حالياً</p>';
+                return;
+            }
+            channels.forEach(channel => {
+                let item = document.createElement('div');
+                item.className = 'channel-item';
+                item.onclick = function() { playM3UChannel(channel.url); };
+                item.innerHTML = `<img src="${channel.logo}" class="channel-logo" onerror="this.src='https://via.placeholder.com/40/333/FFD700?text=TV'"><span class="channel-name">${channel.name}</span>`;
+                channelListContainer.appendChild(item);
+            });
+        }
+
+        function filterChannels() {
+            const filter = searchInput.value.toLowerCase();
+            let filtered = allChannels;
+            if (currentCategory !== 'الكل') filtered = filtered.filter(channel => channel.group === currentCategory);
+            filtered = filtered.filter(channel => channel.name.toLowerCase().includes(filter));
+            renderChannels(filtered);
+        }
+    </script>
 </body>
 </html>
