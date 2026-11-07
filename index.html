@@ -11,19 +11,14 @@
             background-color: #050505; display: flex; flex-direction: column;
             justify-content: center; align-items: center; z-index: 9999; transition: opacity 1s ease-in-out;
         }
-        .splash-image { width: 70%; max-width: 300px; border-radius: 20px; box-shadow: 0 0 30px rgba(255, 215, 0, 0.4); animation: zoomIn 2s ease-in-out infinite alternate; margin-bottom: 20px; }
-        .splash-title { color: #FFD700; font-size: 36px; font-weight: bold; text-shadow: 0 0 20px rgba(255, 215, 0, 0.8); animation: pulse 2s infinite; text-align: center; }
-        @keyframes zoomIn { from { transform: scale(1); } to { transform: scale(1.05); } }
-        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
+        .splash-image { width: 70%; max-width: 300px; border-radius: 20px; box-shadow: 0 0 30px rgba(255, 215, 0, 0.4); margin-bottom: 20px; }
+        .splash-title { color: #FFD700; font-size: 36px; font-weight: bold; text-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
 
         /* --- التصميم العام --- */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-image: url('IMG_6458.jpeg'); background-color: #0f0f0f; 
-            background-size: cover; background-position: center; background-attachment: fixed;
-            color: white; text-align: center; margin: 0; padding: 20px 10px; overflow-x: hidden;
+            background-color: #0f0f0f; color: white; text-align: center; margin: 0; padding: 20px 10px; overflow-x: hidden;
         }
-        body::before { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: -1; }
 
         h1 { color: #FFD700; font-size: 28px; margin-bottom: 20px; }
         h2 { color: #FFD700; text-align: right; font-size: 20px; margin-top: 30px; border-right: 4px solid #FFD700; padding-right: 15px; }
@@ -33,36 +28,28 @@
         video, iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
         #ytPlayer { display: none; }
 
-        .player-controls { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding: 10px; background: rgba(30, 30, 30, 0.9); border-radius: 8px; border: 1px solid #444; }
-        .ctrl-btn { background-color: #FFD700; color: #000; border: none; padding: 10px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
-        .sleep-timer-select { background-color: #222; color: #FFD700; border: 1px solid #FFD700; padding: 10px; border-radius: 5px; font-weight: bold; }
-
         .selector-container { background: rgba(30, 30, 30, 0.95); padding: 20px; border-radius: 12px; max-width: 800px; margin: 20px auto; border: 1px solid #444; }
         
-        /* --- تصميم زر البحث الذكي --- */
-        .fake-search-btn {
-            width: 95%; padding: 15px; font-size: 16px; border-radius: 8px; border: 2px solid #FFD700;
-            background-color: #111; color: #FFD700; margin-bottom: 15px; cursor: pointer; display: block; text-align: center; font-weight: bold;
-        }
-        .fake-search-btn:focus, .fake-search-btn:hover { background-color: #FFD700; color: #000; outline: none; }
-        
+        /* --- مربع البحث (تم حل مشكلة الكيبورد) --- */
         .search-box {
-            width: 95%; padding: 15px; font-size: 16px; border-radius: 8px; border: 2px solid #FFD700;
-            background-color: #222; color: white; margin-bottom: 15px; display: none; text-align: center; outline: none;
+            width: 95%; padding: 15px; font-size: 18px; border-radius: 8px; border: 2px solid #FFD700;
+            background-color: #111; color: white; margin-bottom: 15px; text-align: center; outline: none;
+            cursor: pointer; transition: 0.3s;
+        }
+        .search-box:hover, .search-box:focus {
+            background-color: #222;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
         }
 
-        /* --- قائمة القنوات الموحدة --- */
+        /* --- قائمة القنوات --- */
         .channel-list-container {
-            max-height: 500px; overflow-y: auto; background-color: #111; border: 1px solid #333; border-radius: 8px; scroll-behavior: smooth;
+            max-height: 400px; overflow-y: auto; background-color: #111; border: 1px solid #333; border-radius: 8px;
         }
         .channel-item {
             display: flex; align-items: center; padding: 12px 15px; border-bottom: 1px solid #222; cursor: pointer; outline: none; transition: 0.2s;
         }
-        /* تمييز القناة عند الوقوف عليها بالريموت */
-        .channel-item:hover, .channel-item:focus, .channel-item.selected {
-            background-color: #FFD700;
-        }
-        .channel-item:hover .channel-name, .channel-item:focus .channel-name, .channel-item.selected .channel-name { color: #000; font-weight: bold; }
+        .channel-item:hover, .channel-item:focus { background-color: #FFD700; }
+        .channel-item:hover .channel-name, .channel-item:focus .channel-name { color: #000; font-weight: bold; }
         
         .channel-logo { width: 50px; height: 50px; object-fit: contain; margin-left: 15px; background-color: white; border-radius: 8px; padding: 3px; }
         .channel-name { font-size: 18px; font-weight: bold; color: #ddd; }
@@ -70,7 +57,6 @@
         /* --- قائمة المسلسل --- */
         .series-select { width: 100%; padding: 15px; font-size: 18px; font-weight: bold; color: #FFD700; background-color: #111; border: 2px solid #FFD700; border-radius: 8px; cursor: pointer; text-align: center; outline: none; }
         
-        /* مؤشر التحميل */
         .loading-text { color: #FFD700; font-size: 18px; padding: 20px; text-align: center; }
     </style>
 </head>
@@ -82,7 +68,6 @@
         <div class="splash-title">👑 الزعيم IPTV 👑</div>
     </div>
 
-    <!-- محتوى التطبيق -->
     <div id="app-content" style="display: none;">
         <h1>👑 الزعيم IPTV 👑</h1>
         
@@ -92,26 +77,16 @@
                 <video id="videoPlayer" controls autoplay></video>
                 <iframe id="ytPlayer" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
             </div>
-            <div class="player-controls">
-                <button class="ctrl-btn" onclick="toggleFullScreen()">⛶ ملء الشاشة</button>
-                <select class="sleep-timer-select" id="sleepTimer" onchange="setSleepTimer(this.value)">
-                    <option value="0">⏱️ مؤقت النوم (إيقاف)</option>
-                    <option value="15">15 دقيقة</option>
-                    <option value="30">30 دقيقة</option>
-                    <option value="60">60 دقيقة</option>
-                </select>
-            </div>
         </div>
 
-        <!-- قسم القنوات الموحد -->
+        <!-- قسم القنوات -->
         <h2>📺 جميع القنوات</h2>
         <div class="selector-container">
-            <!-- زر البحث الذكي -->
-            <div class="fake-search-btn" id="fakeSearchBtn" tabindex="0" onclick="activateSearch()">🔍 اضغط هنا للبحث عن قناة...</div>
-            <input type="text" id="searchInput" class="search-box" placeholder="اكتب اسم القناة..." onkeyup="filterChannels()">
+            <!-- مربع البحث المباشر -->
+            <input type="text" id="searchInput" class="search-box" placeholder="🔍 اضغط (OK) للبحث عن قناة..." onkeyup="filterChannels()" onfocus="this.placeholder='اكتب اسم القناة الآن...'">
             
-            <!-- قائمة القنوات (مع معرف للتحكم بها) -->
-            <div class="channel-list-container" id="channelListContainer" tabindex="-1">
+            <!-- قائمة القنوات -->
+            <div class="channel-list-container" id="channelListContainer">
                 <div class="loading-text">جاري تحميل القنوات... يرجى الانتظار</div>
             </div>
         </div>
@@ -160,12 +135,9 @@
         const ytPlayer = document.getElementById('ytPlayer');
         const episodeSelect = document.getElementById('episodeSelect');
         const searchInput = document.getElementById('searchInput');
-        const fakeSearchBtn = document.getElementById('fakeSearchBtn');
         const channelListContainer = document.getElementById('channelListContainer');
-        const playerBox = document.getElementById('playerBox');
         
         let allChannels = [];
-        let sleepTimeout;
 
         const syrianChannels = [
             { name: "التلفزيون السوري", url: "https://svs.itworkscdn.net/syriatvlive/syriatv.smil/playlist_dvr.m3u8", logo: "https://i.imgur.com/3Vq5qJb.jpg" },
@@ -221,7 +193,6 @@
                             currentChannelLogo = "";
                         }
                     }
-                    
                     allChannels = [...syrianChannels, ...fetchedChannels];
                     renderChannels(allChannels);
                 })
@@ -231,42 +202,7 @@
                 });
         }
 
-        // --- التحكم في زر البحث ---
-        function activateSearch() {
-            fakeSearchBtn.style.display = 'none';
-            searchInput.style.display = 'block';
-            searchInput.focus(); 
-        }
-
-        // إخفاء البحث وإرجاع زر البحث، ونقل التركيز إلى القائمة
-        function hideSearchKeyboard() {
-            searchInput.style.display = 'none';
-            fakeSearchBtn.style.display = 'block';
-            fakeSearchBtn.focus();
-        }
-
         // --- دوال المشاهدة ---
-        function toggleFullScreen() {
-            if (!document.fullscreenElement) {
-                if (playerBox.requestFullscreen) playerBox.requestFullscreen();
-            } else {
-                if (document.exitFullscreen) document.exitFullscreen();
-            }
-        }
-
-        function setSleepTimer(minutes) {
-            clearTimeout(sleepTimeout);
-            if (minutes > 0) {
-                let ms = minutes * 60 * 1000;
-                sleepTimeout = setTimeout(() => {
-                    video.pause();
-                    ytPlayer.src = ""; 
-                    alert("تم إيقاف التشغيل بواسطة مؤقت النوم.");
-                    document.getElementById('sleepTimer').value = "0"; 
-                }, ms);
-            }
-        }
-
         function playM3UChannel(url) {
             if(!url) return;
             ytPlayer.style.display = 'none';
@@ -275,6 +211,7 @@
             video.play();
             episodeSelect.selectedIndex = 0;
             window.scrollTo({ top: 0, behavior: 'smooth' });
+            searchInput.blur(); // إغلاق الكيبورد إذا كان مفتوحاً
         }
 
         function playYouTube(videoId) {
@@ -286,7 +223,6 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // --- عرض وتصفية القنوات ---
         function renderChannels(channelsToRender) {
             channelListContainer.innerHTML = '';
             if (channelsToRender.length === 0) {
@@ -312,33 +248,16 @@
             renderChannels(filtered);
         }
 
-        // =====================================================================
-        // 🚨 خدعة التحكم بالريموت (لجعل الريموت ينزل من البحث إلى القائمة) 🚨
-        // =====================================================================
-        document.addEventListener('keydown', function(e) {
-            // إذا كان المستخدم واقفاً على زر البحث وضغط على سهم الأسفل
-            if (document.activeElement === fakeSearchBtn && e.key === 'ArrowDown') {
-                e.preventDefault(); // منع المتصفح من عمل أي شيء افتراضي
-                // نقل التركيز (المؤشر) إلى أول قناة في القائمة
-                const firstChannel = document.querySelector('.channel-item');
-                if (firstChannel) firstChannel.focus();
-            }
-            // إذا كان المستخدم واقفاً على أول قناة وضغط على سهم الأعلى
-            else if (document.activeElement === document.querySelector('.channel-item') && e.key === 'ArrowUp') {
-                e.preventDefault();
-                fakeSearchBtn.focus(); // إرجاع المؤشر لزر البحث
-            }
-            
-            // دعم زر "الرجوع/Back" في الريموت لإغلاق الكيبورد
-            if (e.key === 'Escape' || e.key === 'Backspace') {
-                if (searchInput.style.display === 'block') {
-                    hideSearchKeyboard();
-                    // مسح البحث وإظهار كل القنوات
-                    searchInput.value = "";
-                    filterChannels();
-                }
+        // ==========================================================
+        // 🚨 أقوى كود للتمرير التلقائي بالريموت 🚨
+        // ==========================================================
+        document.addEventListener('focusin', function(e) {
+            // إذا وقف الريموت على قناة، قم بتمرير الشاشة لتوسيطها
+            if (e.target.classList.contains('channel-item')) {
+                e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         });
+
     </script>
 </body>
 </html>
