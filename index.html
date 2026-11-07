@@ -66,6 +66,9 @@
 
         /* --- قائمة المسلسل --- */
         .series-select { width: 100%; padding: 15px; font-size: 18px; font-weight: bold; color: #FFD700; background-color: #111; border: 2px solid #FFD700; border-radius: 8px; cursor: pointer; text-align: center; outline: none; }
+        
+        /* مؤشر التحميل */
+        .loading-text { color: #FFD700; font-size: 18px; padding: 20px; text-align: center; }
     </style>
 </head>
 <body>
@@ -98,7 +101,7 @@
         </div>
 
         <!-- قسم القنوات الموحد -->
-        <h2>📺 اختيار القنوات</h2>
+        <h2>📺 جميع القنوات</h2>
         <div class="selector-container">
             <!-- زر البحث الذكي -->
             <div class="fake-search-btn" id="fakeSearchBtn" tabindex="0" onclick="activateSearch()">🔍 اضغط هنا للبحث عن قناة...</div>
@@ -106,7 +109,7 @@
             
             <!-- قائمة القنوات -->
             <div class="channel-list-container" id="channelListContainer">
-                <!-- سيتم تعبئة القنوات هنا تلقائياً بواسطة الجافاسكريبت -->
+                <div class="loading-text">جاري تحميل القنوات... يرجى الانتظار</div>
             </div>
         </div>
 
@@ -158,24 +161,17 @@
         const channelListContainer = document.getElementById('channelListContainer');
         const playerBox = document.getElementById('playerBox');
         
-        // مصفوفة تحتوي على جميع القنوات التي تريدها
-        const allChannels = [
-            // القنوات السورية
-            { name: "التلفزيون السوري", url: "https://svs.itworkscdn.net/syriatvlive/syriatv.smil/playlist_dvr.m3u8", logo: "https://i.imgur.com/3Vq5qJb.jpg" },
-            { name: "سوريا دراما", url: "https://svs.itworkscdn.net/syriadramalive/syriadrama.smil/playlist_dvr.m3u8", logo: "https://i.imgur.com/z8G0w6x.jpg" },
-            { name: "الأخبارية السورية", url: "https://svs.itworkscdn.net/syrianews/syrianews.smil/playlist_dvr.m3u8", logo: "https://i.imgur.com/7p4n5r2.jpg" },
-            
-            // قنوات أخبار عربية (يمكنك إضافة المزيد هنا بنفس الطريقة)
-            { name: "الجزيرة", url: "https://live-hls-web-aje.getaj.net/AJE/01.m3u8", logo: "https://upload.wikimedia.org/wikipedia/en/thumb/e/e9/Al_Jazeera_English_Logo.svg/200px-Al_Jazeera_English_Logo.svg.png" },
-            { name: "العربية", url: "https://live.alarabiya.net/alarabiapublish/alarabiya.smil/playlist.m3u8", logo: "https://upload.wikimedia.org/wikipedia/en/thumb/0/09/Al_Arabiya_Logo.svg/200px-Al_Arabiya_Logo.svg.png" },
-            { name: "سكاي نيوز عربية", url: "https://stream.skynewsarabia.com/hls/sna.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Sky_News_Arabia_Logo.png/200px-Sky_News_Arabia_Logo.png" },
-            { name: "بي بي سي عربي", url: "https://vs-cmaf-pushb-ww-live.akamaized.net/x=4/i=urn:bbc:pips:service:bbc_arabic_tv/pc_hd_abr_v2_ww.mpd", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/BBC_Arabic_Logo.png/200px-BBC_Arabic_Logo.png" },
-            { name: "فرانس 24 عربي", url: "https://live.francetv.fr/france24-arabe/index.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/France24_Logo_2013.svg/200px-France24_Logo_2013.svg.png" }
-        ];
-
+        let allChannels = [];
         let sleepTimeout;
 
-        // إخفاء شاشة الترحيب وتشغيل أول قناة
+        // 1. القنوات السورية الثابتة (تظهر دائماً في البداية)
+        const syrianChannels = [
+            { name: "التلفزيون السوري", url: "https://svs.itworkscdn.net/syriatvlive/syriatv.smil/playlist_dvr.m3u8", logo: "https://i.imgur.com/3Vq5qJb.jpg" },
+            { name: "سوريا دراما", url: "https://svs.itworkscdn.net/syriadramalive/syriadrama.smil/playlist_dvr.m3u8", logo: "https://i.imgur.com/z8G0w6x.jpg" },
+            { name: "الأخبارية السورية", url: "https://svs.itworkscdn.net/syrianews/syrianews.smil/playlist_dvr.m3u8", logo: "https://i.imgur.com/7p4n5r2.jpg" }
+        ];
+
+        // إخفاء شاشة الترحيب وتشغيل أول قناة وجلب باقي القنوات
         window.addEventListener('load', () => {
             setTimeout(() => {
                 const splash = document.getElementById('splash-screen');
@@ -187,14 +183,68 @@
                     // تشغيل القناة الأولى تلقائياً
                     ytPlayer.style.display = 'none';
                     video.style.display = 'block';
-                    video.src = allChannels[0].url;
+                    video.src = syrianChannels[0].url;
                     video.play();
                     
-                    // عرض القنوات في القائمة
-                    renderChannels(allChannels);
+                    // جلب القنوات العربية من الإنترنت
+                    fetchChannelsFromInternet();
                 }, 1000); 
             }, 3000); 
         });
+
+        // دالة جلب القنوات من ملف M3U (أكثر من 100 قناة أخبار عربية)
+        function fetchChannelsFromInternet() {
+            const m3uUrl = "https://iptv-org.github.io/iptv/regions/arab.m3u";
+            
+            fetch(m3uUrl)
+                .then(response => response.text())
+                .then(data => {
+                    const lines = data.split('\n');
+                    let currentChannelName = "";
+                    let currentChannelLogo = "";
+                    let currentChannelGroup = "";
+                    let fetchedChannels = [];
+
+                    for (let i = 0; i < lines.length; i++) {
+                        let line = lines[i].trim();
+                        if (line.startsWith('#EXTINF:')) {
+                            let logoMatch = line.match(/tvg-logo="([^"]+)"/);
+                            currentChannelLogo = logoMatch ? logoMatch[1] : "https://via.placeholder.com/50/333/FFD700?text=TV";
+                            
+                            let groupMatch = line.match(/group-title="([^"]+)"/);
+                            currentChannelGroup = groupMatch ? groupMatch[1] : "عام";
+                            
+                            let commaIndex = line.lastIndexOf(',');
+                            if (commaIndex !== -1) currentChannelName = line.substring(commaIndex + 1).trim();
+                        } 
+                        else if (line.startsWith('http') && currentChannelName !== "") {
+                            // تصفية القنوات لتكون عربية أو إخبارية فقط لتقليل العدد
+                            if (currentChannelGroup.toLowerCase().includes('news') || currentChannelName.includes('إخبار') || currentChannelName.includes('عربية')) {
+                                fetchedChannels.push({ 
+                                    name: currentChannelName, 
+                                    url: line, 
+                                    logo: currentChannelLogo 
+                                });
+                            }
+                            currentChannelName = ""; 
+                            currentChannelLogo = "";
+                        }
+                    }
+                    
+                    // دمج القنوات السورية مع القنوات التي تم تحميلها
+                    allChannels = [...syrianChannels, ...fetchedChannels];
+                    
+                    // عرض جميع القنوات في القائمة
+                    renderChannels(allChannels);
+                })
+                .catch(error => {
+                    console.error("خطأ في جلب القنوات:", error);
+                    // إذا فشل الإنترنت، نعرض القنوات السورية فقط
+                    allChannels = syrianChannels;
+                    renderChannels(allChannels);
+                    channelListContainer.innerHTML += '<p style="padding:10px; color:red;">فشل جلب القنوات العربية، تأكد من الإنترنت.</p>';
+                });
+        }
 
         // --- التمرير التلقائي بالريموت ---
         document.addEventListener('focusin', function(e) {
