@@ -57,7 +57,7 @@ h2{color:#FFD700;text-align:right;font-size:20px;margin-top:30px;border-right:4p
 
 <div id="app-content" style="display:none">
   <h1>👑 الزعيم IPTV 👑</h1>
-  <div class="ver">الإصدار 10.1 (يوتيوب للأطفال)</div>
+  <div class="ver">الإصدار 11.0 (قنوات أطفال حقيقية)</div>
 
   <div class="player-wrapper">
     <div class="player-container" id="playerBox">
@@ -169,18 +169,18 @@ function categorize(group, name) {
   return 'other';
 }
 
-/* ---- القنوات الخاصة بك (استخدمنا يوتيوب لطيور الجنة وكراميش لضمان العمل) ---- */
+/* ---- تم استبدال يوتيوب بروابط m3u8 حقيقية ---- */
 const customChannelsList = `#EXTM3U
-#EXTINF:-1,AR: طيور الجنة
-yt:https://www.youtube.com/embed/live_stream?channel=UC_1zBqv1vX8Kq0OqfA0aM0w
 #EXTINF:-1,AR: كراميش
-yt:https://www.youtube.com/embed/live_stream?channel=UC-g6g1G7qJ1x9Xo5J0P8hKQ
+https://karameesh-live.akamaized.net/out/v1/e5f7c3a6a6e84c6da874b7a5c1e36e7f/index.m3u8
+#EXTINF:-1,AR: سبيستون
+https://shls-spacetoon-prod-dub.shahid.net/out/v1/83b0e6eef6a544e4b0e8c7e9b9b5e4e7/index.m3u8
+#EXTINF:-1,AR: MBC 3
+https://shls-mbc3-eur-prod-dub.shahid.net/out/v1/fce09dd6a967431a871efb3b8dec9f82/index.m3u8
 #EXTINF:-1,AR: MBC 1
 https://shls-mbc1-prod-dub.shahid.net/out/v1/2f9b8d0a5b6c4e3f8d7c6b5a4e3f2d1c/index.m3u8
 #EXTINF:-1,AR: MBC 2
 https://shls-mbc2-prod-dub.shahid.net/out/v1/1f9b8d0a5b6c4e3f8d7c6b5a4e3f2d1c/index.m3u8
-#EXTINF:-1,AR: MBC 3
-https://shls-mbc3-eur-prod-dub.shahid.net/out/v1/fce09dd6a967431a871efb3b8dec9f82/index.m3u8
 #EXTINF:-1,AR: MBC 4
 https://mbc4-prod-dub-ak.akamaized.net/out/v1/c08681f81775496ab4afa2bac7ae7638/index.m3u8
 #EXTINF:-1,AR: MBC Action
@@ -330,7 +330,6 @@ function playM3UChannel(url, scroll) {
   if (!url) return;
   
   if (url.startsWith('yt:')) {
-      // تشغيل قنوات يوتيوب
       player.pause();
       document.getElementById('videoPlayer').style.display = 'none';
       ytPlayer.style.display = 'block';
