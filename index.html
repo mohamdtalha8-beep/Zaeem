@@ -2,118 +2,195 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
+    <!-- هذا السطر هو الأهم لضبط الأبعاد على التلفاز والهاتف -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>👑 الزعيم IPTV 👑</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #121212; color: #ffffff; overflow-x: hidden; }
-        
-        .search-container { position: sticky; top: 0; background-color: #1f1f1f; padding: 15px 20px; display: flex; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 1000; }
-        .search-box { width: 100%; max-width: 800px; }
-        .search-box input { width: 100%; padding: 12px 20px; font-size: 18px; border: 2px solid #333; border-radius: 30px; background-color: #2b2b2b; color: white; outline: none; transition: 0.3s; }
-        .search-box input:focus { border-color: #00a8ff; background-color: #333; transform: scale(1.02); }
+        /* إعدادات عامة لتناسب التلفاز */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-        .main-container { padding: 20px; max-width: 1200px; margin: 0 auto; }
-        h2 { margin-bottom: 15px; color: #00a8ff; border-bottom: 2px solid #333; padding-bottom: 10px; }
-        
-        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 15px; }
+        body {
+            background-color: #121212; /* خلفية داكنة مريحة للعين */
+            color: #ffffff;
+            /* منع التمرير الأفقي وجعل التمرير عمودياً فقط */
+            overflow-x: hidden; 
+            overflow-y: auto;
+        }
 
-        /* تصميم الأزرار */
-        .btn {
-            background-color: #2b2b2b; color: white; border: 2px solid #444; padding: 15px; border-radius: 10px;
-            text-decoration: none; text-align: center; font-size: 18px; font-weight: bold; transition: all 0.2s ease;
-            display: flex; align-items: center; justify-content: center; cursor: pointer;
+        /* تنسيق شريط البحث العلوي */
+        .search-container {
+            position: sticky;
+            top: 0;
+            background-color: #1f1f1f;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            z-index: 1000;
         }
-        .btn:hover, .btn:focus { background-color: #00a8ff; color: #121212; border-color: #00a8ff; transform: scale(1.05); outline: none; }
 
-        /* شاشة المشاهدة المنبثقة (Modal) */
-        .video-modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.9); z-index: 2000; justify-content: center; align-items: center; flex-direction: column;
+        .search-box {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
         }
-        .video-modal iframe {
-            width: 90%; height: 80%; border: none; border-radius: 10px; background: #000;
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 20px;
+            font-size: 18px;
+            border: 2px solid #333;
+            border-radius: 30px;
+            background-color: #2b2b2b;
+            color: white;
+            outline: none;
+            transition: 0.3s;
         }
-        .close-btn {
-            margin-top: 15px; padding: 10px 30px; background-color: #ff4757; color: white; border: none;
-            border-radius: 5px; font-size: 20px; cursor: pointer; font-weight: bold;
+
+        /* عند النقر على البحث يتغير لونه (مفيد لريموت التلفاز) */
+        .search-box input:focus {
+            border-color: #00a8ff;
+            background-color: #333;
+            transform: scale(1.02);
         }
-        .close-btn:hover { background-color: #ff6b81; }
+
+        /* تنسيق المحتوى الرئيسي */
+        .main-container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin-bottom: 15px;
+            color: #00a8ff;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+
+        /* شبكة عرض القنوات والأقسام */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        /* أزرار القنوات (مصممة لتناسب الريموت) */
+        .channel-btn, .episode-btn {
+            background-color: #2b2b2b;
+            color: white;
+            border: 2px solid #444;
+            padding: 15px;
+            border-radius: 10px;
+            text-decoration: none;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* تأثير التحديد عند التمرير بالريموت */
+        .channel-btn:hover, .channel-btn:focus, 
+        .episode-btn:hover, .episode-btn:focus {
+            background-color: #00a8ff;
+            color: #121212;
+            border-color: #00a8ff;
+            transform: scale(1.05);
+            outline: none;
+        }
+
+        /* تنسيق قائمة الحلقات */
+        .episodes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
     </style>
 </head>
 <body>
 
-    <!-- شريط البحث -->
+    <!-- شريط البحث في أعلى الشاشة -->
     <div class="search-container">
         <div class="search-box">
             <input type="text" id="searchInput" placeholder="ابحث عن قناة أو مسلسل..." onkeyup="filterContent()">
         </div>
     </div>
 
-    <!-- المحتوى -->
+    <!-- المحتوى الرئيسي -->
     <div class="main-container">
+        
         <h2>📺 القنوات المباشرة</h2>
         <div class="grid-container" id="channelsList">
-            <!-- ضع رابط البث الحقيقي في دالة playVideo -->
-            <div class="btn" onclick="playVideo('ضع_رابط_القناة_هنا.m3u8')">التلفزيون السوري</div>
-            <div class="btn" onclick="playVideo('ضع_رابط_القناة_هنا.m3u8')">سوريا دراما</div>
-            <div class="btn" onclick="playVideo('ضع_رابط_القناة_هنا.m3u8')">الجزيرة</div>
+            <!-- ضع روابط القنوات الحقيقية هنا في خاصية href -->
+            <a href="#" class="channel-btn">التلفزيون السوري</a>
+            <a href="#" class="channel-btn">سوريا دراما</a>
+            <a href="#" class="channel-btn">الجزيرة</a>
         </div>
 
         <h2>🎬 مسلسل الإمام أحمد بن حنبل</h2>
         <p style="margin-bottom: 10px; color: #aaa;">اختر الحلقة التي تريد مشاهدتها:</p>
+        
         <div class="episodes-grid" id="episodesList">
-            <!-- ضع رابط الفيديو الخاص بكل حلقة هنا -->
-            <div class="btn" onclick="playVideo('رابط_الحلقة_1')">الحلقة 1</div>
-            <div class="btn" onclick="playVideo('رابط_الحلقة_2')">الحلقة 2</div>
-            <div class="btn" onclick="playVideo('رابط_الحلقة_3')">الحلقة 3</div>
-            <div class="btn" onclick="playVideo('رابط_الحلقة_4')">الحلقة 4</div>
-            <div class="btn" onclick="playVideo('رابط_الحلقة_5')">الحلقة 5</div>
-            <!-- أكمل باقي الحلقات بنفس الطريقة -->
+            <!-- الحلقات من 1 إلى 30 -->
+            <a href="#" class="episode-btn">الحلقة 1</a>
+            <a href="#" class="episode-btn">الحلقة 2</a>
+            <a href="#" class="episode-btn">الحلقة 3</a>
+            <a href="#" class="episode-btn">الحلقة 4</a>
+            <a href="#" class="episode-btn">الحلقة 5</a>
+            <a href="#" class="episode-btn">الحلقة 6</a>
+            <a href="#" class="episode-btn">الحلقة 7</a>
+            <a href="#" class="episode-btn">الحلقة 8</a>
+            <a href="#" class="episode-btn">الحلقة 9</a>
+            <a href="#" class="episode-btn">الحلقة 10</a>
+            <a href="#" class="episode-btn">الحلقة 11</a>
+            <a href="#" class="episode-btn">الحلقة 12</a>
+            <a href="#" class="episode-btn">الحلقة 13</a>
+            <a href="#" class="episode-btn">الحلقة 14</a>
+            <a href="#" class="episode-btn">الحلقة 15</a>
+            <!-- ... يمكنك إكمال الباقي بنفس الطريقة ... -->
         </div>
+
     </div>
 
-    <!-- نافذة المشاهدة -->
-    <div id="videoModal" class="video-modal">
-        <iframe id="videoPlayer" allowfullscreen></iframe>
-        <button class="close-btn" onclick="closeVideo()">إغلاق (رجوع)</button>
-    </div>
-
+    <!-- كود جافاسكريبت لعمل البحث -->
     <script>
-        // دالة تشغيل الفيديو
-        function playVideo(url) {
-            if (url.includes('ضع_رابط')) {
-                alert('الرجاء وضع رابط الفيديو الحقيقي في الكود أولاً!');
-                return;
-            }
-            const modal = document.getElementById('videoModal');
-            const player = document.getElementById('videoPlayer');
-            player.src = url; // وضع الرابط في المشغل
-            modal.style.display = 'flex'; // إظهار الشاشة
-        }
-
-        // دالة إغلاق الفيديو
-        function closeVideo() {
-            const modal = document.getElementById('videoModal');
-            const player = document.getElementById('videoPlayer');
-            player.src = ''; // إيقاف الفيديو
-            modal.style.display = 'none'; // إخفاء الشاشة
-        }
-
-        // دالة البحث (بقيت كما هي)
         function filterContent() {
+            // جلب النص المكتوب في مربع البحث وتحويله لحروف صغيرة
             let input = document.getElementById('searchInput').value.toLowerCase();
-            let items = document.querySelectorAll('.btn');
-            items.forEach(item => {
-                let txt = item.textContent || item.innerText;
-                if (txt.toLowerCase().indexOf(input) > -1) {
-                    item.style.display = "flex";
+            
+            // البحث في القنوات
+            let channels = document.getElementById('channelsList').getElementsByTagName('a');
+            for (let i = 0; i < channels.length; i++) {
+                let txtValue = channels[i].textContent || channels[i].innerText;
+                if (txtValue.toLowerCase().indexOf(input) > -1) {
+                    channels[i].style.display = "";
                 } else {
-                    item.style.display = "none";
+                    channels[i].style.display = "none";
                 }
-            });
+            }
+
+            // البحث في الحلقات
+            let episodes = document.getElementById('episodesList').getElementsByTagName('a');
+            for (let i = 0; i < episodes.length; i++) {
+                let txtValue = episodes[i].textContent || episodes[i].innerText;
+                if (txtValue.toLowerCase().indexOf(input) > -1) {
+                    episodes[i].style.display = "";
+                } else {
+                    episodes[i].style.display = "none";
+                }
+            }
         }
     </script>
+
 </body>
 </html>
