@@ -123,7 +123,7 @@
             gap: 5px;
         }
 
-        .ctrl-btn:hover { background-color: #fff; }
+        .ctrl-btn:hover, .ctrl-btn:focus { background-color: #fff; outline: none; }
 
         .sleep-timer-select {
             background-color: #222;
@@ -235,27 +235,27 @@
             outline: none;
         }
 
-        /* --- التعديلات الجديدة لتحسين التمرير بالريموت --- */
+        /* --- تحسينات قائمة القنوات والتمرير --- */
         .channel-list-container {
-            max-height: 450px; /* زيادة الطول */
-            overflow-y: scroll; /* إظهار شريط التمرير دائماً */
+            max-height: 450px; 
+            overflow-y: scroll; 
             background-color: #111;
             border: 1px solid #FFD700;
             border-radius: 8px;
             display: none; 
-            scroll-behavior: smooth; /* تمرير ناعم */
+            scroll-behavior: smooth; 
         }
 
-        /* إظهار شريط التمرير بشكل واضح على التلفاز */
+        /* شريط تمرير واضح وسميك */
         .channel-list-container::-webkit-scrollbar {
-            width: 10px;
+            width: 12px;
         }
         .channel-list-container::-webkit-scrollbar-track {
             background: #222; 
         }
         .channel-list-container::-webkit-scrollbar-thumb {
             background: #FFD700; 
-            border-radius: 5px;
+            border-radius: 6px;
         }
 
         .channel-item {
@@ -265,10 +265,9 @@
             border-bottom: 1px solid #333;
             cursor: pointer;
             transition: background 0.2s;
-            outline: none; /* إزالة الإطار الافتراضي */
+            outline: none;
         }
 
-        /* تأثير التحديد بالريموت على القنوات */
         .channel-item:hover, .channel-item:focus {
             background-color: #FFD700;
         }
@@ -310,7 +309,7 @@
 </head>
 <body>
 
-    <!-- شاشة الترحيب (الصورة + الاسم) -->
+    <!-- شاشة الترحيب -->
     <div id="splash-screen">
         <img src="63A5AFDB-C33D-4E90-8631-577AD940E645.png" alt="شعار الزعيم" class="splash-image">
         <div class="splash-title">👑 الزعيم IPTV 👑</div>
@@ -415,7 +414,6 @@
                     splash.style.display = 'none';
                     document.getElementById('app-content').style.display = 'block';
                     
-                    // تشغيل أول قناة تلقائياً (التلفزيون السوري)
                     ytPlayer.style.display = 'none';
                     video.style.display = 'block';
                     video.src = 'https://svs.itworkscdn.net/syriatvlive/syriatv.smil/playlist_dvr.m3u8';
@@ -479,7 +477,6 @@
             document.querySelectorAll('.channel-btn').forEach(btn => btn.classList.remove('active'));
             episodeSelect.selectedIndex = 0;
             
-            // التمرير لأعلى الصفحة عند اختيار قناة لمشاهدتها
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -563,7 +560,14 @@
             channels.forEach(channel => {
                 let item = document.createElement('div');
                 item.className = 'channel-item';
-                item.tabIndex = 0; // هذا السطر مهم جداً لتمكين التحديد بالريموت
+                item.tabIndex = 0; 
+                
+                // --- هذا هو الكود السحري الذي يجعل الشاشة تنزل تلقائياً عند التحديد بالريموت ---
+                item.addEventListener('focus', function() {
+                    this.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                });
+                // -------------------------------------------------------------------------------
+
                 item.onclick = function() { playM3UChannel(channel.url); };
                 item.innerHTML = `<img src="${channel.logo}" class="channel-logo" onerror="this.src='https://via.placeholder.com/40/333/FFD700?text=TV'"><span class="channel-name">${channel.name}</span>`;
                 channelListContainer.appendChild(item);
