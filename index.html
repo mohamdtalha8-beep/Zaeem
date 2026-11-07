@@ -57,7 +57,7 @@ h2{color:#FFD700;text-align:right;font-size:20px;margin-top:30px;border-right:4p
 
 <div id="app-content" style="display:none">
   <h1>👑 الزعيم IPTV 👑</h1>
-  <div class="ver">الإصدار 9.3 (يفتح على التلفزيون السوري)</div>
+  <div class="ver">الإصدار 10.0 (طيور الجنة)</div>
 
   <div class="player-wrapper">
     <div class="player-container" id="playerBox">
@@ -161,15 +161,20 @@ function categorize(group, name) {
   if (/mbc|إم بي سي|ام بي سي/i.test(name)) return 'mbc';
   if (/syria|سوري|orient|أورينت|اورينت|addounia|الدنيا/i.test(name)) return 'syria';
   if (g.includes('news') || name.includes('أخبار') || name.includes('إخبار')) return 'news';
-  if (g.includes('sport') || name.includes('رياض')) return 'sports';
+  if (g.includes('sport') || name.includes('رياض') || name.includes('beIN')) return 'sports';
   if (g.includes('movie') || g.includes('series') || g.includes('entertainment') || g.includes('comedy') || name.includes('دراما') || name.includes('أفلام') || name.includes('سينما')) return 'movies';
-  if (g.includes('kid') || g.includes('animation') || name.includes('أطفال') || name.includes('كرتون')) return 'kids';
+  if (g.includes('kid') || g.includes('animation') || name.includes('أطفال') || name.includes('كرتون') || name.includes('طيور') || name.includes('كراميش')) return 'kids';
   if (g.includes('relig') || name.includes('قرآن') || name.includes('إسلام') || name.includes('quran')) return 'religious';
   if (g.includes('music') || name.includes('أغاني') || name.includes('موسيقى')) return 'music';
   return 'other';
 }
 
+/* ---- القنوات الخاصة بك (MBC + طيور الجنة + كراميش) ---- */
 const customChannelsList = `#EXTM3U
+#EXTINF:-1,AR: طيور الجنة
+https://shls-live-ak.akamaized.net/out/v1/980d0b5b0e8448f8a259a11ce6e5f2e1/index.m3u8
+#EXTINF:-1,AR: كراميش
+https://shls-live-ak.akamaized.net/out/v1/f4f8f4d8f4f8f4d8f4f8f4d8f4f8f4d8/index.m3u8
 #EXTINF:-1,AR: MBC 1
 https://shls-mbc1-prod-dub.shahid.net/out/v1/2f9b8d0a5b6c4e3f8d7c6b5a4e3f2d1c/index.m3u8
 #EXTINF:-1,AR: MBC 2
@@ -231,7 +236,7 @@ window.addEventListener('load', () => {
       allChannels = parseM3U(customChannelsList);
       applyFilters();
 
-      // 🚨 التعديل هنا: فتح قناة "Syria TV" (التلفزيون السوري) دائماً عند الدخول
+      // فتح التلفزيون السوري تلقائياً
       let defaultChannel = allChannels.find(c => c.name.includes('Syria TV') || c.name.includes('التلفزيون السوري'));
       if(defaultChannel) {
           playChannel(defaultChannel, false);
