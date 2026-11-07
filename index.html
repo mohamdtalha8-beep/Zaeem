@@ -150,9 +150,26 @@ const categories = [
   {id:'أطفال',name:'🧸 أطفال'},{id:'دينية',name:'🕌 دينية'},{id:'موسيقى',name:'🎵 موسيقى'},{id:'منوعة',name:'🌟 منوعة'}
 ];
 
+// *** مسلسل الإمام أحمد بن حنبل ***
 const epIds = ["rAOJZMPjxLc","e8jh0NfoUxQ","nN5A1RGBF3c","UI6qR865ehg","8NJE5yb_lqw","g5FrTDkth1I","_9Q7Nf1Ui7Q","zNcIpZu5Yhw","AAMwQCeeVZI","dDHnvmGSemw","AjS0rtLjX8A","dAtMZ-U9taA","EtE8uK22X-w","qsNdkdS81Q0","8I5TxMoAcOQ","5pPYjrfbkuw","ty516Uh3xP8","P82rEDYDozU","tq_SBbmJJ8A","d1fns8LG3uo","V6yPHEXN1fg","VtJuAWosqM4","hNXkpfyPi_Q","zCJWST2u6Vw","E41YElDToHw","JHgGELihZjs","ofkmmFBkx4o","4thw1O2Ql-k","D-eeoZP5Ido","RDPSiRV4TxY"];
 const episodes = epIds.map((id, i) => ({
   yt: id, name: 'الحلقة ' + (i + 1) + (i === epIds.length - 1 ? ' (الأخيرة)' : ''),
+  thumb: 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg'
+}));
+
+// *** مسلسل بقلة ذوق وكثرة غلبة ***
+// الحلقات التي أضفناها (1، 2، 3، 4، 5)
+const epIds_baqla = [
+  "6Q3LHKD-OQE", // 1
+  "G6scQ2IHiHc", // 2
+  "Sk3uDpQRu6w", // 3
+  "AM6qKx3kyTE", // 4
+  "_5pWUphmekU"  // 5
+];
+
+const episodes_baqla = epIds_baqla.map((id, i) => ({
+  yt: id, 
+  name: 'بقلة ذوق - الحلقة ' + (i + 1),
   thumb: 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg'
 }));
 
@@ -331,17 +348,7 @@ function render() {
     addRow('🎬 أحدث الأفلام', byCat('أفلام').slice(0, 20), chCard);
     addRow('📺 أحدث المسلسلات', byCat('مسلسلات').slice(0, 20), chCard);
     addRow('🎬 مسلسل الإمام أحمد بن حنبل', episodes, epCard);
-    
-    // إضافة قسم مسلسل بقلة ذوق وكثرة غلبة في الرئيسية
-    const bqlaRowHome = document.createElement('section');
-    bqlaRowHome.className = 'row';
-    bqlaRowHome.innerHTML = `
-      <h2>🎬 مسلسل بقلة ذوق وكثرة غلبة</h2>
-      <div style="padding: 10px 20px;">
-        <button class="more-btn" onclick="window.open('https://youtube.com/playlist?list=PLSBW2fS7td73uXgPx044dD15G_g_m4Aje', '_blank')">▶️ مشاهدة المسلسل كاملاً (40 حلقة)</button>
-      </div>
-    `;
-    viewEl.appendChild(bqlaRowHome);
+    addRow('🎬 مسلسل بقلة ذوق وكثرة غلبة', episodes_baqla, epCard);
 
     categories.slice(1).forEach(c => {
       if (!VOD.includes(c.id)) addRow(c.name, byCat(c.id).slice(0, 20), chCard);
@@ -364,21 +371,8 @@ function render() {
   } else if (view === 'movies') {
     showGrid(byCat('أفلام'), chCard, 'جاري جلب الأفلام...');
   } else if (view === 'series') {
-    // مسلسل الإمام
     addRow('🎬 مسلسل الإمام أحمد بن حنبل', episodes, epCard);
-    
-    // إضافة زر مسلسل بقلة ذوق وكثرة غلبة في قسم المسلسلات
-    const bqlaRow = document.createElement('section');
-    bqlaRow.className = 'row';
-    bqlaRow.innerHTML = `
-      <h2>🎬 مسلسل بقلة ذوق وكثرة غلبة</h2>
-      <div style="padding: 10px 20px;">
-        <button class="more-btn" onclick="window.open('https://youtube.com/playlist?list=PLSBW2fS7td73uXgPx044dD15G_g_m4Aje', '_blank')">▶️ مشاهدة المسلسل كاملاً (40 حلقة)</button>
-      </div>
-    `;
-    viewEl.appendChild(bqlaRow);
-
-    // عرض باقي المسلسلات
+    addRow('🎬 مسلسل بقلة ذوق وكثرة غلبة', episodes_baqla, epCard);
     showGrid(byCat('مسلسلات'), chCard);
   } else {
     const st = document.createElement('div');
