@@ -160,12 +160,13 @@
             justify-content: center;
         }
 
-        .channel-btn:hover, .channel-btn.active {
+        .channel-btn:hover, .channel-btn.active, .channel-btn:focus {
             background-color: #FFD700;
             color: #000;
             border-color: #FFD700;
             box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
             transform: translateY(-2px);
+            outline: none;
         }
 
         .selector-container {
@@ -192,7 +193,7 @@
             margin-bottom: 15px;
         }
         
-        .load-btn:hover { background-color: #fff; }
+        .load-btn:hover, .load-btn:focus { background-color: #fff; outline: none; }
 
         .search-box {
             width: 90%;
@@ -228,18 +229,33 @@
             transition: 0.3s;
         }
 
-        .category-btn:hover, .category-btn.active {
+        .category-btn:hover, .category-btn.active, .category-btn:focus {
             background-color: #FFD700;
             color: #000;
+            outline: none;
         }
 
+        /* --- التعديلات الجديدة لتحسين التمرير بالريموت --- */
         .channel-list-container {
-            max-height: 400px;
-            overflow-y: auto;
+            max-height: 450px; /* زيادة الطول */
+            overflow-y: scroll; /* إظهار شريط التمرير دائماً */
             background-color: #111;
             border: 1px solid #FFD700;
             border-radius: 8px;
             display: none; 
+            scroll-behavior: smooth; /* تمرير ناعم */
+        }
+
+        /* إظهار شريط التمرير بشكل واضح على التلفاز */
+        .channel-list-container::-webkit-scrollbar {
+            width: 10px;
+        }
+        .channel-list-container::-webkit-scrollbar-track {
+            background: #222; 
+        }
+        .channel-list-container::-webkit-scrollbar-thumb {
+            background: #FFD700; 
+            border-radius: 5px;
         }
 
         .channel-item {
@@ -249,10 +265,16 @@
             border-bottom: 1px solid #333;
             cursor: pointer;
             transition: background 0.2s;
+            outline: none; /* إزالة الإطار الافتراضي */
         }
 
-        .channel-item:hover {
-            background-color: #222;
+        /* تأثير التحديد بالريموت على القنوات */
+        .channel-item:hover, .channel-item:focus {
+            background-color: #FFD700;
+        }
+
+        .channel-item:hover .channel-name, .channel-item:focus .channel-name {
+            color: #000;
         }
 
         .channel-logo {
@@ -290,7 +312,6 @@
 
     <!-- شاشة الترحيب (الصورة + الاسم) -->
     <div id="splash-screen">
-        <!-- هنا تم وضع اسم الصورة الطويل الذي رفعته -->
         <img src="63A5AFDB-C33D-4E90-8631-577AD940E645.png" alt="شعار الزعيم" class="splash-image">
         <div class="splash-title">👑 الزعيم IPTV 👑</div>
     </div>
@@ -457,6 +478,9 @@
             video.play();
             document.querySelectorAll('.channel-btn').forEach(btn => btn.classList.remove('active'));
             episodeSelect.selectedIndex = 0;
+            
+            // التمرير لأعلى الصفحة عند اختيار قناة لمشاهدتها
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function loadM3U() {
@@ -539,6 +563,7 @@
             channels.forEach(channel => {
                 let item = document.createElement('div');
                 item.className = 'channel-item';
+                item.tabIndex = 0; // هذا السطر مهم جداً لتمكين التحديد بالريموت
                 item.onclick = function() { playM3UChannel(channel.url); };
                 item.innerHTML = `<img src="${channel.logo}" class="channel-logo" onerror="this.src='https://via.placeholder.com/40/333/FFD700?text=TV'"><span class="channel-name">${channel.name}</span>`;
                 channelListContainer.appendChild(item);
@@ -554,3 +579,4 @@
         }
     </script>
 </body>
+</html>
