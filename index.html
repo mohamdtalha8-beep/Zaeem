@@ -59,7 +59,7 @@ video,iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
 
 <div id="app-content" style="display:none">
   <h1>👑 الزعيم IPTV 👑</h1>
-  <div class="ver">الإصدار 4.1 (مع الأفلام)</div>
+  <div class="ver">الإصدار 5.0 (كامل بدون نقص)</div>
 
   <div class="player-wrapper">
     <div class="player-container" id="playerBox">
@@ -145,7 +145,6 @@ let allChannels = [], sleepTimeout, hls, currentCat = 'all';
 let shownList = [], nowPlaying = null, nameLabel = '', nameTimer;
 const PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50"><rect width="50" height="50" fill="#333"/><text x="25" y="32" font-size="18" fill="#FFD700" text-anchor="middle">TV</text></svg>');
 
-/* ---- التصنيفات (أضفنا الأفلام) ---- */
 const CATEGORIES = [
   { id: 'all',   label: 'الكل' },
   { id: 'movies',label: '🎬 أفلام' },
@@ -154,29 +153,85 @@ const CATEGORIES = [
   { id: 'news',  label: 'أخبار' }
 ];
 
-function categorize(group, name) {
-  const g = (group || '').toLowerCase();
-  if (/mbc|إم بي سي|ام بي سي/i.test(name)) return 'mbc';
-  if (/syria|سوري|orient|أورينت|اورينت|addounia|الدنيا/i.test(name)) return 'syria';
-  if (g.includes('news') || name.includes('أخبار') || name.includes('إخبار')) return 'news';
-  return 'other';
+/* ---- كافة القنوات الخاصة بك (مضمنة لتعمل فوراً) ---- */
+const staticPlaylist = `#EXTM3U
+#EXTINF:-1,AR: Noor Dubai
+http://iptv.alphacs.tv:8080/live/K4YhuqTtxV/T3GnNRmxPY/7887.ts
+#EXTINF:-1,AR: MTV Lebanon
+http://iptv.alphacs.tv:8080/live/K4YhuqTtxV/T3GnNRmxPY/7883.ts
+#EXTINF:-1,AR: Mobahat TV
+http://iptv.alphacs.tv:8080/live/K4YhuqTtxV/T3GnNRmxPY/7882.ts
+#EXTINF:-1,AR: MBC1
+http://iptv.alphacs.tv:8080/live/K4YhuqTtxV/T3GnNRmxPY/7589.ts
+#EXTINF:-1,AR: MBC2
+http://iptv.alphacs.tv:8080/live/K4YhuqTtxV/T3GnNRmxPY/7590.ts
+#EXTINF:-1,AR: MBC3
+http://iptv.alphacs.tv:8080/live/K4YhuqTtxV/T3GnNRmxPY/7601.ts
+#EXTINF:-1,AR: MBC4
+http://iptv.alphacs.tv:8080/live/K4YhuqTtxV/T3GnNRmxPY/7591.ts
+#EXTINF:-1,AR: MBC PRO SP1 HD
+http://iptv.alphacs.tv:8080/live/K4YhuqTtxV/T3GnNRmxPY/7598.ts
+#EXTINF:-1,AR: MBC PRO SP2 HD
+http://iptv.alphacs.tv:8080/live/K4YhuqTtxV/T3GnNRmxPY/7599.ts
+#EXTINF:-1,AR: MBC PRO SP3 HD
+http://iptv.alphacs.tv:8080/live/K4YhuqTtxV/T3GnNRmxPY/7600.ts
+#EXTINF:-1,AR: MBC Masr 1
+http://iptv.alphacs.tv:8080/live/K4YhuqTtxV/T3GnNRmxPY/7915.ts
+#EXTINF:-1,AR: MBC Masr 2
+http://iptv.alphacs.tv:8080/live/K4YhuqTtxV/T3GnNRmxPY/7916.ts
+#EXTINF:-1,AR: MBC MAX
+http://iptv.alphacs.tv:8080/live/K4YhuqTtxV/T3GnNRmxPY/7593.ts
+#EXTINF:-1,AR: MBC Drama
+http://iptv.alphacs.tv:8080/live/K4YhuqTtxV/T3GnNRmxPY/7597.ts
+#EXTINF:-1,AR: MBC Bollywood
+http://iptv.alphacs.tv:8080/live/K4YhuqTtxV/T3GnNRmxPY/7594.ts
+#EXTINF:-1,AR: MBC Action
+http://iptv.alphacs.tv:8080/live/K4YhuqTtxV/T3GnNRmxPY/7592.ts
+#EXTINF:-1,AR: LBC Sat
+http://iptv.alphacs.tv:8080/live/K4YhuqTtxV/T3GnNRmxPY/7879.ts
+#EXTINF:-1,AR: Future TV Int
+http://iptv.alphacs.tv:8080/live/K4YhuqTtxV/T3GnNRmxPY/7877.ts
+#EXTINF:-1,AR: Dubai One
+http://iptv.alphacs.tv:8080/live/K4YhuqTtxV/T3GnNRmxPY/7875.ts
+#EXTINF:-1,AR: Dubai Drama
+http://iptv.alphacs.tv:8080/live/K4YhuqTtxV/T3GnNRmxPY/7909.ts
+#EXTINF:-1,AR: CBC Drama
+http://iptv.alphacs.tv:8080/live/K4YhuqTtxV/T3GnNRmxPY/7908.ts
+#EXTINF:-1,AR: Cartoon Network
+http://iptv.alphacs.tv:8080/live/K4YhuqTtxV/T3GnNRmxPY/7903.ts
+#EXTINF:-1,AR: Al Jazeera
+https://live-hls-web-aje.getaj.net/AJE/01.m3u8
+#EXTINF:-1,AR: Al Arabiya
+https://live.alarabiya.net/alarabiapublish/alarabiya.smil/playlist.m3u8
+#EXTINF:-1,AR: Sky News Arabia
+https://stream.skynewsarabia.com/hls/sna.m3u8
+#EXTINF:-1,SY: Syria TV
+https://svs.itworkscdn.net/syriatvlive/syriatv.smil/playlist_dvr.m3u8
+#EXTINF:-1,SY: Syria Drama
+https://svs.itworkscdn.net/syriadramalive/syriadrama.smil/playlist_dvr.m3u8
+#EXTINF:-1,SY: Syria News
+https://svs.itworkscdn.net/syrianews/syrianews.smil/playlist_dvr.m3u8`;
+
+function parseM3U(text) {
+  const out = [];
+  let name = '';
+  text.split('\n').forEach(raw => {
+    const line = raw.trim();
+    if (line.startsWith('#EXTINF:')) {
+      const c = line.lastIndexOf(',');
+      name = c !== -1 ? line.substring(c + 1).trim() : '';
+    } else if (line.startsWith('http') && name) {
+      let cat = 'other';
+      if (name.includes('MBC')) cat = 'mbc';
+      else if (name.includes('News') || name.includes('Jazeera') || name.includes('Arabiya') || name.includes('أخبار')) cat = 'news';
+      else if (name.includes('SY:') || name.includes('Syria') || name.includes('سوريا')) cat = 'syria';
+      
+      out.push({ name, url: line, logo: '', cat });
+      name = '';
+    }
+  });
+  return out;
 }
-
-/* ---- القنوات السورية الثابتة ---- */
-const syrianChannels = [
-  { name: "التلفزيون السوري", url: "https://svs.itworkscdn.net/syriatvlive/syriatv.smil/playlist_dvr.m3u8", logo: "", cat: 'syria' },
-  { name: "سوريا دراما", url: "https://svs.itworkscdn.net/syriadramalive/syriadrama.smil/playlist_dvr.m3u8", logo: "", cat: 'syria' },
-  { name: "الأخبارية السورية", url: "https://svs.itworkscdn.net/syrianews/syrianews.smil/playlist_dvr.m3u8", logo: "", cat: 'syria' }
-];
-
-/* ---- مصادر القوائم الأساسية ---- */
-const PLAYLISTS = [
-  { url: "https://iptv-org.github.io/iptv/countries/sy.m3u", forceCat: 'syria' },
-  { url: "https://iptv-org.github.io/iptv/regions/arab.m3u" }
-];
-
-/* ---- رابط قائمة الأفلام الخاص بك ---- */
-const MOVIES_PLAYLIST_URL = "https://www.free-codecs.com/app/iptv-finder/data/ready/movies.m3u";
 
 window.addEventListener('load', () => {
   setTimeout(() => {
@@ -186,63 +241,31 @@ window.addEventListener('load', () => {
       splash.style.display = 'none';
       document.getElementById('app-content').style.display = 'block';
       buildTabs();
-      playChannel(syrianChannels[0], false);
-      loadAllPlaylists();
+      
+      // تحميل القنوات من النص المضمن
+      allChannels = parseM3U(staticPlaylist);
+      applyFilters();
+      if(allChannels.length > 0) playChannel(allChannels[0], false);
+
+      // محاولة جلب الأفلام من الرابط الخارجي ودمجها
+      fetch("https://www.free-codecs.com/app/iptv-finder/data/ready/movies.m3u", { cache: 'no-store' })
+        .then(r => r.text())
+        .then(t => {
+          const movies = parseM3U(t);
+          movies.forEach(m => { m.cat = 'movies'; }); // تصنيفها كأفلام
+          if (movies.length > 0) {
+            const seen = new Set(allChannels.map(c => c.url));
+            movies.forEach(m => {
+              if (!seen.has(m.url)) { seen.add(m.url); allChannels.push(m); }
+            });
+            applyFilters(); // تحديث القائمة
+          }
+        })
+        .catch(() => console.log("لم نتمكن من جلب الأفلام الخارجية (محمية)."));
+
     }, 1000);
-  }, 3000);
+  }, 2500);
 });
-
-/* ---- تحميل وتحليل القوائم ---- */
-function parseM3U(text, forceCat) {
-  const out = [];
-  let name = '', logo = '', group = '';
-  text.split('\n').forEach(raw => {
-    const line = raw.trim();
-    if (line.startsWith('#EXTINF:')) {
-      const l = line.match(/tvg-logo="([^"]*)"/);
-      const g = line.match(/group-title="([^"]*)"/);
-      logo = l && l[1] ? l[1] : '';
-      group = g ? g[1] : '';
-      const c = line.lastIndexOf(',');
-      name = c !== -1 ? line.substring(c + 1).trim() : '';
-    } else if (line.startsWith('http') && name) {
-      out.push({ name, url: line, logo, cat: forceCat || categorize(group, name) });
-      name = ''; logo = ''; group = '';
-    }
-  });
-  return out;
-}
-
-function loadAllPlaylists() {
-  // جلب القنوات الأساسية
-  Promise.all(PLAYLISTS.map(p =>
-    fetch(p.url, { cache: 'no-store' }).then(r => r.text()).then(t => parseM3U(t, p.forceCat))
-      .then(list => p.only ? list.filter(c => c.cat === p.only) : list).catch(() => [])
-  )).then(results => {
-    const seen = new Set(syrianChannels.map(c => c.url));
-    const merged = [...syrianChannels];
-    results.flat().forEach(c => {
-      if (!seen.has(c.url)) { seen.add(c.url); merged.push(c); }
-    });
-    allChannels = merged;
-    applyFilters();
-
-    // جلب الأفلام ودمجها (بشكل منفصل حتى لا يعطل القنوات إذا فشل)
-    fetch(MOVIES_PLAYLIST_URL, { cache: 'no-store' })
-      .then(r => r.text())
-      .then(t => {
-        const movies = parseM3U(t, 'movies');
-        if (movies.length > 0) {
-          const seenMovies = new Set(allChannels.map(c => c.url));
-          movies.forEach(m => {
-            if (!seenMovies.has(m.url)) { seenMovies.add(m.url); allChannels.push(m); }
-          });
-          applyFilters(); // تحديث القائمة لتشمل الأفلام
-        }
-      })
-      .catch(() => console.log("لم نتمكن من تحميل الأفلام (CORS)."));
-  });
-}
 
 /* ---- التبويبات ---- */
 function buildTabs() {
@@ -272,11 +295,11 @@ function applyFilters() {
 function renderChannels(list) {
   listBox.textContent = '';
   shownList = list;
-  countEl.textContent = allChannels.length ? 'العدد: ' + list.length : '';
+  countEl.textContent = 'العدد: ' + list.length;
   if (!list.length) {
     const p = document.createElement('p');
     p.className = 'empty';
-    p.textContent = allChannels.length ? 'لا توجد نتائج مطابقة.' : 'تعذّر تحميل القائمة. تحقق من الإنترنت.';
+    p.textContent = 'لا توجد قنوات مطابقة.';
     listBox.appendChild(p);
     return;
   }
@@ -290,9 +313,7 @@ function renderChannels(list) {
     item.onclick = () => playChannel(ch, true);
     const img = document.createElement('img');
     img.className = 'channel-logo';
-    img.loading = 'lazy';
-    img.src = /^https?:\/\//.test(ch.logo) ? ch.logo : PLACEHOLDER;
-    img.onerror = () => { img.onerror = null; img.src = PLACEHOLDER; };
+    img.src = PLACEHOLDER;
     const span = document.createElement('span');
     span.className = 'channel-name';
     span.textContent = ch.name;
