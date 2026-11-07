@@ -39,7 +39,7 @@ video,iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
 .fake-search-btn{width:95%;padding:15px;font-size:16px;border-radius:8px;border:2px solid #FFD700;background:#111;color:#FFD700;margin:0 auto 15px;cursor:pointer;display:block;font-weight:bold}
 .fake-search-btn:focus,.fake-search-btn:hover{background:#FFD700;color:#000;outline:none}
 .search-box{width:95%;padding:15px;font-size:16px;border-radius:8px;border:2px solid #FFD700;background:#222;color:#fff;margin-bottom:15px;display:none;text-align:center;outline:none}
-.channel-list-container{max-height:500px;overflow-y:auto;background:#111;border:1px solid #333;border-radius:8px;scroll-behavior:smooth}
+.channel-list-container{max-height:500px;overflow-y:auto;background:#111;border:1px solid #333;border-radius:8px}
 .channel-item{display:flex;align-items:center;padding:12px 15px;border-bottom:1px solid #222;cursor:pointer;outline:none;transition:.2s}
 .channel-item:hover,.channel-item:focus,.channel-item.selected{background:#FFD700}
 .channel-item:hover .channel-name,.channel-item:focus .channel-name,.channel-item.selected .channel-name{color:#000}
@@ -59,7 +59,7 @@ video,iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
 
 <div id="app-content" style="display:none">
   <h1>👑 الزعيم IPTV 👑</h1>
-  <div class="ver">الإصدار 4</div>
+  <div class="ver">الإصدار 5</div>
 
   <div class="player-wrapper">
     <div class="player-container" id="playerBox">
@@ -142,7 +142,7 @@ const tabsEl = document.getElementById('tabs');
 const countEl = document.getElementById('count');
 
 let allChannels = [], sleepTimeout, hls, currentCat = 'all';
-let shownList = [], nowPlaying = null, nameLabel = '', nameTimer;
+let shownList = [], nowPlaying = null, nameLabel = '', nameTimer, zapTimer, currentFail;
 const PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50"><rect width="50" height="50" fill="#333"/><text x="25" y="32" font-size="18" fill="#FFD700" text-anchor="middle">TV</text></svg>');
 
 /* ---- التصنيفات ---- */
@@ -301,27 +301,45 @@ function renderChannels(list) {
 /* ---- التشغيل ---- */
 function setStatus(msg) { statusEl.textContent = msg || ''; }
 
+const HLS_CONFIG = {
+  startLevel: 0, capLevelToPlayerSize: true, maxBufferLength: 10, maxMaxBufferLength: 20,
+  backBufferLength: 0, manifestLoadingTimeOut: 8000, manifestLoadingMaxRetry: 1,
+  levelLoadingTimeOut: 8000, fragLoadingTimeOut: 12000, startFragPrefetch: true, enableWorker: true
+};
+
+function ensureHls() {
+  if (hls) return hls;
+  hls = new Hls(HLS_CONFIG);
+  hls.attachMedia(video);
+  hls.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(() => {}));
+  hls.on(Hls.Events.ERROR, (_, d) => {
+    if (!d.fatal) return;
+    if (d.type === Hls.ErrorTypes.MEDIA_ERROR && !hls._recovered) { hls._recovered = true; hls.recoverMediaError(); return; }
+    if (currentFail) currentFail();
+  });
+  return hls;
+}
+
 function playM3UChannel(url, scroll) {
   if (!url) return;
   ytPlayer.src = '';
   ytPlayer.style.display = 'none';
   video.style.display = 'block';
   episodeSelect.selectedIndex = 0;
-  if (hls) { hls.destroy(); hls = null; }
   setStatus('⏳ ' + nameLabel);
   const done = () => { setStatus(nameLabel); clearTimeout(nameTimer); nameTimer = setTimeout(() => setStatus(''), 4000); };
-  const fail = () => setStatus('⚠️ هذه القناة لا تعمل حاليًا، جرّب قناة أخرى');
+  currentFail = () => setStatus('⚠️ هذه القناة لا تعمل حاليًا، جرّب قناة أخرى');
   video.onplaying = done;
 
   if (window.Hls && Hls.isSupported() && /\.m3u8/i.test(url)) {
-    hls = new Hls();
-    hls.loadSource(url);
-    hls.attachMedia(video);
-    hls.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(() => {}));
-    hls.on(Hls.Events.ERROR, (_, d) => { if (d.fatal) fail(); });
+    const h = ensureHls();
+    h._recovered = false;
+    video.onerror = null;
+    h.loadSource(url);
   } else {
+    if (hls) { hls.destroy(); hls = null; }
     video.src = url;
-    video.onerror = fail;
+    video.onerror = currentFail;
     video.play().catch(() => {});
   }
   if (scroll) window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -357,6 +375,7 @@ function setSleepTimer(minutes) {
 
 /* ---- التقليب بين القنوات ---- */
 function playChannel(ch, scroll) {
+  clearTimeout(zapTimer);
   nowPlaying = ch;
   nameLabel = '📺 ' + ch.name;
   playM3UChannel(ch.url, scroll);
@@ -378,7 +397,15 @@ function zap(dir) {
   if (!list.length) return;
   let i = list.indexOf(nowPlaying);
   i = i === -1 ? (dir > 0 ? 0 : list.length - 1) : (i + dir + list.length) % list.length;
-  playChannel(list[i], false);
+  const ch = list[i];
+  /* يظهر الاسم فورًا، ولا يبدأ البث إلا بعد توقف الضغط (تقليب سريع) */
+  nowPlaying = ch;
+  nameLabel = '📺 ' + ch.name;
+  clearTimeout(nameTimer);
+  setStatus(nameLabel);
+  markSelected();
+  clearTimeout(zapTimer);
+  zapTimer = setTimeout(() => playChannel(ch, false), 250);
 }
 
 /* ---- البحث والريموت ---- */
