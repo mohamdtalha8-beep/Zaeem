@@ -57,7 +57,7 @@ h2{color:#FFD700;text-align:right;font-size:20px;margin-top:30px;border-right:4p
 
 <div id="app-content" style="display:none">
   <h1>👑 الزعيم IPTV 👑</h1>
-  <div class="ver">الإصدار 8.0 (كافة التصنيفات)</div>
+  <div class="ver">الإصدار 9.2 (يفتح على الأخبارية السورية)</div>
 
   <div class="player-wrapper">
     <div class="player-container" id="playerBox">
@@ -143,7 +143,6 @@ let allChannels = [], sleepTimeout, currentCat = 'all';
 let shownList = [], nowPlaying = null, nameLabel = '', nameTimer, zapTimer;
 const PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50"><rect width="50" height="50" fill="#333"/><text x="25" y="32" font-size="18" fill="#FFD700" text-anchor="middle">TV</text></svg>');
 
-/* ---- إرجاع جميع التصنيفات كما كانت ---- */
 const CATEGORIES = [
   { id: 'all',   label: 'الكل' },
   { id: 'syria', label: '🇸🇾 سوريا' },
@@ -170,7 +169,6 @@ function categorize(group, name) {
   return 'other';
 }
 
-/* ---- قنوات MBC الخاصة بك (روابط جديدة) ---- */
 const customChannelsList = `#EXTM3U
 #EXTINF:-1,AR: MBC 1
 https://shls-mbc1-prod-dub.shahid.net/out/v1/2f9b8d0a5b6c4e3f8d7c6b5a4e3f2d1c/index.m3u8
@@ -232,7 +230,14 @@ window.addEventListener('load', () => {
       
       allChannels = parseM3U(customChannelsList);
       applyFilters();
-      if(allChannels.length > 0) playChannel(allChannels[0], false);
+
+      // 🚨 التعديل هنا: فتح قناة "الأخبارية السورية" دائماً عند الدخول
+      let defaultChannel = allChannels.find(c => c.name.includes('Syria News') || c.name.includes('الأخبارية السورية'));
+      if(defaultChannel) {
+          playChannel(defaultChannel, false);
+      } else if(allChannels.length > 0) {
+          playChannel(allChannels[0], false);
+      }
 
       Promise.all(PLAYLISTS.map(p =>
         fetch(p.url, { cache: 'no-store' }).then(r => r.text()).then(t => parseM3U(t, p.forceCat)).catch(() => [])
