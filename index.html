@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>الزعيم IPTV</title>
@@ -13,12 +16,17 @@
 body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background-image:url('IMG_6458.jpeg');background-color:#0f0f0f;background-size:cover;background-position:center;background-attachment:fixed;color:#fff;text-align:center;margin:0;padding:20px 10px;overflow-x:hidden}
 body::before{content:"";position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:-1}
 h1{color:#FFD700;font-size:28px;margin-bottom:20px}
+.ver{color:#888;font-size:12px;margin:-12px 0 12px}
 h2{color:#FFD700;text-align:right;font-size:20px;margin-top:30px;border-right:4px solid #FFD700;padding-right:15px}
 .player-wrapper{max-width:500px;margin:0 auto 20px;position:relative}
 .player-container{background:#000;border-radius:12px;overflow:hidden;border:2px solid #333;position:relative;padding-top:56.25%}
 video,iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
 #ytPlayer{display:none}
 #status{position:absolute;inset:auto 0 8px 0;color:#FFD700;font-size:14px;pointer-events:none;text-shadow:0 0 6px #000}
+#playerBox:fullscreen{padding-top:0;width:100%;height:100%;border:none;border-radius:0}
+#playerBox:-webkit-full-screen{padding-top:0;width:100%;height:100%;border:none;border-radius:0}
+#playerBox:fullscreen #status{top:24px;bottom:auto;font-size:28px;z-index:5}
+#playerBox:-webkit-full-screen #status{top:24px;bottom:auto;font-size:28px;z-index:5}
 .player-controls{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;padding:10px;background:rgba(30,30,30,.9);border-radius:8px;border:1px solid #444}
 .ctrl-btn{background:#FFD700;color:#000;border:none;padding:10px 15px;border-radius:5px;font-weight:bold;cursor:pointer}
 .ctrl-btn:focus{outline:3px solid #fff}
@@ -51,10 +59,11 @@ video,iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
 
 <div id="app-content" style="display:none">
   <h1>👑 الزعيم IPTV 👑</h1>
+  <div class="ver">الإصدار 4</div>
 
   <div class="player-wrapper">
     <div class="player-container" id="playerBox">
-      <video id="videoPlayer" controls autoplay playsinline></video>
+      <video id="videoPlayer" controls controlsList="nofullscreen" autoplay playsinline></video>
       <iframe id="ytPlayer" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
       <div id="status"></div>
     </div>
@@ -218,7 +227,7 @@ function parseM3U(text, forceCat) {
 
 function loadAllPlaylists() {
   Promise.all(PLAYLISTS.map(p =>
-    fetch(p.url).then(r => r.text()).then(t => parseM3U(t, p.forceCat))
+    fetch(p.url, { cache: 'no-store' }).then(r => r.text()).then(t => parseM3U(t, p.forceCat))
       .then(list => p.only ? list.filter(c => c.cat === p.only) : list).catch(() => [])
   )).then(results => {
     const seen = new Set(syrianChannels.map(c => c.url));
@@ -420,12 +429,22 @@ document.addEventListener('keydown', e => {
     return;
   }
 
+  const ctrls = Array.from(document.querySelectorAll('.player-controls button, .player-controls select'));
   let handled = true;
-  if (a && a.classList.contains('tab')) {
+  if (a && ctrls.includes(a)) {
+    const ci = ctrls.indexOf(a);
+    if (key === 'right' && ci > 0) ctrls[ci - 1].focus();      /* RTL */
+    else if (key === 'left' && ci < ctrls.length - 1) ctrls[ci + 1].focus();
+    else if (key === 'down') (tabs.find(t => t.classList.contains('active')) || tabs[0]).focus();
+    else if (key === 'up') window.scrollTo({ top: 0, behavior: 'smooth' });
+    else if (key === 'enter' && a.tagName === 'BUTTON') a.click();
+    else handled = false;
+  } else if (a && a.classList.contains('tab')) {
     const idx = tabs.indexOf(a);
     if (key === 'right' && idx > 0) tabs[idx - 1].focus();      /* RTL */
     else if (key === 'left' && idx < tabs.length - 1) tabs[idx + 1].focus();
     else if (key === 'down') fakeSearchBtn.focus();
+    else if (key === 'up') ctrls[0].focus();
     else if (key === 'enter') a.click();
     else handled = false;
   } else if (a === fakeSearchBtn) {
@@ -445,6 +464,33 @@ document.addEventListener('keydown', e => {
   } else handled = false;
 
   if (handled) e.preventDefault();
+});
+
+/* ---- التقليب أثناء ملء الشاشة ---- */
+function isFull() { return document.fullscreenElement || document.webkitFullscreenElement; }
+
+document.addEventListener('keydown', e => {
+  if (!isFull()) return;
+  const key = keyName(e);
+  if (key === 'chup' || key === 'up' || key === 'left') {
+    e.preventDefault(); e.stopPropagation(); zap(1);
+  } else if (key === 'chdown' || key === 'down' || key === 'right') {
+    e.preventDefault(); e.stopPropagation(); zap(-1);
+  }
+}, true);
+
+function onFullChange() {
+  if (isFull()) {
+    setStatus('▲ ▼ لتقليب القنوات');
+    clearTimeout(nameTimer);
+    nameTimer = setTimeout(() => setStatus(''), 4000);
+  }
+}
+document.addEventListener('fullscreenchange', onFullChange);
+document.addEventListener('webkitfullscreenchange', onFullChange);
+
+document.addEventListener('focusin', e => {
+  if (e.target.closest && e.target.closest('.player-controls')) window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 </script>
 </body>
