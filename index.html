@@ -22,6 +22,7 @@ button{color:inherit}
 #splash-screen{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;justify-content:center;align-items:center;background:radial-gradient(circle,#101a3d,#000 72%);transition:opacity .8s}
 .splash-logo{width:150px;border-radius:24px;filter:drop-shadow(0 0 30px rgba(240,189,74,.45))}
 .splash-title{margin-top:1.2rem;color:var(--gold);font-size:2.2rem;font-weight:900}
+.splash-ver{margin-top:.4rem;color:var(--mut);font-size:.9rem}
 
 #app{display:none;height:100%;flex-direction:column}
 #app.show{display:flex}
@@ -55,6 +56,7 @@ button{color:inherit}
 .card.poster .thumb img{width:100%;height:100%;object-fit:cover}
 .grid .card.poster{width:auto}
 .settings{padding:1rem 2rem}
+.ver{padding:1rem;text-align:center;color:var(--mut);font-size:.85rem}
 .chips{display:flex;gap:.5rem;overflow-x:auto;padding:.5rem 2rem}
 .chip{flex:0 0 auto;padding:.55rem 1.2rem;border:1px solid var(--line);border-radius:999px;background:var(--s1);font-size:.95rem;font-weight:700;color:var(--mut);cursor:pointer;outline:none}
 .chip.active{background:rgba(240,189,74,.16);border-color:var(--gold);color:var(--gold)}
@@ -69,7 +71,7 @@ button{color:inherit}
 .dock button:focus{background:var(--gold);color:#14100a;box-shadow:0 0 0 3px rgba(240,189,74,.35)}
 html.tv .dock button{padding:.4rem 1.2rem;font-size:.75rem}
 
-#player{position:fixed;inset:0;z-index:100;display:none;background:#000}
+#player{position:fixed;inset:0;z-index:100;display:none;background:#000;outline:none}
 #player.open{display:block}
 #player video,#player iframe{position:absolute;inset:0;width:100%;height:100%;border:0;object-fit:contain;background:#000}
 #ytPlayer{display:none}
@@ -82,6 +84,10 @@ html.tv .dock button{padding:.4rem 1.2rem;font-size:.75rem}
 #favBtn.on{color:var(--gold)}
 #ytBar{display:none;position:absolute;bottom:1.5rem;left:50%;transform:translateX(-50%);gap:.6rem;z-index:3}
 #closeBtn:focus,#favBtn:focus,.pbtn:focus{background:var(--gold);color:#14100a}
+#closeBtn,#favBtn,#ytBar{transition:opacity .3s}
+/* إخفاء العناصر أثناء التشغيل */
+#player.idle{cursor:none}
+#player.idle #closeBtn,#player.idle #favBtn,#player.idle #ytBar,#player.idle #hud:not(.sticky){opacity:0;pointer-events:none}
 
 html.tv .top,html.tv .row h2{padding-right:2.6rem;padding-left:2.6rem}
 html.tv .rail,html.tv .grid,html.tv .chips{padding-right:2.6rem;padding-left:2.6rem}
@@ -107,6 +113,7 @@ html.tv .rail,html.tv .grid,html.tv .chips{padding-right:2.6rem;padding-left:2.6
 <div id="splash-screen">
   <img src="63A5AFDB-C33D-4E90-8631-577AD940E645.png" alt="" class="splash-logo" onerror="this.style.display='none'">
   <div class="splash-title">👑 الزعيم IPTV 👑</div>
+  <div class="splash-ver">v4</div>
 </div>
 
 <div id="app">
@@ -124,8 +131,8 @@ html.tv .rail,html.tv .grid,html.tv .chips{padding-right:2.6rem;padding-left:2.6
   </nav>
 </div>
 
-<div id="player">
-  <video id="videoPlayer" controls autoplay playsinline></video>
+<div id="player" tabindex="-1">
+  <video id="videoPlayer" autoplay playsinline></video>
   <iframe id="ytPlayer" allow="autoplay; encrypted-media; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
   <div id="hud"></div>
   <button id="closeBtn">✕ رجوع</button>
@@ -143,6 +150,7 @@ html.tv .rail,html.tv .grid,html.tv .chips{padding-right:2.6rem;padding-left:2.6
   if (q === '1' || (q === null && auto)) document.documentElement.classList.add('tv');
 })();
 
+const VERSION = 'v4';
 const $ = id => document.getElementById(id);
 const video = $('videoPlayer'), ytPlayer = $('ytPlayer'), viewEl = $('view'), searchInput = $('searchInput'),
       dock = $('dock'), playerEl = $('player'), hud = $('hud'), favBtn = $('favBtn'),
@@ -159,7 +167,8 @@ const store = {
 
 let allChannels = [], shown = PAGE, nextId = 0, hls = null, idx = null;
 let view = 'home', cat = 'all', q = '';
-let currentId = -1, curList = [], curIdx = 0, lastFocus = null, hudTimer = 0, ytTimer = 0, favDirty = false;
+let currentId = -1, curList = [], curIdx = 0, lastFocus = null, hudTimer = 0, ytTimer = 0, idleTimer = 0;
+let favDirty = false, ytPlaying = false;
 let favs = store.get('zaeemFav', []), recent = store.get('zaeemRecent', []);
 const byUrl = new Map();
 
@@ -410,7 +419,10 @@ function render() {
     r.className = 'more-btn';
     r.textContent = '🗑️ مسح سجل المشاهدة';
     r.onclick = () => { recent = []; store.set('zaeemRecent', recent); r.textContent = 'تم المسح ✅'; };
-    st.append(b, r);
+    const v = document.createElement('div');
+    v.className = 'ver';
+    v.textContent = 'الإصدار ' + VERSION;
+    st.append(b, r, v);
     viewEl.appendChild(st);
   }
 }
@@ -450,15 +462,36 @@ searchInput.addEventListener('input', () => {
   }, 250);
 });
 
-function stopYouTube() { clearTimeout(ytTimer); ytPlayer.src = 'about:blank'; ytPlayer.style.display = 'none'; ytBar.style.display = 'none'; }
+function stopYouTube() {
+  clearTimeout(ytTimer);
+  ytPlaying = false;
+  ytPlayer.src = 'about:blank';
+  ytPlayer.style.display = 'none';
+  ytBar.style.display = 'none';
+}
 function stopHls() { if (hls) { hls.destroy(); hls = null; } }
 
 function showHud(text, sticky) {
   hud.textContent = text;
   hud.classList.add('on');
+  hud.classList.toggle('sticky', !!sticky);
   clearTimeout(hudTimer);
   if (!sticky) hudTimer = setTimeout(() => hud.classList.remove('on'), 4000);
 }
+
+/* ---------- إخفاء الأزرار أثناء التشغيل ---------- */
+function wake() {
+  playerEl.classList.remove('idle');
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(() => {
+    if (!playerEl.classList.contains('open')) return;
+    const it = curList[curIdx];
+    if (it && it.yt && !ytPlaying) return; // زر «تشغيل» يبقى ظاهراً حتى يبدأ الفيديو
+    playerEl.classList.add('idle');
+  }, 4000);
+}
+playerEl.addEventListener('pointerdown', wake);
+playerEl.addEventListener('mousemove', wake);
 
 /* ---------- يوتيوب على التلفاز ---------- */
 function ytCmd(f) {
@@ -495,9 +528,14 @@ window.addEventListener('message', e => {
     clearTimeout(ytTimer);
     showHud('⚠️ يوتيوب لا يسمح بتشغيل هذه الحلقة هنا — اضغط «فتح في تطبيق يوتيوب»', true);
     ytOpen.focus();
+    wake();
   } else if ((d.event === 'onStateChange' && d.info === 1) || (d.event === 'infoDelivery' && d.info && d.info.playerState === 1)) {
     clearTimeout(ytTimer);
-    const it = curList[curIdx]; if (it) showHud(it.name);
+    if (!ytPlaying) {
+      ytPlaying = true;
+      const it = curList[curIdx]; if (it) showHud(it.name);
+      wake();
+    }
   }
 });
 
@@ -527,17 +565,76 @@ function pushRecent(ch) {
   store.set('zaeemRecent', recent);
 }
 
+/* ---------- تشغيل القنوات: عدة محاولات بالترتيب ---------- */
+let playToken = 0, stepTimer = 0, onPlaying = null, onVideoError = null;
+video.addEventListener('playing', () => { if (onPlaying) onPlaying(); });
+video.addEventListener('error', () => { if (onVideoError) onVideoError(); });
+
+function clearStep() { clearTimeout(stepTimer); onPlaying = null; onVideoError = null; }
+
+function startStream(item) {
+  const tok = ++playToken;
+  const urls = [item.url];
+  if (location.protocol === 'https:' && item.url.startsWith('http:')) urls.unshift('https:' + item.url.slice(5));
+  const steps = [];
+  urls.forEach(u => {
+    if (window.Hls && Hls.isSupported() && /\.m3u8/i.test(u)) steps.push([u, 'hls']);
+    steps.push([u, 'native']);
+  });
+  let i = 0, last = '';
+  const next = why => {
+    if (tok !== playToken) return;
+    if (why) last = why;
+    clearStep(); stopHls();
+    if (i >= steps.length) {
+      showHud('⚠️ القناة لا تعمل: ' + item.name + (last ? ' (' + last + ')' : '') + ' — اضغط ▼ للتالية', true);
+      wake();
+      return;
+    }
+    const [u, mode] = steps[i++];
+    let done = false;
+    const fail = w => { if (!done) { done = true; next(w); } };
+    const tryPlay = () => video.play().catch(e => {
+      if (e && e.name === 'NotAllowedError') { clearTimeout(stepTimer); showHud('اضغط OK للتشغيل', true); }
+    });
+    onPlaying = () => { if (tok === playToken) { clearTimeout(stepTimer); showHud(item.name); } };
+    onVideoError = () => fail('video error');
+    stepTimer = setTimeout(() => fail('timeout'), 12000);
+    if (mode === 'hls') {
+      const h = new Hls();
+      hls = h;
+      let rec = 0;
+      h.loadSource(u);
+      h.attachMedia(video);
+      h.on(Hls.Events.MANIFEST_PARSED, tryPlay);
+      h.on(Hls.Events.ERROR, (e, d) => {
+        if (!d.fatal || hls !== h) return;
+        if (d.type === Hls.ErrorTypes.MEDIA_ERROR && rec++ < 2) h.recoverMediaError();
+        else fail(d.details || 'hls');
+      });
+    } else {
+      video.src = u;
+      video.load();
+      tryPlay();
+    }
+  };
+  next();
+}
+
 function play(item, list) {
   if (!playerEl.classList.contains('open')) lastFocus = document.activeElement;
   playerEl.classList.add('open');
-  $('closeBtn').focus();
+  playerEl.focus();
   curList = list;
   curIdx = Math.max(0, list.indexOf(item));
   stopHls();
   clearTimeout(ytTimer);
+  ytPlaying = false;
   updateFav(item);
+  wake();
 
   if (item.yt) {
+    playToken++; clearStep();
     video.pause();
     video.style.display = 'none';
     ytPlayer.style.display = 'block';
@@ -548,10 +645,9 @@ function play(item, list) {
     let playlist = curList.map(e => e.yt).join(',');
     let currentIndex = curIdx;
     const org = /^https?:/.test(location.origin) ? '&origin=' + encodeURIComponent(location.origin) : '';
-    ytPlayer.src = `https://www.youtube.com/embed/${item.yt}?autoplay=1&rel=0&playlist=${playlist}&index=${currentIndex}&enablejsapi=1&playsinline=1${org}`;
+    ytPlayer.src = `https://www.youtube.com/embed/${item.yt}?autoplay=1&rel=0&playlist=${playlist}&index=${currentIndex}&enablejsapi=1&playsinline=1&controls=0&modestbranding=1&iv_load_policy=3&fs=0${org}`;
 
     showHud(item.name);
-    // إن لم يبدأ الفيديو خلال 9 ثوانٍ نعرض تلميحاً
     ytTimer = setTimeout(() => {
       showHud('اضغط OK على «تشغيل» أو افتحه في تطبيق يوتيوب', true);
     }, 9000);
@@ -564,31 +660,8 @@ function play(item, list) {
   stopYouTube();
   video.style.display = 'block';
   video.pause();
-
-  let url = item.url;
-  if (location.protocol === 'https:' && url.startsWith('http:')) url = 'https:' + url.slice(5);
-
   showHud('جاري التحميل... ' + item.name, true);
-  const fail = () => showHud('⚠️ القناة لا تعمل حالياً: ' + item.name + ' — اضغط ▼ للقناة التالية', true);
-  const ok = () => showHud(item.name);
-
-  if (window.Hls && Hls.isSupported() && url.includes('.m3u8')) {
-    hls = new Hls();
-    const h = hls;
-    h.loadSource(url);
-    h.attachMedia(video);
-    h.on(Hls.Events.MANIFEST_PARSED, () => { video.play().then(ok).catch(ok); });
-    let recovered = 0;
-    h.on(Hls.Events.ERROR, (e, data) => {
-      if (!data.fatal) return;
-      if (data.type === Hls.ErrorTypes.MEDIA_ERROR && recovered++ < 2) h.recoverMediaError();
-      else if (data.type === Hls.ErrorTypes.NETWORK_ERROR && recovered++ < 2) h.startLoad();
-      else { h.destroy(); if (hls === h) hls = null; fail(); }
-    });
-  } else {
-    video.src = url;
-    video.play().then(ok).catch(fail);
-  }
+  startStream(item);
 }
 
 function zap(dir) {
@@ -598,12 +671,13 @@ function zap(dir) {
 }
 
 function closePlayer() {
-  stopHls(); stopYouTube();
+  stopHls(); stopYouTube(); playToken++; clearStep();
+  clearTimeout(idleTimer);
   video.pause();
   video.removeAttribute('src');
   video.load();
-  hud.classList.remove('on');
-  playerEl.classList.remove('open');
+  hud.classList.remove('on', 'sticky');
+  playerEl.classList.remove('open', 'idle');
   currentId = -1;
   let target = lastFocus && lastFocus.isConnected ? lastFocus : null;
   if (favDirty) { favDirty = false; target = null; render(); }
@@ -649,15 +723,21 @@ const isBack = e => e.key === 'Escape' || e.key === 'Backspace' || e.key === 'Go
 document.addEventListener('keydown', e => {
   const t = document.activeElement;
   if (playerEl.classList.contains('open')) {
+    wake();
     if (e.key === 'ArrowDown' || e.key === 'ChannelDown' || e.key === 'PageDown') { e.preventDefault(); zap(1); }
     else if (e.key === 'ArrowUp' || e.key === 'ChannelUp' || e.key === 'PageUp') { e.preventDefault(); zap(-1); }
     else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
       const bs = [$('closeBtn'), favBtn, ytPlay, ytOpen].filter(b => b.offsetParent !== null);
-      if (bs.length > 1) {
+      if (bs.length) {
         e.preventDefault();
-        const i = bs.indexOf(t);
-        bs[(i + (e.key === 'ArrowRight' ? 1 : -1) + bs.length) % bs.length].focus();
+        const fwd = e.key === 'ArrowRight', i = bs.indexOf(t);
+        bs[i < 0 ? (fwd ? 0 : bs.length - 1) : (i + (fwd ? 1 : -1) + bs.length) % bs.length].focus();
       }
+    }
+    else if (e.key === 'Enter' && (t === playerEl || t === video) && video.style.display !== 'none') {
+      e.preventDefault();
+      if (video.paused) video.play().catch(() => {}); else video.pause();
+      showHud(video.paused ? '⏸' : '▶');
     }
     else if (isBack(e)) { e.preventDefault(); closePlayer(); }
     return;
