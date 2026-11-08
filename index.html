@@ -65,6 +65,14 @@ button{color:inherit}
 .more-btn{display:block;margin:0 auto 1rem;padding:.7rem 1.6rem;border:1px solid var(--line);border-radius:999px;background:var(--s2);font-size:.95rem;font-weight:700;cursor:pointer;outline:none}
 .more-btn:focus{background:var(--gold);color:#14100a}
 
+/* Spinner & Loading */
+.spinner-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;padding:3rem 2rem;color:var(--gold);font-weight:700}
+.spinner{width:3rem;height:3rem;border:4px solid rgba(240,189,74,.2);border-top-color:var(--gold);border-radius:50%;animation:spin .9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-bar{position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--gold),transparent);background-size:200% 100%;animation:slide 1.2s linear infinite;z-index:2000;display:none}
+.loading-bar.on{display:block}
+@keyframes slide{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
 .dock{align-self:center;display:flex;gap:.3rem;padding:.35rem;margin:.3rem 0 max(.7rem,env(safe-area-inset-bottom));border:1px solid var(--line);border-radius:999px;background:rgba(12,17,38,.95)}
 .dock button{display:flex;align-items:center;gap:.5rem;padding:.7rem 1.5rem;border:0;border-radius:999px;background:transparent;color:var(--mut);font-size:1rem;font-weight:700;cursor:pointer;outline:none}
 .dock button.active{background:rgba(240,189,74,.16);color:var(--gold)}
@@ -85,7 +93,6 @@ html.tv .dock button{padding:.4rem 1.2rem;font-size:.75rem}
 #ytBar{display:none;position:absolute;bottom:1.5rem;left:50%;transform:translateX(-50%);gap:.6rem;z-index:3}
 #closeBtn:focus,#favBtn:focus,.pbtn:focus{background:var(--gold);color:#14100a}
 #closeBtn,#favBtn,#ytBar{transition:opacity .3s}
-/* إخفاء العناصر أثناء التشغيل */
 #player.idle{cursor:none}
 #player.idle #closeBtn,#player.idle #favBtn,#player.idle #ytBar,#player.idle #hud:not(.sticky){opacity:0;pointer-events:none}
 
@@ -115,6 +122,8 @@ html.tv .rail,html.tv .grid,html.tv .chips{padding-right:2.6rem;padding-left:2.6
   <div class="splash-title">👑 الزعيم IPTV 👑</div>
   <div class="splash-ver">v4</div>
 </div>
+
+<div id="loadingBar" class="loading-bar"></div>
 
 <div id="app">
   <div class="top">
@@ -172,28 +181,15 @@ let favDirty = false, ytPlaying = false;
 let favs = store.get('zaeemFav', []), recent = store.get('zaeemRecent', []);
 const byUrl = new Map();
 
+// البيانات القادمة من channels.json
+let CONFIG = { baseChannels: [], playlists: [], series: [] };
+let baseChannels = [];
+let episodes = [], episodes_baqla = [];
+
 const categories = [
   {id:'all',name:'🏠 الرئيسية'},{id:'fav',name:'⭐ المفضلة'},{id:'سوريا',name:'🇸🇾 سوريا'},{id:'mbc',name:'MBC'},
   {id:'أخبار',name:'📰 أخبار'},{id:'رياضة',name:'⚽ رياضة'},{id:'أفلام',name:'🎬 أفلام'},{id:'مسلسلات',name:'📺 مسلسلات'},
   {id:'أطفال',name:'🧸 أطفال'},{id:'دينية',name:'🕌 دينية'},{id:'موسيقى',name:'🎵 موسيقى'},{id:'منوعة',name:'🌟 منوعة'}
-];
-
-const epIds = ["rAOJZMPjxLc","e8jh0NfoUxQ","nN5A1RGBF3c","UI6qR865ehg","8NJE5yb_lqw","g5FrTDkth1I","_9Q7Nf1Ui7Q","zNcIpZu5Yhw","AAMwQCeeVZI","dDHnvmGSemw","AjS0rtLjX8A","dAtMZ-U9taA","EtE8uK22X-w","qsNdkdS81Q0","8I5TxMoAcOQ","5pPYjrfbkuw","ty516Uh3xP8","P82rEDYDozU","tq_SBbmJJ8A","d1fns8LG3uo","V6yPHEXN1fg","VtJuAWosqM4","hNXkpfyPi_Q","zCJWST2u6Vw","E41YElDToHw","JHgGELihZjs","ofkmmFBkx4o","4thw1O2Ql-k","D-eeoZP5Ido","RDPSiRV4TxY"];
-const episodes = epIds.map((id, i) => ({
-  yt: id, name: 'الحلقة ' + (i + 1) + (i === epIds.length - 1 ? ' (الأخيرة)' : ''),
-  thumb: 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg'
-}));
-
-const epIds_baqla = ["6Q3LHKD-OQE", "G6scQ2IHiHc", "Sk3uDpQRu6w", "AM6qKx3kyTE", "_5pWUphmekU"];
-const episodes_baqla = epIds_baqla.map((id, i) => ({
-  yt: id, name: 'بقلة ذوق - الحلقة ' + (i + 1),
-  thumb: 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg'
-}));
-
-const baseChannels = [
-  {name:"التلفزيون السوري",url:"https://svs.itworkscdn.net/syriatvlive/syriatv.smil/playlist_dvr.m3u8",logo:"https://upload.wikimedia.org/wikipedia/ar/thumb/1/1a/Syria_TV_logo.png/200px-Syria_TV_logo.png",cat:"سوريا"},
-  {name:"سوريا دراما",url:"https://svs.itworkscdn.net/syriadramalive/syriadrama.smil/playlist_dvr.m3u8",logo:"https://upload.wikimedia.org/wikipedia/ar/thumb/9/9f/Syria_Drama_logo.png/200px-Syria_Drama_logo.png",cat:"سوريا"},
-  {name:"الأخبارية السورية",url:"https://svs.itworkscdn.net/syrianews/syrianews.smil/playlist_dvr.m3u8",logo:"https://upload.wikimedia.org/wikipedia/ar/thumb/e/e1/Syria_News_logo.png/200px-Syria_News_logo.png",cat:"سوريا"}
 ];
 
 const VOD = ['أفلام', 'مسلسلات'];
@@ -220,8 +216,21 @@ function scheduleRender() {
   }, 300);
 }
 
+function showToast(msg, ms) {
+  let t = document.getElementById('toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'toast';
+    t.style.cssText = 'position:fixed;bottom:5.5rem;left:50%;transform:translateX(-50%);padding:.8rem 1.6rem;border-radius:999px;background:rgba(240,189,74,.95);color:#14100a;font-weight:800;font-size:.95rem;z-index:3000;box-shadow:0 8px 30px rgba(0,0,0,.5);opacity:0;transition:opacity .3s;pointer-events:none;max-width:90vw;text-align:center';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.style.opacity = '0', ms || 3000);
+}
+
 window.addEventListener('load', () => {
-  addChannels(baseChannels);
   addChannels(favs.map(f => ({...f})));
   addChannels(recent.map(f => ({...f})));
   render();
@@ -241,22 +250,63 @@ function autoStart() {
   if (!autoOn()) return;
   let saved = null;
   try { saved = JSON.parse(localStorage.getItem('zaeemLast')); } catch (e) {}
-  if (saved && saved.url) addChannels([saved]);
-  const ch = (saved && byUrl.get(saved.url)) || allChannels[0];
-  if (ch) play(ch, allChannels.filter(c => c.cat === ch.cat));
+  const tryStart = () => {
+    const ch = (saved && byUrl.get(saved.url)) || allChannels[0];
+    if (ch) play(ch, allChannels.filter(c => c.cat === ch.cat));
+  };
+  if (saved) addChannels([saved]);
+  if (allChannels.length) tryStart();
+  else setTimeout(tryStart, 2500);
 }
 
 function loadAllPlaylists() {
-  const lists = [
-    {url:"https://iptv-org.github.io/iptv/countries/sy.m3u",cat:'سوريا'},
-    {url:"https://iptv-org.github.io/iptv/languages/ara.m3u",cat:'منوعة'},
-    {url:"https://iptv-org.github.io/iptv/categories/movies.m3u",cat:'أفلام'}
-  ];
-  lists.forEach(p =>
-    fetch(p.url, {cache:'no-store'}).then(r => r.text())
-      .then(t => { addChannels(parseM3U(t, p.cat)); scheduleRender(); })
-      .catch(() => console.log('فشل جلب: ' + p.url))
-  );
+  const bar = $('loadingBar');
+  bar.classList.add('on');
+
+  fetch('channels.json', {cache:'no-store'})
+    .then(r => { if (!r.ok) throw new Error('channels.json'); return r.json(); })
+    .then(cfg => {
+      CONFIG = cfg;
+      baseChannels = cfg.baseChannels || [];
+      addChannels(baseChannels);
+
+      (cfg.series || []).forEach((s, i) => {
+        const eps = s.episodes.map((yt, j) => ({
+          yt,
+          name: s.title.replace(/^🎬\s*/, '') + ' - الحلقة ' + (j+1),
+          thumb: 'https://i.ytimg.com/vi/' + yt + '/hqdefault.jpg'
+        }));
+        if (i === 0) episodes = eps;
+        else if (i === 1) episodes_baqla = eps;
+      });
+
+      const lists = cfg.playlists || [];
+      let done = 0, failed = 0;
+      if (!lists.length) { bar.classList.remove('on'); scheduleRender(); return; }
+      lists.forEach(p =>
+        fetch(p.url, {cache:'no-store'})
+          .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+          .then(t => addChannels(parseM3U(t, p.cat)))
+          .catch(err => { failed++; console.log('فشل جلب: ' + p.url); })
+          .finally(() => {
+            done++;
+            if (done === lists.length) {
+              bar.classList.remove('on');
+              if (failed === lists.length) showToast('⚠️ تعذّر جلب القوائم، تحقق من الاتصال');
+              scheduleRender();
+            }
+          })
+      );
+    })
+    .catch(err => {
+      bar.classList.remove('on');
+      showToast('⚠️ ملف channels.json غير موجود');
+      baseChannels = [
+        {name:"التلفزيون السوري",url:"https://svs.itworkscdn.net/syriatvlive/syriatv.smil/playlist_dvr.m3u8",logo:"https://upload.wikimedia.org/wikipedia/ar/thumb/1/1a/Syria_TV_logo.png/200px-Syria_TV_logo.png",cat:"سوريا"}
+      ];
+      addChannels(baseChannels);
+      scheduleRender();
+    });
 }
 
 function parseM3U(text, defaultCat) {
@@ -350,8 +400,13 @@ function showGrid(list, mk, emptyText) {
   if (!list.length) {
     if (emptyText) {
       const e = document.createElement('div');
-      e.className = 'empty';
-      e.textContent = emptyText;
+      if (/جاري/.test(emptyText) && allChannels.length === 0) {
+        e.className = 'spinner-wrap';
+        e.innerHTML = '<div class="spinner"></div><div>' + emptyText + '</div>';
+      } else {
+        e.className = 'empty';
+        e.textContent = emptyText;
+      }
       viewEl.appendChild(e);
     }
     return;
@@ -435,7 +490,7 @@ dock.querySelectorAll('button').forEach(b => b.onclick = () => {
   viewEl.scrollTo({top: 0});
 });
 
-/* ---------- البحث: لا يفتح الكيبورد إلا عند الضغط ---------- */
+/* ---------- البحث ---------- */
 let opening = false, searchTimer = 0;
 function openSearch() {
   opening = true;
@@ -479,21 +534,19 @@ function showHud(text, sticky) {
   if (!sticky) hudTimer = setTimeout(() => hud.classList.remove('on'), 4000);
 }
 
-/* ---------- إخفاء الأزرار أثناء التشغيل ---------- */
 function wake() {
   playerEl.classList.remove('idle');
   clearTimeout(idleTimer);
   idleTimer = setTimeout(() => {
     if (!playerEl.classList.contains('open')) return;
     const it = curList[curIdx];
-    if (it && it.yt && !ytPlaying) return; // زر «تشغيل» يبقى ظاهراً حتى يبدأ الفيديو
+    if (it && it.yt && !ytPlaying) return;
     playerEl.classList.add('idle');
   }, 4000);
 }
 playerEl.addEventListener('pointerdown', wake);
 playerEl.addEventListener('mousemove', wake);
 
-/* ---------- يوتيوب على التلفاز ---------- */
 function ytCmd(f) {
   try { ytPlayer.contentWindow.postMessage(JSON.stringify({event:'command', func:f, args:[]}), '*'); } catch (e) {}
 }
@@ -555,7 +608,7 @@ function toggleFav() {
   store.set('zaeemFav', favs);
   favDirty = true;
   updateFav(it);
-  showHud(i >= 0 ? 'أُزيلت من المفضلة' : '⭐ أضيفت للمفضلة');
+  showToast(i >= 0 ? 'أُزيلت من المفضلة' : '⭐ أضيفت للمفضلة');
 }
 favBtn.onclick = toggleFav;
 
@@ -565,7 +618,7 @@ function pushRecent(ch) {
   store.set('zaeemRecent', recent);
 }
 
-/* ---------- تشغيل القنوات: عدة محاولات بالترتيب ---------- */
+/* ---------- تشغيل القنوات ---------- */
 let playToken = 0, stepTimer = 0, onPlaying = null, onVideoError = null;
 video.addEventListener('playing', () => { if (onPlaying) onPlaying(); });
 video.addEventListener('error', () => { if (onVideoError) onVideoError(); });
@@ -641,7 +694,6 @@ function play(item, list) {
     ytBar.style.display = 'flex';
     ytPlay.focus();
 
-    // تشغيل الحلقة التالية تلقائياً (كما كان تماماً)
     let playlist = curList.map(e => e.yt).join(',');
     let currentIndex = curIdx;
     const org = /^https?:/.test(location.origin) ? '&origin=' + encodeURIComponent(location.origin) : '';
@@ -717,7 +769,6 @@ function spatialMove(dir) {
   if (best) { best.focus(); best.scrollIntoView({block: 'nearest', inline: 'center'}); }
 }
 
-// زر الرجوع: ويب، أندرويد (4)، Tizen (10009)، webOS (461)
 const isBack = e => e.key === 'Escape' || e.key === 'Backspace' || e.key === 'GoBack' || e.keyCode === 4 || e.keyCode === 10009 || e.keyCode === 461;
 
 document.addEventListener('keydown', e => {
