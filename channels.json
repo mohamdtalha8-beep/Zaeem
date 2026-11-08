@@ -1,0 +1,22 @@
+{
+  "baseChannels": [
+    {"name":"التلفزيون السوري","url":"https://svs.itworkscdn.net/syriatvlive/syriatv.smil/playlist_dvr.m3u8","logo":"https://upload.wikimedia.org/wikipedia/ar/thumb/1/1a/Syria_TV_logo.png/200px-Syria_TV_logo.png","cat":"سوريا"},
+    {"name":"سوريا دراما","url":"https://svs.itworkscdn.net/syriadramalive/syriadrama.smil/playlist_dvr.m3u8","logo":"https://upload.wikimedia.org/wikipedia/ar/thumb/9/9f/Syria_Drama_logo.png/200px-Syria_Drama_logo.png","cat":"سوريا"},
+    {"name":"الأخبارية السورية","url":"https://svs.itworkscdn.net/syrianews/syrianews.smil/playlist_dvr.m3u8","logo":"https://upload.wikimedia.org/wikipedia/ar/thumb/e/e1/Syria_News_logo.png/200px-Syria_News_logo.png","cat":"سوريا"}
+  ],
+  "playlists": [
+    {"url":"https://iptv-org.github.io/iptv/countries/sy.m3u","cat":"سوريا"},
+    {"url":"https://iptv-org.github.io/iptv/languages/ara.m3u","cat":"منوعة"},
+    {"url":"https://iptv-org.github.io/iptv/categories/movies.m3u","cat":"أفلام"}
+  ],
+  "series": [
+    {
+      "title": "🎬 مسلسل الإمام أحمد بن حنبل",
+      "episodes": ["rAOJZMPjxLc","e8jh0NfoUxQ","nN5A1RGBF3c","UI6qR865ehg","8NJE5yb_lqw","g5FrTDkth1I","_9Q7Nf1Ui7Q","zNcIpZu5Yhw","AAMwQCeeVZI","dDHnvmGSemw","AjS0rtLjX8A","dAtMZ-U9taA","EtE8uK22X-w","qsNdkdS81Q0","8I5TxMoAcOQ","5pPYjrfbkuw","ty516Uh3xP8","P82rEDYDozU","tq_SBbmJJ8A","d1fns8LG3uo","V6yPHEXN1fg","VtJuAWosqM4","hNXkpfyPi_Q","zCJWST2u6Vw","E41YElDToHw","JHgGELihZjs","ofkmmFBkx4o","4thw1O2Ql-k","D-eeoZP5Ido","RDPSiRV4TxY"]
+    },
+    {
+      "title": "🎬 مسلسل بقلة ذوق وكثرة غلبة",
+      "episodes": ["6Q3LHKD-OQE","G6scQ2IHiHc","Sk3uDpQRu6w","AM6qKx3kyTE","_5pWUphmekU"]
+    }
+  ]
+}
