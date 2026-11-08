@@ -24,6 +24,22 @@ button{color:inherit}
 .rail{display:flex;gap:1rem;overflow-x:auto;padding:.9rem 2rem 1.1rem;scroll-behavior:smooth;transform:translateZ(0);will-change:scroll-position;contain:content}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(10.5rem,1fr));gap:1.3rem 1rem;padding:.9rem 2rem 1rem;transform:translateZ(0)}
 
+/* واجهة القائمة الكلاسيكية الجديدة */
+#tv-guide{display:none;flex:1;overflow:hidden;background:#060914;margin-bottom:10px}
+#tv-guide.active{display:flex}
+.guide-channels{flex:1;display:flex;flex-direction:column;overflow-y:auto;border-left:1px solid var(--line);background:var(--s1)}
+.guide-header{background:#0055ff;padding:12px 20px;display:flex;justify-content:space-between;font-weight:bold;color:#fff;position:sticky;top:0;z-index:2}
+.guide-item{display:flex;align-items:center;padding:10px 20px;border-bottom:1px solid var(--line);cursor:pointer;outline:none;transition:background 0.1s}
+.guide-item:hover,.guide-item:focus{background:#0055ff}
+.guide-num{width:40px;font-weight:bold;font-size:14px;color:#ccc}
+.guide-logo{width:40px;height:40px;object-fit:contain;margin:0 15px;background:rgba(255,255,255,0.05);border-radius:4px;padding:2px}
+.guide-name{font-size:16px;font-weight:700}
+.guide-cats{width:280px;display:flex;flex-direction:column;overflow-y:auto;background:#0a0d14}
+.guide-cat-header{background:#000;padding:12px 20px;color:#fff;font-weight:bold;display:flex;justify-content:space-between;position:sticky;top:0;z-index:2}
+.guide-cat{padding:12px 20px;border-bottom:1px solid var(--line);cursor:pointer;outline:none;color:var(--mut);font-weight:700;display:flex;align-items:center}
+.guide-cat:hover,.guide-cat:focus{background:#1a2235;color:#fff}
+.guide-cat.active{background:#0055ff;color:#fff}
+
 #splash-screen{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;justify-content:center;align-items:center;background:radial-gradient(circle,#101a3d,#000 72%);transition:opacity .4s}
 .splash-logo{width:150px;border-radius:24px;filter:drop-shadow(0 0 30px rgba(240,189,74,.45))}
 .splash-title{margin-top:1.2rem;color:var(--gold);font-size:2.2rem;font-weight:900}
@@ -112,6 +128,7 @@ html.tv .rail,html.tv .grid,html.tv .chips{padding-right:2.6rem;padding-left:2.6
   .dock{width:calc(100% - 1.4rem);justify-content:space-around}
   .dock button{flex:1;justify-content:center;padding:.6rem .15rem;font-size:.75rem;gap:.2rem}
   #hud{max-width:40%;font-size:.8rem;top:3.6rem}
+  .guide-cats{width:150px}
 }
 @media(max-width:400px){.grid{grid-template-columns:repeat(2,1fr)}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
@@ -133,9 +150,29 @@ html.tv .rail,html.tv .grid,html.tv .chips{padding-right:2.6rem;padding-left:2.6
     <input type="text" id="searchInput" class="search-box" placeholder="🔍 ابحث عن قناة..." readonly inputmode="search" enterkeyhint="search" autocomplete="off">
   </div>
   <div id="view"></div>
+  
+  <!-- واجهة الدليل التلفزيوني الجديدة (مخفية افتراضياً) -->
+  <div id="tv-guide">
+    <div class="guide-channels">
+      <div class="guide-header">
+        <span>القنوات</span>
+        <span>الشعار</span>
+      </div>
+      <div id="guide-channels-list" style="padding-bottom: 50px;"></div>
+    </div>
+    <div class="guide-cats">
+      <div class="guide-cat-header">
+        <span>الأقسام</span>
+        <span>▼</span>
+      </div>
+      <div id="guide-cats-list"></div>
+    </div>
+  </div>
+
   <nav class="dock" id="dock">
     <button data-v="home">🏠 الرئيسية</button>
     <button data-v="channels">📺 القنوات</button>
+    <button data-v="tvguide">📋 قائمة IPTV</button> <!-- الزر الجديد -->
     <button data-v="movies">🎬 أفلام</button>
     <button data-v="series">📼 مسلسلات</button>
     <button data-v="settings">⚙️ إعدادات</button>
@@ -165,7 +202,7 @@ const VERSION = 'v4';
 const $ = id => document.getElementById(id);
 const video = $('videoPlayer'), ytPlayer = $('ytPlayer'), viewEl = $('view'), searchInput = $('searchInput'),
       dock = $('dock'), playerEl = $('player'), hud = $('hud'), favBtn = $('favBtn'),
-      ytBar = $('ytBar'), ytPlay = $('ytPlay'), ytOpen = $('ytOpen');
+      ytBar = $('ytBar'), ytPlay = $('ytPlay'), ytOpen = $('ytOpen'), tvGuide = $('tv-guide');
 
 const PAGE = 60;
 const PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
@@ -208,13 +245,12 @@ function byCat(id) {
   return idx[id] || [];
 }
 
-// تم تحسين هذه الدالة لتعمل فوراً بدون تأخير
 let renderTimer = 0;
 function scheduleRender() {
   if (renderTimer) cancelAnimationFrame(renderTimer);
   renderTimer = requestAnimationFrame(() => {
     renderTimer = 0;
-    if (!viewEl.contains(document.activeElement)) render();
+    if (!viewEl.contains(document.activeElement) && view !== 'tvguide') render();
   });
 }
 
@@ -238,7 +274,6 @@ window.addEventListener('load', () => {
   render();
   loadAllPlaylists();
   
-  // تسريع شاشة البداية إلى 0.5 ثانية
   setTimeout(() => {
     const sp = $('splash-screen');
     $('app').classList.add('show');
@@ -272,12 +307,10 @@ function loadAllPlaylists() {
     .then(cfg => {
       CONFIG = cfg;
       baseChannels = cfg.baseChannels || [];
-      
-      // 1. عرض القنوات الأساسية فوراً
       addChannels(baseChannels);
       scheduleRender(); 
+      buildTVGuide(); // بناء قائمة IPTV
 
-      // 2. تحويل المسلسلات
       (cfg.series || []).forEach((s, i) => {
         const eps = s.episodes.map((yt, j) => ({
           yt,
@@ -289,7 +322,6 @@ function loadAllPlaylists() {
       });
       scheduleRender();
 
-      // 3. تحميل القوائم الكبيرة في الخلفية (بدون إبطاء التطبيق)
       const lists = cfg.playlists || [];
       let done = 0, failed = 0;
       if (!lists.length) { bar.classList.remove('on'); return; }
@@ -299,7 +331,8 @@ function loadAllPlaylists() {
           .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
           .then(t => { 
              addChannels(parseM3U(t, p.cat)); 
-             scheduleRender(); // عرض القنوات الجديدة فور وصولها
+             scheduleRender(); 
+             buildTVGuide(); // تحديث قائمة IPTV
           })
           .catch(err => { failed++; console.log('فشل جلب: ' + p.url); })
           .finally(() => {
@@ -315,12 +348,59 @@ function loadAllPlaylists() {
     .catch(err => {
       bar.classList.remove('on');
       showToast('⚠️ ملف channels.json غير موجود');
-      baseChannels = [
-        {name:"التلفزيون السوري",url:"https://svs.itworkscdn.net/syriatvlive/syriatv.smil/playlist_dvr.m3u8",logo:"https://upload.wikimedia.org/wikipedia/ar/thumb/1/1a/Syria_TV_logo.png/200px-Syria_TV_logo.png",cat:"سوريا"}
-      ];
+      baseChannels = [{name:"التلفزيون السوري",url:"https://svs.itworkscdn.net/syriatvlive/syriatv.smil/playlist_dvr.m3u8",logo:"https://upload.wikimedia.org/wikipedia/ar/thumb/1/1a/Syria_TV_logo.png/200px-Syria_TV_logo.png",cat:"سوريا"}];
       addChannels(baseChannels);
       scheduleRender();
+      buildTVGuide();
     });
+}
+
+// دالة بناء قائمة IPTV
+function buildTVGuide() {
+  const catsList = $('guide-cats-list');
+  if (!catsList) return;
+  catsList.innerHTML = '';
+  
+  const uniqueCats = ['all', ...new Set(allChannels.map(c => c.cat))];
+  
+  uniqueCats.forEach((cId, i) => {
+    const div = document.createElement('div');
+    div.className = 'guide-cat' + (i === 0 ? ' active' : '');
+    div.tabIndex = 0;
+    div.textContent = cId === 'all' ? 'كل القنوات' : cId;
+    div.onclick = () => {
+      document.querySelectorAll('.guide-cat').forEach(el => el.classList.remove('active'));
+      div.classList.add('active');
+      loadGuideChannels(cId);
+    };
+    catsList.appendChild(div);
+  });
+  
+  loadGuideChannels('all');
+}
+
+function loadGuideChannels(catId) {
+  const list = $('guide-channels-list');
+  if (!list) return;
+  list.innerHTML = '';
+  
+  const channels = catId === 'all' ? allChannels.filter(c => !VOD.includes(c.cat)) : allChannels.filter(c => c.cat === catId);
+  const chListForPlay = [...channels];
+  
+  channels.forEach((ch, i) => {
+    const div = document.createElement('div');
+    div.className = 'guide-item';
+    div.tabIndex = 0;
+    div.onclick = () => play(ch, chListForPlay);
+    
+    const num = String(i + 1).padStart(3, '0');
+    div.innerHTML = `
+      <div class="guide-num">${num}</div>
+      <img class="guide-logo" src="${ch.logo || PLACEHOLDER}" onerror="this.src='${PLACEHOLDER}'">
+      <div class="guide-name">${ch.name}</div>
+    `;
+    list.appendChild(div);
+  });
 }
 
 function parseM3U(text, defaultCat) {
@@ -359,7 +439,6 @@ function chCard(ch, list) {
   const t = document.createElement('div');
   t.className = 'thumb';
   const img = new Image();
-  // تحميل متأخر لصور القنوات لتخفيف الضغط
   img.alt = ''; img.loading = 'lazy'; img.decoding = 'async';
   img.src = ch.logo || PLACEHOLDER;
   img.onerror = () => { img.onerror = null; img.src = PLACEHOLDER; };
@@ -442,8 +521,19 @@ function showGrid(list, mk, emptyText) {
 function autoOn() { try { return localStorage.getItem('zaeemAuto') !== '0'; } catch (e) { return true; } }
 
 function render() {
+  if (view === 'tvguide') {
+    viewEl.style.display = 'none';
+    tvGuide.classList.add('active');
+    document.querySelectorAll('.guide-cat.active')[0]?.focus();
+    return;
+  } else {
+    viewEl.style.display = 'block';
+    tvGuide.classList.remove('active');
+  }
+
   viewEl.textContent = '';
   dock.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.v === view));
+  
   if (view === 'home') {
     addRow('🕘 تابع المشاهدة', recent.map(r => byUrl.get(r.url)).filter(Boolean), chCard);
     addRow('⭐ المفضلة', byCat('fav'), chCard);
@@ -477,7 +567,7 @@ function render() {
     addRow('🎬 مسلسل الإمام أحمد بن حنبل', episodes, epCard);
     addRow('🎬 مسلسل بقلة ذوق وكثرة غلبة', episodes_baqla, epCard);
     showGrid(byCat('مسلسلات'), chCard);
-  } else {
+  } else if (view === 'settings') {
     const st = document.createElement('div');
     st.className = 'settings';
     const b = document.createElement('button');
@@ -503,6 +593,7 @@ dock.querySelectorAll('button').forEach(b => b.onclick = () => {
   shown = PAGE;
   render();
   viewEl.scrollTo({top: 0});
+  dock.querySelectorAll('button').forEach(btn => btn.classList.toggle('active', btn.dataset.v === view));
 });
 
 let opening = false, searchTimer = 0;
@@ -525,9 +616,8 @@ searchInput.addEventListener('input', () => {
   clearTimeout(searchTimer);
   searchTimer = setTimeout(() => {
     q = searchInput.value.trim();
-    if (q) view = 'channels';
+    if (q) { view = 'channels'; render(); }
     shown = PAGE;
-    render();
   }, 150);
 });
 
@@ -756,7 +846,7 @@ function closePlayer() {
 $('closeBtn').onclick = closePlayer;
 
 function focusables() {
-  return Array.from(document.querySelectorAll('.card,.chip,.dock button,.search-box,.more-btn'))
+  return Array.from(document.querySelectorAll('.card,.chip,.dock button,.search-box,.more-btn,.guide-item,.guide-cat'))
     .filter(el => el.offsetParent !== null);
 }
 
@@ -786,6 +876,7 @@ const isBack = e => e.key === 'Escape' || e.key === 'Backspace' || e.key === 'Go
 
 document.addEventListener('keydown', e => {
   const t = document.activeElement;
+  
   if (playerEl.classList.contains('open')) {
     wake();
     if (e.key === 'ArrowDown' || e.key === 'ChannelDown' || e.key === 'PageDown') { e.preventDefault(); zap(1); }
@@ -806,12 +897,34 @@ document.addEventListener('keydown', e => {
     else if (isBack(e)) { e.preventDefault(); closePlayer(); }
     return;
   }
+
+  // منطق التنقل في قائمة IPTV (يمين ويسار)
+  if (view === 'tvguide') {
+    if (e.key === 'ArrowLeft' && t.classList.contains('guide-item')) {
+      e.preventDefault();
+      document.querySelector('.guide-cat.active')?.focus();
+    } else if (e.key === 'ArrowRight' && t.classList.contains('guide-cat')) {
+      e.preventDefault();
+      document.querySelector('.guide-item')?.focus();
+    } else if (e.key === 'Enter' && (t.classList.contains('guide-item') || t.classList.contains('guide-cat'))) {
+      e.preventDefault();
+      t.click();
+    } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      if (e.key === 'ArrowDown' && t.tagName === 'BUTTON') e.preventDefault(); // منع الخروج من الشاشة
+      setTimeout(() => { if(document.activeElement) document.activeElement.scrollIntoView({block: 'nearest'}); }, 50);
+    } else if (isBack(e)) {
+      e.preventDefault();
+      const a = dock.querySelector('.active'); if (a) a.focus();
+    }
+    return; // لا تكمل لباقي الشاشات
+  }
+
   const typing = t && t.tagName === 'INPUT' && !t.readOnly;
   if (typing && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) return;
   if (e.key.startsWith('Arrow')) {
     e.preventDefault();
     spatialMove(e.key);
-  } else if (e.key === 'Enter' && t && t.classList.contains('card')) {
+  } else if (e.key === 'Enter' && t && (t.classList.contains('card') || t.classList.contains('chip') || t.classList.contains('more-btn') || t.tagName === 'BUTTON')) {
     t.click();
   } else if (isBack(e)) {
     if (typing) return;
