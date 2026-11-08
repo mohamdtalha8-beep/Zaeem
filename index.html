@@ -19,7 +19,12 @@ body{height:100%;overflow:hidden;color:var(--txt);background:radial-gradient(ell
 ::-webkit-scrollbar{width:0;height:0}
 button{color:inherit}
 
-#splash-screen{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;justify-content:center;align-items:center;background:radial-gradient(circle,#101a3d,#000 72%);transition:opacity .8s}
+/* تحسينات الأداء */
+#view{flex:1;min-height:0;overflow-y:auto;padding:.4rem 0 1rem;scroll-behavior:smooth;transform:translateZ(0);will-change:scroll-position;contain:content}
+.rail{display:flex;gap:1rem;overflow-x:auto;padding:.9rem 2rem 1.1rem;scroll-behavior:smooth;transform:translateZ(0);will-change:scroll-position;contain:content}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(10.5rem,1fr));gap:1.3rem 1rem;padding:.9rem 2rem 1rem;transform:translateZ(0)}
+
+#splash-screen{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;justify-content:center;align-items:center;background:radial-gradient(circle,#101a3d,#000 72%);transition:opacity .4s}
 .splash-logo{width:150px;border-radius:24px;filter:drop-shadow(0 0 30px rgba(240,189,74,.45))}
 .splash-title{margin-top:1.2rem;color:var(--gold);font-size:2.2rem;font-weight:900}
 .splash-ver{margin-top:.4rem;color:var(--mut);font-size:.9rem}
@@ -31,24 +36,21 @@ button{color:inherit}
 .search-box{width:22rem;max-width:100%;padding:.7rem 1.3rem;font-size:1rem;color:var(--txt);background:rgba(16,21,40,.9);border:1px solid var(--line);border-radius:999px;outline:none}
 .search-box::placeholder{color:var(--mut)}
 .search-box:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(240,189,74,.28)}
-#view{flex:1;min-height:0;overflow-y:auto;padding:.4rem 0 1rem;scroll-behavior:smooth}
 
 .row{margin-bottom:.8rem}
 .row h2{padding:0 2rem;font-size:1.25rem;font-weight:900}
-.rail{display:flex;gap:1rem;overflow-x:auto;padding:.9rem 2rem 1.1rem;scroll-behavior:smooth}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(10.5rem,1fr));gap:1.3rem 1rem;padding:.9rem 2rem 1rem}
-.card{flex:0 0 auto;width:11rem;text-align:center;cursor:pointer;outline:none;border-radius:14px;transition:transform .18s}
+.card{flex:0 0 auto;width:11rem;text-align:center;cursor:pointer;outline:none;border-radius:14px;transition:transform .15s cubic-bezier(0.2, 0.8, 0.2, 1);transform:translateZ(0)}
 .card.ep{width:15rem}
 .grid .card,.grid .card.ep{width:auto}
-.thumb{position:relative;display:flex;align-items:center;justify-content:center;aspect-ratio:16/10;overflow:hidden;border-radius:14px;border:1px solid var(--line);background:linear-gradient(160deg,var(--s2),var(--s1));transition:box-shadow .18s,border-color .18s}
+.thumb{position:relative;display:flex;align-items:center;justify-content:center;aspect-ratio:16/10;overflow:hidden;border-radius:14px;border:1px solid var(--line);background:linear-gradient(160deg,var(--s2),var(--s1));transition:box-shadow .15s,border-color .15s;transform:translateZ(0);backface-visibility:hidden}
 .card.ep .thumb{aspect-ratio:16/9}
-.thumb img{width:62%;height:72%;object-fit:contain}
+.thumb img{width:62%;height:72%;object-fit:contain;transform:translateZ(0)}
 .thumb img.cover{width:100%;height:100%;object-fit:cover}
 .badge{position:absolute;right:.45rem;bottom:.45rem;padding:.1rem .65rem;border-radius:999px;background:rgba(0,0,0,.72);color:var(--gold2);font-size:.75rem;font-weight:700}
 .card.live .thumb::after{content:'';position:absolute;top:.5rem;right:.5rem;width:.55rem;height:.55rem;border-radius:50%;background:#ff4d4d;box-shadow:0 0 8px #ff4d4d}
 .cname{margin-top:.5rem;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:#dfe3ee;font-size:.9rem;font-weight:700}
 .card:hover .thumb{border-color:var(--gold)}
-.card:focus{transform:scale(1.08);z-index:3}
+.card:focus{transform:scale(1.06) translateZ(0);z-index:3}
 .card:focus .thumb{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold),0 14px 34px rgba(240,189,74,.3)}
 
 .card.poster{width:9rem}
@@ -57,8 +59,8 @@ button{color:inherit}
 .grid .card.poster{width:auto}
 .settings{padding:1rem 2rem}
 .ver{padding:1rem;text-align:center;color:var(--mut);font-size:.85rem}
-.chips{display:flex;gap:.5rem;overflow-x:auto;padding:.5rem 2rem}
-.chip{flex:0 0 auto;padding:.55rem 1.2rem;border:1px solid var(--line);border-radius:999px;background:var(--s1);font-size:.95rem;font-weight:700;color:var(--mut);cursor:pointer;outline:none}
+.chips{display:flex;gap:.5rem;overflow-x:auto;padding:.5rem 2rem;transform:translateZ(0)}
+.chip{flex:0 0 auto;padding:.55rem 1.2rem;border:1px solid var(--line);border-radius:999px;background:var(--s1);font-size:.95rem;font-weight:700;color:var(--mut);cursor:pointer;outline:none;transition:transform .1s}
 .chip.active{background:rgba(240,189,74,.16);border-color:var(--gold);color:var(--gold)}
 .chip:focus{background:var(--gold);border-color:var(--gold);color:#14100a;box-shadow:0 0 0 3px rgba(240,189,74,.35)}
 .empty{padding:3rem 2rem;text-align:center;color:var(--gold);font-size:1.1rem;font-weight:700}
@@ -73,7 +75,7 @@ button{color:inherit}
 .loading-bar.on{display:block}
 @keyframes slide{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
-.dock{align-self:center;display:flex;gap:.3rem;padding:.35rem;margin:.3rem 0 max(.7rem,env(safe-area-inset-bottom));border:1px solid var(--line);border-radius:999px;background:rgba(12,17,38,.95)}
+.dock{align-self:center;display:flex;gap:.3rem;padding:.35rem;margin:.3rem 0 max(.7rem,env(safe-area-inset-bottom));border:1px solid var(--line);border-radius:999px;background:rgba(12,17,38,.95);transform:translateZ(0)}
 .dock button{display:flex;align-items:center;gap:.5rem;padding:.7rem 1.5rem;border:0;border-radius:999px;background:transparent;color:var(--mut);font-size:1rem;font-weight:700;cursor:pointer;outline:none}
 .dock button.active{background:rgba(240,189,74,.16);color:var(--gold)}
 .dock button:focus{background:var(--gold);color:#14100a;box-shadow:0 0 0 3px rgba(240,189,74,.35)}
@@ -181,7 +183,6 @@ let favDirty = false, ytPlaying = false;
 let favs = store.get('zaeemFav', []), recent = store.get('zaeemRecent', []);
 const byUrl = new Map();
 
-// البيانات القادمة من channels.json
 let CONFIG = { baseChannels: [], playlists: [], series: [] };
 let baseChannels = [];
 let episodes = [], episodes_baqla = [];
@@ -207,13 +208,14 @@ function byCat(id) {
   return idx[id] || [];
 }
 
+// تم تحسين هذه الدالة لتعمل فوراً بدون تأخير
 let renderTimer = 0;
 function scheduleRender() {
-  if (renderTimer) return;
-  renderTimer = setTimeout(() => {
+  if (renderTimer) cancelAnimationFrame(renderTimer);
+  renderTimer = requestAnimationFrame(() => {
     renderTimer = 0;
     if (!viewEl.contains(document.activeElement)) render();
-  }, 300);
+  });
 }
 
 function showToast(msg, ms) {
@@ -235,15 +237,17 @@ window.addEventListener('load', () => {
   addChannels(recent.map(f => ({...f})));
   render();
   loadAllPlaylists();
+  
+  // تسريع شاشة البداية إلى 0.5 ثانية
   setTimeout(() => {
     const sp = $('splash-screen');
     $('app').classList.add('show');
     sp.style.opacity = '0';
-    setTimeout(() => sp.remove(), 800);
+    setTimeout(() => sp.remove(), 400);
     const first = viewEl.querySelector('.card') || dock.querySelector('.active');
     if (first) first.focus();
     autoStart();
-  }, 1500);
+  }, 500);
 });
 
 function autoStart() {
@@ -256,7 +260,7 @@ function autoStart() {
   };
   if (saved) addChannels([saved]);
   if (allChannels.length) tryStart();
-  else setTimeout(tryStart, 2500);
+  else setTimeout(tryStart, 2000);
 }
 
 function loadAllPlaylists() {
@@ -268,8 +272,12 @@ function loadAllPlaylists() {
     .then(cfg => {
       CONFIG = cfg;
       baseChannels = cfg.baseChannels || [];
+      
+      // 1. عرض القنوات الأساسية فوراً
       addChannels(baseChannels);
+      scheduleRender(); 
 
+      // 2. تحويل المسلسلات
       (cfg.series || []).forEach((s, i) => {
         const eps = s.episodes.map((yt, j) => ({
           yt,
@@ -279,14 +287,20 @@ function loadAllPlaylists() {
         if (i === 0) episodes = eps;
         else if (i === 1) episodes_baqla = eps;
       });
+      scheduleRender();
 
+      // 3. تحميل القوائم الكبيرة في الخلفية (بدون إبطاء التطبيق)
       const lists = cfg.playlists || [];
       let done = 0, failed = 0;
-      if (!lists.length) { bar.classList.remove('on'); scheduleRender(); return; }
+      if (!lists.length) { bar.classList.remove('on'); return; }
+      
       lists.forEach(p =>
         fetch(p.url, {cache:'no-store'})
           .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
-          .then(t => addChannels(parseM3U(t, p.cat)))
+          .then(t => { 
+             addChannels(parseM3U(t, p.cat)); 
+             scheduleRender(); // عرض القنوات الجديدة فور وصولها
+          })
           .catch(err => { failed++; console.log('فشل جلب: ' + p.url); })
           .finally(() => {
             done++;
@@ -345,7 +359,8 @@ function chCard(ch, list) {
   const t = document.createElement('div');
   t.className = 'thumb';
   const img = new Image();
-  img.alt = ''; img.loading = 'lazy';
+  // تحميل متأخر لصور القنوات لتخفيف الضغط
+  img.alt = ''; img.loading = 'lazy'; img.decoding = 'async';
   img.src = ch.logo || PLACEHOLDER;
   img.onerror = () => { img.onerror = null; img.src = PLACEHOLDER; };
   t.appendChild(img);
@@ -363,7 +378,7 @@ function epCard(ep, list) {
   const t = document.createElement('div');
   t.className = 'thumb';
   const img = new Image();
-  img.alt = ''; img.loading = 'lazy'; img.className = 'cover';
+  img.alt = ''; img.loading = 'lazy'; img.decoding = 'async'; img.className = 'cover';
   img.src = ep.thumb;
   img.onerror = () => { img.style.display = 'none'; };
   const b = document.createElement('span');
@@ -490,7 +505,6 @@ dock.querySelectorAll('button').forEach(b => b.onclick = () => {
   viewEl.scrollTo({top: 0});
 });
 
-/* ---------- البحث ---------- */
 let opening = false, searchTimer = 0;
 function openSearch() {
   opening = true;
@@ -514,7 +528,7 @@ searchInput.addEventListener('input', () => {
     if (q) view = 'channels';
     shown = PAGE;
     render();
-  }, 250);
+  }, 150);
 });
 
 function stopYouTube() {
@@ -569,7 +583,7 @@ ytOpen.onclick = openInYouTube;
 ytPlayer.addEventListener('load', () => {
   if (ytPlayer.src.indexOf('/embed/') === -1) return;
   try { ytPlayer.contentWindow.postMessage(JSON.stringify({event:'listening', id:1, channel:'widget'}), '*'); } catch (e) {}
-  setTimeout(() => ytCmd('playVideo'), 1500);
+  setTimeout(() => ytCmd('playVideo'), 1000);
 });
 
 window.addEventListener('message', e => {
@@ -618,7 +632,6 @@ function pushRecent(ch) {
   store.set('zaeemRecent', recent);
 }
 
-/* ---------- تشغيل القنوات ---------- */
 let playToken = 0, stepTimer = 0, onPlaying = null, onVideoError = null;
 video.addEventListener('playing', () => { if (onPlaying) onPlaying(); });
 video.addEventListener('error', () => { if (onVideoError) onVideoError(); });
