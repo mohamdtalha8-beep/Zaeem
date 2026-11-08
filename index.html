@@ -72,10 +72,14 @@ button{color:inherit}
 #player.open{display:block}
 #player video,#player iframe{position:absolute;inset:0;width:100%;height:100%;border:0;object-fit:contain;background:#000}
 #ytPlayer{display:none}
-#hud{position:absolute;top:1rem;left:50%;max-width:70%;padding:.4rem 1.4rem;transform:translateX(-50%);border-radius:999px;background:rgba(0,0,0,.7);color:var(--gold2);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;pointer-events:none;transition:opacity .3s}
+#hud{position:absolute;top:1rem;left:50%;max-width:60%;padding:.4rem 1.4rem;transform:translateX(-50%);border-radius:999px;background:rgba(0,0,0,.7);color:var(--gold2);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;pointer-events:none;transition:opacity .3s;z-index:2}
 #hud.on{opacity:1}
-#closeBtn{position:absolute;top:1rem;right:1rem;padding:.55rem 1.3rem;border:1px solid var(--line);border-radius:999px;background:rgba(0,0,0,.65);font-size:.95rem;font-weight:700;cursor:pointer;outline:none}
-#closeBtn:focus{background:var(--gold);color:#14100a}
+#closeBtn,#favBtn,#ytOpen{position:absolute;z-index:3;padding:.55rem 1.3rem;border:1px solid var(--line);border-radius:999px;background:rgba(0,0,0,.65);font-size:.95rem;font-weight:700;cursor:pointer;outline:none}
+#closeBtn{top:1rem;right:1rem}
+#favBtn{top:1rem;left:1rem}
+#favBtn.on{color:var(--gold)}
+#ytOpen{display:none;bottom:1.5rem;left:50%;transform:translateX(-50%)}
+#closeBtn:focus,#favBtn:focus,#ytOpen:focus{background:var(--gold);color:#14100a}
 
 html.tv .top,html.tv .row h2{padding-right:2.6rem;padding-left:2.6rem}
 html.tv .rail,html.tv .grid,html.tv .chips{padding-right:2.6rem;padding-left:2.6rem}
@@ -90,7 +94,7 @@ html.tv .rail,html.tv .grid,html.tv .chips{padding-right:2.6rem;padding-left:2.6
   .grid{grid-template-columns:repeat(3,1fr);gap:1rem .6rem}
   .dock{width:calc(100% - 1.4rem);justify-content:space-around;bottom:max(.7rem,env(safe-area-inset-bottom))}
   .dock button{flex:1;justify-content:center;padding:.6rem .15rem;font-size:.75rem;gap:.2rem}
-  #hud{max-width:55%;font-size:.85rem}
+  #hud{max-width:40%;font-size:.8rem;top:3.6rem}
 }
 @media(max-width:400px){.grid{grid-template-columns:repeat(2,1fr)}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
@@ -120,9 +124,11 @@ html.tv .rail,html.tv .grid,html.tv .chips{padding-right:2.6rem;padding-left:2.6
 
 <div id="player">
   <video id="videoPlayer" controls autoplay playsinline></video>
-  <iframe id="ytPlayer" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
+  <iframe id="ytPlayer" allow="autoplay; encrypted-media; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
   <div id="hud"></div>
   <button id="closeBtn">✕ رجوع</button>
+  <button id="favBtn">☆ مفضلة</button>
+  <button id="ytOpen">▶ فتح في تطبيق يوتيوب</button>
 </div>
 
 <script>
@@ -134,18 +140,25 @@ html.tv .rail,html.tv .grid,html.tv .chips{padding-right:2.6rem;padding-left:2.6
 
 const $ = id => document.getElementById(id);
 const video = $('videoPlayer'), ytPlayer = $('ytPlayer'), viewEl = $('view'), searchInput = $('searchInput'),
-      dock = $('dock'), playerEl = $('player'), hud = $('hud');
+      dock = $('dock'), playerEl = $('player'), hud = $('hud'), favBtn = $('favBtn'), ytOpen = $('ytOpen');
 
 const PAGE = 60;
 const PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
   '<svg xmlns="http://www.w3.org/2000/svg" width="70" height="70"><rect width="70" height="70" rx="12" fill="#1a2244"/><text x="35" y="43" font-size="22" font-weight="bold" text-anchor="middle" fill="#f0bd4a" font-family="sans-serif">TV</text></svg>');
 
-let allChannels = [], shown = PAGE, nextId = 0, hls = null;
+const store = {
+  get(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+};
+
+let allChannels = [], shown = PAGE, nextId = 0, hls = null, idx = null;
 let view = 'home', cat = 'all', q = '';
-let currentId = -1, curList = [], curIdx = 0, lastFocus = null, hudTimer = 0;
+let currentId = -1, curList = [], curIdx = 0, lastFocus = null, hudTimer = 0, ytTimer = 0, favDirty = false;
+let favs = store.get('zaeemFav', []), recent = store.get('zaeemRecent', []);
+const byUrl = new Map();
 
 const categories = [
-  {id:'all',name:'🏠 الرئيسية'},{id:'سوريا',name:'🇸🇾 سوريا'},{id:'mbc',name:'MBC'},
+  {id:'all',name:'🏠 الرئيسية'},{id:'fav',name:'⭐ المفضلة'},{id:'سوريا',name:'🇸🇾 سوريا'},{id:'mbc',name:'MBC'},
   {id:'أخبار',name:'📰 أخبار'},{id:'رياضة',name:'⚽ رياضة'},{id:'أفلام',name:'🎬 أفلام'},{id:'مسلسلات',name:'📺 مسلسلات'},
   {id:'أطفال',name:'🧸 أطفال'},{id:'دينية',name:'🕌 دينية'},{id:'موسيقى',name:'🎵 موسيقى'},{id:'منوعة',name:'🌟 منوعة'}
 ];
@@ -156,10 +169,7 @@ const episodes = epIds.map((id, i) => ({
   thumb: 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg'
 }));
 
-const epIds_baqla = [
-  "6Q3LHKD-OQE", "G6scQ2IHiHc", "Sk3uDpQRu6w", "AM6qKx3kyTE", "_5pWUphmekU"
-];
-
+const epIds_baqla = ["6Q3LHKD-OQE", "G6scQ2IHiHc", "Sk3uDpQRu6w", "AM6qKx3kyTE", "_5pWUphmekU"];
 const episodes_baqla = epIds_baqla.map((id, i) => ({
   yt: id, name: 'بقلة ذوق - الحلقة ' + (i + 1),
   thumb: 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg'
@@ -171,15 +181,34 @@ const baseChannels = [
   {name:"الأخبارية السورية",url:"https://svs.itworkscdn.net/syrianews/syrianews.smil/playlist_dvr.m3u8",logo:"https://upload.wikimedia.org/wikipedia/ar/thumb/e/e1/Syria_News_logo.png/200px-Syria_News_logo.png",cat:"سوريا"}
 ];
 
-const seen = new Set();
+const VOD = ['أفلام', 'مسلسلات'];
+const isFav = u => favs.some(f => f.url === u);
+
 function addChannels(list) {
   list.forEach(c => {
-    if (!seen.has(c.url)) { seen.add(c.url); c.id = nextId++; allChannels.push(c); }
+    if (!byUrl.has(c.url)) { c.id = nextId++; byUrl.set(c.url, c); allChannels.push(c); idx = null; }
   });
+}
+
+function byCat(id) {
+  if (id === 'fav') return favs.map(f => byUrl.get(f.url)).filter(Boolean);
+  if (!idx) { idx = {}; allChannels.forEach(c => (idx[c.cat] || (idx[c.cat] = [])).push(c)); }
+  return idx[id] || [];
+}
+
+let renderTimer = 0;
+function scheduleRender() {
+  if (renderTimer) return;
+  renderTimer = setTimeout(() => {
+    renderTimer = 0;
+    if (!viewEl.contains(document.activeElement)) render();
+  }, 300);
 }
 
 window.addEventListener('load', () => {
   addChannels(baseChannels);
+  addChannels(favs.map(f => ({...f})));
+  addChannels(recent.map(f => ({...f})));
   render();
   loadAllPlaylists();
   setTimeout(() => {
@@ -198,7 +227,7 @@ function autoStart() {
   let saved = null;
   try { saved = JSON.parse(localStorage.getItem('zaeemLast')); } catch (e) {}
   if (saved && saved.url) addChannels([saved]);
-  const ch = (saved && allChannels.find(c => c.url === saved.url)) || allChannels[0];
+  const ch = (saved && byUrl.get(saved.url)) || allChannels[0];
   if (ch) play(ch, allChannels.filter(c => c.cat === ch.cat));
 }
 
@@ -210,11 +239,7 @@ function loadAllPlaylists() {
   ];
   lists.forEach(p =>
     fetch(p.url, {cache:'no-store'}).then(r => r.text())
-      .then(t => { 
-          const parsed = parseM3U(t, p.cat);
-          addChannels(parsed); 
-          if (!viewEl.contains(document.activeElement)) render(); 
-      })
+      .then(t => { addChannels(parseM3U(t, p.cat)); scheduleRender(); })
       .catch(() => console.log('فشل جلب: ' + p.url))
   );
 }
@@ -260,7 +285,7 @@ function chCard(ch, list) {
   img.onerror = () => { img.onerror = null; img.src = PLACEHOLDER; };
   t.appendChild(img);
   const n = document.createElement('div');
-  n.className = 'cname'; n.textContent = ch.name; n.title = ch.name;
+  n.className = 'cname'; n.textContent = (isFav(ch.url) ? '⭐ ' : '') + ch.name; n.title = ch.name;
   d.append(t, n);
   d.onclick = () => play(ch, list);
   return d;
@@ -299,12 +324,11 @@ function addRow(title, items, mk) {
   viewEl.appendChild(s);
 }
 
-const VOD = ['أفلام', 'مسلسلات'];
-
 function filteredChannels() {
   const s = q.toLowerCase();
   return allChannels.filter(c =>
-    (cat === 'all' ? (s || !VOD.includes(c.cat)) : c.cat === cat) && c.name.toLowerCase().includes(s));
+    (cat === 'all' ? (s || !VOD.includes(c.cat)) : cat === 'fav' ? isFav(c.url) : c.cat === cat) &&
+    c.name.toLowerCase().includes(s));
 }
 
 function showGrid(list, mk, emptyText) {
@@ -335,15 +359,15 @@ function autoOn() { try { return localStorage.getItem('zaeemAuto') !== '0'; } ca
 function render() {
   viewEl.textContent = '';
   dock.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.v === view));
-  const byCat = id => allChannels.filter(x => x.cat === id);
   if (view === 'home') {
+    addRow('🕘 تابع المشاهدة', recent.map(r => byUrl.get(r.url)).filter(Boolean), chCard);
+    addRow('⭐ المفضلة', byCat('fav'), chCard);
     addRow('🎬 أحدث الأفلام', byCat('أفلام').slice(0, 20), chCard);
     addRow('📺 أحدث المسلسلات', byCat('مسلسلات').slice(0, 20), chCard);
     addRow('🎬 مسلسل الإمام أحمد بن حنبل', episodes, epCard);
     addRow('🎬 مسلسل بقلة ذوق وكثرة غلبة', episodes_baqla, epCard);
-
     categories.slice(1).forEach(c => {
-      if (!VOD.includes(c.id)) addRow(c.name, byCat(c.id).slice(0, 20), chCard);
+      if (c.id !== 'fav' && !VOD.includes(c.id)) addRow(c.name, byCat(c.id).slice(0, 20), chCard);
     });
   } else if (view === 'channels') {
     const chips = document.createElement('div');
@@ -359,7 +383,9 @@ function render() {
       chips.appendChild(b);
     });
     viewEl.appendChild(chips);
-    showGrid(filteredChannels(), chCard, allChannels.length ? 'لا توجد نتائج مطابقة' : 'جاري جلب القنوات...');
+    showGrid(filteredChannels(), chCard,
+      cat === 'fav' ? 'لا توجد قنوات مفضلة بعد — افتح قناة واضغط «مفضلة»' :
+      allChannels.length ? 'لا توجد نتائج مطابقة' : 'جاري جلب القنوات...');
   } else if (view === 'movies') {
     showGrid(byCat('أفلام'), chCard, 'جاري جلب الأفلام...');
   } else if (view === 'series') {
@@ -374,7 +400,11 @@ function render() {
     const label = () => 'فتح آخر قناة تلقائياً عند التشغيل: ' + (autoOn() ? 'مفعّل ✅' : 'متوقف ⛔');
     b.textContent = label();
     b.onclick = () => { try { localStorage.setItem('zaeemAuto', autoOn() ? '0' : '1'); } catch (e) {} b.textContent = label(); };
-    st.appendChild(b);
+    const r = document.createElement('button');
+    r.className = 'more-btn';
+    r.textContent = '🗑️ مسح سجل المشاهدة';
+    r.onclick = () => { recent = []; store.set('zaeemRecent', recent); r.textContent = 'تم المسح ✅'; };
+    st.append(b, r);
     viewEl.appendChild(st);
   }
 }
@@ -387,14 +417,18 @@ dock.querySelectorAll('button').forEach(b => b.onclick = () => {
   viewEl.scrollTo({top: 0});
 });
 
+let searchTimer = 0;
 searchInput.addEventListener('input', () => {
-  q = searchInput.value.trim();
-  if (q) view = 'channels';
-  shown = PAGE;
-  render();
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    q = searchInput.value.trim();
+    if (q) view = 'channels';
+    shown = PAGE;
+    render();
+  }, 250);
 });
 
-function stopYouTube() { ytPlayer.src = 'about:blank'; ytPlayer.style.display = 'none'; }
+function stopYouTube() { clearTimeout(ytTimer); ytPlayer.src = 'about:blank'; ytPlayer.style.display = 'none'; ytOpen.style.display = 'none'; }
 function stopHls() { if (hls) { hls.destroy(); hls = null; } }
 
 function showHud(text, sticky) {
@@ -404,6 +438,66 @@ function showHud(text, sticky) {
   if (!sticky) hudTimer = setTimeout(() => hud.classList.remove('on'), 4000);
 }
 
+/* ---------- يوتيوب على التلفاز ---------- */
+function openInYouTube() {
+  const it = curList[curIdx];
+  if (!it || !it.yt) return;
+  const web = 'https://www.youtube.com/watch?v=' + it.yt;
+  if (/Android/i.test(navigator.userAgent)) {
+    const pkg = document.documentElement.classList.contains('tv') ? 'com.google.android.youtube.tv' : 'com.google.android.youtube';
+    location.href = 'intent://www.youtube.com/watch?v=' + it.yt + '#Intent;scheme=https;package=' + pkg +
+      ';S.browser_fallback_url=' + encodeURIComponent(web) + ';end';
+  } else {
+    window.open(web, '_blank');
+  }
+}
+ytOpen.onclick = openInYouTube;
+
+ytPlayer.addEventListener('load', () => {
+  try { ytPlayer.contentWindow.postMessage(JSON.stringify({event:'listening', id:1, channel:'widget'}), '*'); } catch (e) {}
+});
+
+window.addEventListener('message', e => {
+  if (e.source !== ytPlayer.contentWindow) return;
+  let d = e.data;
+  if (typeof d === 'string') { try { d = JSON.parse(d); } catch (x) { return; } }
+  if (!d) return;
+  if (d.event === 'onError') {
+    clearTimeout(ytTimer);
+    showHud('⚠️ يوتيوب لا يسمح بتشغيل هذه الحلقة هنا — اضغط «فتح في تطبيق يوتيوب»', true);
+    ytOpen.focus();
+  } else if ((d.event === 'onStateChange' && d.info === 1) || (d.event === 'infoDelivery' && d.info && d.info.playerState === 1)) {
+    clearTimeout(ytTimer);
+    const it = curList[curIdx]; if (it) showHud(it.name);
+  }
+});
+
+function updateFav(it) {
+  favBtn.style.display = it.yt ? 'none' : 'block';
+  const on = !it.yt && isFav(it.url);
+  favBtn.classList.toggle('on', on);
+  favBtn.textContent = on ? '⭐ في المفضلة' : '☆ مفضلة';
+}
+
+function toggleFav() {
+  const it = curList[curIdx];
+  if (!it || it.yt) return;
+  const i = favs.findIndex(f => f.url === it.url);
+  if (i >= 0) favs.splice(i, 1);
+  else favs.push({name: it.name, url: it.url, logo: it.logo, cat: it.cat});
+  store.set('zaeemFav', favs);
+  favDirty = true;
+  updateFav(it);
+  showHud(i >= 0 ? 'أُزيلت من المفضلة' : '⭐ أضيفت للمفضلة');
+}
+favBtn.onclick = toggleFav;
+
+function pushRecent(ch) {
+  recent = [{name: ch.name, url: ch.url, logo: ch.logo, cat: ch.cat}]
+    .concat(recent.filter(r => r.url !== ch.url)).slice(0, 12);
+  store.set('zaeemRecent', recent);
+}
+
 function play(item, list) {
   if (!playerEl.classList.contains('open')) lastFocus = document.activeElement;
   playerEl.classList.add('open');
@@ -411,24 +505,33 @@ function play(item, list) {
   curList = list;
   curIdx = Math.max(0, list.indexOf(item));
   stopHls();
+  clearTimeout(ytTimer);
+  updateFav(item);
 
   if (item.yt) {
     video.pause();
     video.style.display = 'none';
     ytPlayer.style.display = 'block';
-    
-    // ميزة التشغيل التلقائي للحلقة التالية:
-    // نقوم بتشغيل الفيديو وإضافة قائمة تشغيل (Playlist) بكود الحلقة الحالية والحلقات التالية
+    ytOpen.style.display = 'block';
+
+    // تشغيل الحلقة التالية تلقائياً (كما كان تماماً)
     let playlist = curList.map(e => e.yt).join(',');
     let currentIndex = curIdx;
-    ytPlayer.src = `https://www.youtube.com/embed/${item.yt}?autoplay=1&rel=0&playlist=${playlist}&index=${currentIndex}`;
-    
+    const org = /^https?:/.test(location.origin) ? '&origin=' + encodeURIComponent(location.origin) : '';
+    ytPlayer.src = `https://www.youtube.com/embed/${item.yt}?autoplay=1&rel=0&playlist=${playlist}&index=${currentIndex}&enablejsapi=1&playsinline=1${org}`;
+
     showHud(item.name);
+    // إن لم يبدأ الفيديو خلال 9 ثوانٍ نعرض الحل البديل
+    ytTimer = setTimeout(() => {
+      showHud('إن لم يبدأ الفيديو اضغط «فتح في تطبيق يوتيوب»', true);
+      ytOpen.focus();
+    }, 9000);
     return;
   }
 
   currentId = item.id;
   try { localStorage.setItem('zaeemLast', JSON.stringify({name:item.name,url:item.url,logo:item.logo,cat:item.cat})); } catch (e) {}
+  pushRecent(item);
   stopYouTube();
   video.style.display = 'block';
   video.pause();
@@ -437,7 +540,7 @@ function play(item, list) {
   if (location.protocol === 'https:' && url.startsWith('http:')) url = 'https:' + url.slice(5);
 
   showHud('جاري التحميل... ' + item.name, true);
-  const fail = () => showHud('⚠️ القناة لا تعمل حالياً: ' + item.name, true);
+  const fail = () => showHud('⚠️ القناة لا تعمل حالياً: ' + item.name + ' — اضغط ▼ للقناة التالية', true);
   const ok = () => showHud(item.name);
 
   if (window.Hls && Hls.isSupported() && url.includes('.m3u8')) {
@@ -472,12 +575,14 @@ function closePlayer() {
   video.load();
   hud.classList.remove('on');
   playerEl.classList.remove('open');
-  if (view === 'home' || view === 'channels') {
-    const keep = lastFocus && lastFocus.isConnected;
+  currentId = -1;
+  let target = lastFocus && lastFocus.isConnected ? lastFocus : null;
+  if (favDirty) { favDirty = false; target = null; render(); }
+  else if (view === 'home' || view === 'channels') {
     document.querySelectorAll('.card').forEach(c => c.classList.remove('live'));
-    if (!keep) render();
+    if (!target) render();
   }
-  const target = lastFocus && lastFocus.isConnected ? lastFocus : (viewEl.querySelector('.card') || dock.querySelector('.active'));
+  target = target || viewEl.querySelector('.card') || dock.querySelector('.active');
   if (target) target.focus();
 }
 $('closeBtn').onclick = closePlayer;
@@ -509,12 +614,23 @@ function spatialMove(dir) {
   if (best) { best.focus(); best.scrollIntoView({block: 'nearest', inline: 'center'}); }
 }
 
+// زر الرجوع: ويب، أندرويد (4)، Tizen (10009)، webOS (461)
+const isBack = e => e.key === 'Escape' || e.key === 'Backspace' || e.key === 'GoBack' || e.keyCode === 4 || e.keyCode === 10009 || e.keyCode === 461;
+
 document.addEventListener('keydown', e => {
   const t = document.activeElement;
   if (playerEl.classList.contains('open')) {
     if (e.key === 'ArrowDown' || e.key === 'ChannelDown' || e.key === 'PageDown') { e.preventDefault(); zap(1); }
     else if (e.key === 'ArrowUp' || e.key === 'ChannelUp' || e.key === 'PageUp') { e.preventDefault(); zap(-1); }
-    else if (e.key === 'Escape' || e.key === 'Backspace' || e.key === 'GoBack') { e.preventDefault(); closePlayer(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      const bs = [$('closeBtn'), favBtn, ytOpen].filter(b => b.offsetParent !== null);
+      if (bs.length > 1) {
+        e.preventDefault();
+        const i = bs.indexOf(t);
+        bs[(i + (e.key === 'ArrowRight' ? 1 : -1) + bs.length) % bs.length].focus();
+      }
+    }
+    else if (isBack(e)) { e.preventDefault(); closePlayer(); }
     return;
   }
   if (t && t.tagName === 'INPUT' && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) return;
@@ -523,8 +639,9 @@ document.addEventListener('keydown', e => {
     spatialMove(e.key);
   } else if (e.key === 'Enter' && t && t.classList.contains('card')) {
     t.click();
-  } else if (e.key === 'Escape' || e.key === 'Backspace') {
+  } else if (isBack(e)) {
     if (t && t.tagName === 'INPUT') return;
+    e.preventDefault();
     const a = dock.querySelector('.active'); if (a) a.focus();
   }
 });
