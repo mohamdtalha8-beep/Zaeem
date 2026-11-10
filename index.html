@@ -174,8 +174,7 @@ html.tv .rail,html.tv .grid,html.tv .chips{padding-right:2.6rem;padding-left:2.6
     <button class="pbtn" id="ytPlay">▶ تشغيل</button>
     <button class="pbtn" id="ytOpen">↗ فتح في تطبيق يوتيوب</button>
   </div>
-</div>
-<script>
+</div> <script>
 (function(){
   const q = new URLSearchParams(location.search).get('tv');
   const auto = /TV|Tizen|Web0S|AFT|BRAVIA|SMART|Android(?!.*Mobile)/i.test(navigator.userAgent);
@@ -218,17 +217,11 @@ const categories = [
 const VOD = ['أفلام', 'مسلسلات'];
 const isFav = u => favs.some(f => f.url === u);
 
-// ============================================================
-// تطبيع الروابط
-// ============================================================
 function normalizeUrl(u) {
   if (!u) return '';
   return u.replace(/^http:/i, 'https:').replace(/\/+$/, '').toLowerCase().trim();
 }
 
-// ============================================================
-// إعادة بناء الأقسام ديناميكياً
-// ============================================================
 function rebuildCategories() {
   const base = [
     {id:'all', name:'🏠 الرئيسية'},
@@ -248,9 +241,6 @@ function rebuildCategories() {
 
 const MAX_PLAYLIST_SIZE = 3 * 1024 * 1024;
 
-// ============================================================
-// إضافة القنوات (مع منع التكرار)
-// ============================================================
 function addChannels(list) {
   list.forEach(c => {
     const norm = normalizeUrl(c.url);
@@ -321,9 +311,6 @@ function autoStart() {
   else setTimeout(tryStart, 2000);
 }
 
-// ============================================================
-// تحميل القوائم (النسخة المحسّنة)
-// ============================================================
 function loadAllPlaylists() {
   const bar = $('loadingBar');
   bar.classList.add('on');
