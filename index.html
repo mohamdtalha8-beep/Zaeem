@@ -18,13 +18,9 @@ html.tv{font-size:22px}
 body{height:100%;overflow:hidden;color:var(--txt);background:radial-gradient(ellipse at 70% -5%,rgba(40,90,220,.3),transparent 55%),radial-gradient(ellipse at 5% 105%,rgba(240,189,74,.09),transparent 45%),var(--bg)}
 ::-webkit-scrollbar{width:0;height:0}
 button{color:inherit}
-
-/* تحسينات الأداء */
 #view{flex:1;min-height:0;overflow-y:auto;padding:.4rem 0 1rem;scroll-behavior:smooth;transform:translateZ(0);will-change:scroll-position;contain:content}
 .rail{display:flex;gap:1rem;overflow-x:auto;padding:.9rem 2rem 1.1rem;scroll-behavior:smooth;transform:translateZ(0);will-change:scroll-position;contain:content}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(10.5rem,1fr));gap:1.3rem 1rem;padding:.9rem 2rem 1rem;transform:translateZ(0)}
-
-/* واجهة القائمة الكلاسيكية الجديدة */
 #tv-guide{display:none;flex:1;overflow:hidden;background:#060914;margin-bottom:10px}
 #tv-guide.active{display:flex}
 .guide-channels{flex:1;display:flex;flex-direction:column;overflow-y:auto;border-left:1px solid var(--line);background:var(--s1)}
@@ -39,12 +35,10 @@ button{color:inherit}
 .guide-cat{padding:12px 20px;border-bottom:1px solid var(--line);cursor:pointer;outline:none;color:var(--mut);font-weight:700;display:flex;align-items:center}
 .guide-cat:hover,.guide-cat:focus{background:#1a2235;color:#fff}
 .guide-cat.active{background:#0055ff;color:#fff}
-
 #splash-screen{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;justify-content:center;align-items:center;background:radial-gradient(circle,#101a3d,#000 72%);transition:opacity .4s}
 .splash-logo{width:150px;border-radius:24px;filter:drop-shadow(0 0 30px rgba(240,189,74,.45))}
 .splash-title{margin-top:1.2rem;color:var(--gold);font-size:2.2rem;font-weight:900}
 .splash-ver{margin-top:.4rem;color:var(--mut);font-size:.9rem}
-
 #app{display:none;height:100%;flex-direction:column}
 #app.show{display:flex}
 .top{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 2rem .3rem}
@@ -52,7 +46,6 @@ button{color:inherit}
 .search-box{width:22rem;max-width:100%;padding:.7rem 1.3rem;font-size:1rem;color:var(--txt);background:rgba(16,21,40,.9);border:1px solid var(--line);border-radius:999px;outline:none}
 .search-box::placeholder{color:var(--mut)}
 .search-box:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(240,189,74,.28)}
-
 .row{margin-bottom:.8rem}
 .row h2{padding:0 2rem;font-size:1.25rem;font-weight:900}
 .card{flex:0 0 auto;width:11rem;text-align:center;cursor:pointer;outline:none;border-radius:14px;transition:transform .15s cubic-bezier(0.2, 0.8, 0.2, 1);transform:translateZ(0)}
@@ -68,7 +61,6 @@ button{color:inherit}
 .card:hover .thumb{border-color:var(--gold)}
 .card:focus{transform:scale(1.06) translateZ(0);z-index:3}
 .card:focus .thumb{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold),0 14px 34px rgba(240,189,74,.3)}
-
 .card.poster{width:9rem}
 .card.poster .thumb{aspect-ratio:2/3}
 .card.poster .thumb img{width:100%;height:100%;object-fit:cover}
@@ -82,21 +74,17 @@ button{color:inherit}
 .empty{padding:3rem 2rem;text-align:center;color:var(--gold);font-size:1.1rem;font-weight:700}
 .more-btn{display:block;margin:0 auto 1rem;padding:.7rem 1.6rem;border:1px solid var(--line);border-radius:999px;background:var(--s2);font-size:.95rem;font-weight:700;cursor:pointer;outline:none}
 .more-btn:focus{background:var(--gold);color:#14100a}
-
-/* Spinner & Loading */
 .spinner-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;padding:3rem 2rem;color:var(--gold);font-weight:700}
 .spinner{width:3rem;height:3rem;border:4px solid rgba(240,189,74,.2);border-top-color:var(--gold);border-radius:50%;animation:spin .9s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-bar{position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--gold),transparent);background-size:200% 100%;animation:slide 1.2s linear infinite;z-index:2000;display:none}
 .loading-bar.on{display:block}
 @keyframes slide{0%{background-position:200% 0}100%{background-position:-200% 0}}
-
 .dock{align-self:center;display:flex;gap:.3rem;padding:.35rem;margin:.3rem 0 max(.7rem,env(safe-area-inset-bottom));border:1px solid var(--line);border-radius:999px;background:rgba(12,17,38,.95);transform:translateZ(0)}
 .dock button{display:flex;align-items:center;gap:.5rem;padding:.7rem 1.5rem;border:0;border-radius:999px;background:transparent;color:var(--mut);font-size:1rem;font-weight:700;cursor:pointer;outline:none}
 .dock button.active{background:rgba(240,189,74,.16);color:var(--gold)}
 .dock button:focus{background:var(--gold);color:#14100a;box-shadow:0 0 0 3px rgba(240,189,74,.35)}
 html.tv .dock button{padding:.4rem 1.2rem;font-size:.75rem}
-
 #player{position:fixed;inset:0;z-index:100;display:none;background:#000;outline:none}
 #player.open{display:block}
 #player video,#player iframe{position:absolute;inset:0;width:100%;height:100%;border:0;object-fit:contain;background:#000}
@@ -113,10 +101,8 @@ html.tv .dock button{padding:.4rem 1.2rem;font-size:.75rem}
 #closeBtn,#favBtn,#ytBar{transition:opacity .3s}
 #player.idle{cursor:none}
 #player.idle #closeBtn,#player.idle #favBtn,#player.idle #ytBar,#player.idle #hud:not(.sticky){opacity:0;pointer-events:none}
-
 html.tv .top,html.tv .row h2{padding-right:2.6rem;padding-left:2.6rem}
 html.tv .rail,html.tv .grid,html.tv .chips{padding-right:2.6rem;padding-left:2.6rem}
-
 @media(max-width:800px){
   html{font-size:15px}
   .top{flex-direction:column;align-items:stretch;gap:.6rem;padding:max(.8rem,env(safe-area-inset-top)) 1rem .3rem}
@@ -139,7 +125,7 @@ html.tv .rail,html.tv .grid,html.tv .chips{padding-right:2.6rem;padding-left:2.6
 <div id="splash-screen">
   <img src="63A5AFDB-C33D-4E90-8631-577AD940E645.png" alt="" class="splash-logo" onerror="this.style.display='none'">
   <div class="splash-title">👑 الزعيم IPTV 👑</div>
-  <div class="splash-ver">v4</div>
+  <div class="splash-ver">v5</div>
 </div>
 
 <div id="loadingBar" class="loading-bar"></div>
@@ -151,7 +137,6 @@ html.tv .rail,html.tv .grid,html.tv .chips{padding-right:2.6rem;padding-left:2.6
   </div>
   <div id="view"></div>
   
-  <!-- واجهة الدليل التلفزيوني الجديدة (مخفية افتراضياً) -->
   <div id="tv-guide">
     <div class="guide-channels">
       <div class="guide-header">
@@ -172,7 +157,7 @@ html.tv .rail,html.tv .grid,html.tv .chips{padding-right:2.6rem;padding-left:2.6
   <nav class="dock" id="dock">
     <button data-v="home">🏠 الرئيسية</button>
     <button data-v="channels">📺 القنوات</button>
-    <button data-v="tvguide">📋 قائمة IPTV</button> <!-- الزر الجديد -->
+    <button data-v="tvguide">📋 قائمة IPTV</button>
     <button data-v="movies">🎬 أفلام</button>
     <button data-v="series">📼 مسلسلات</button>
     <button data-v="settings">⚙️ إعدادات</button>
@@ -190,7 +175,6 @@ html.tv .rail,html.tv .grid,html.tv .chips{padding-right:2.6rem;padding-left:2.6
     <button class="pbtn" id="ytOpen">↗ فتح في تطبيق يوتيوب</button>
   </div>
 </div>
-
 <script>
 (function(){
   const q = new URLSearchParams(location.search).get('tv');
@@ -198,7 +182,7 @@ html.tv .rail,html.tv .grid,html.tv .chips{padding-right:2.6rem;padding-left:2.6
   if (q === '1' || (q === null && auto)) document.documentElement.classList.add('tv');
 })();
 
-const VERSION = 'v4';
+const VERSION = 'v5';
 const $ = id => document.getElementById(id);
 const video = $('videoPlayer'), ytPlayer = $('ytPlayer'), viewEl = $('view'), searchInput = $('searchInput'),
       dock = $('dock'), playerEl = $('player'), hud = $('hud'), favBtn = $('favBtn'),
@@ -219,6 +203,7 @@ let currentId = -1, curList = [], curIdx = 0, lastFocus = null, hudTimer = 0, yt
 let favDirty = false, ytPlaying = false;
 let favs = store.get('zaeemFav', []), recent = store.get('zaeemRecent', []);
 const byUrl = new Map();
+const normalizedUrls = new Set();
 
 let CONFIG = { baseChannels: [], playlists: [], series: [] };
 let baseChannels = [];
@@ -233,9 +218,48 @@ const categories = [
 const VOD = ['أفلام', 'مسلسلات'];
 const isFav = u => favs.some(f => f.url === u);
 
+// ============================================================
+// تطبيع الروابط
+// ============================================================
+function normalizeUrl(u) {
+  if (!u) return '';
+  return u.replace(/^http:/i, 'https:').replace(/\/+$/, '').toLowerCase().trim();
+}
+
+// ============================================================
+// إعادة بناء الأقسام ديناميكياً
+// ============================================================
+function rebuildCategories() {
+  const base = [
+    {id:'all', name:'🏠 الرئيسية'},
+    {id:'fav', name:'⭐ المفضلة'}
+  ];
+  const seen = new Set(['all', 'fav']);
+  const dyn = [];
+  allChannels.forEach(c => {
+    if (c.cat && !seen.has(c.cat)) {
+      seen.add(c.cat);
+      dyn.push({id: c.cat, name: c.cat});
+    }
+  });
+  categories.length = 0;
+  categories.push(...base, ...dyn);
+}
+
+const MAX_PLAYLIST_SIZE = 3 * 1024 * 1024;
+
+// ============================================================
+// إضافة القنوات (مع منع التكرار)
+// ============================================================
 function addChannels(list) {
   list.forEach(c => {
-    if (!byUrl.has(c.url)) { c.id = nextId++; byUrl.set(c.url, c); allChannels.push(c); idx = null; }
+    const norm = normalizeUrl(c.url);
+    if (!norm || normalizedUrls.has(norm)) return;
+    normalizedUrls.add(norm);
+    c.id = nextId++;
+    byUrl.set(c.url, c);
+    allChannels.push(c);
+    idx = null;
   });
 }
 
@@ -281,7 +305,6 @@ window.addEventListener('load', () => {
     setTimeout(() => sp.remove(), 400);
     const first = viewEl.querySelector('.card') || dock.querySelector('.active');
     if (first) first.focus();
-    autoStart();
   }, 500);
 });
 
@@ -298,6 +321,9 @@ function autoStart() {
   else setTimeout(tryStart, 2000);
 }
 
+// ============================================================
+// تحميل القوائم (النسخة المحسّنة)
+// ============================================================
 function loadAllPlaylists() {
   const bar = $('loadingBar');
   bar.classList.add('on');
@@ -308,8 +334,9 @@ function loadAllPlaylists() {
       CONFIG = cfg;
       baseChannels = cfg.baseChannels || [];
       addChannels(baseChannels);
-      scheduleRender(); 
-      buildTVGuide(); // بناء قائمة IPTV
+      rebuildCategories();
+      scheduleRender();
+      buildTVGuide();
 
       (cfg.series || []).forEach((s, i) => {
         const eps = s.episodes.map((yt, j) => ({
@@ -323,39 +350,87 @@ function loadAllPlaylists() {
       scheduleRender();
 
       const lists = cfg.playlists || [];
-      let done = 0, failed = 0;
-      if (!lists.length) { bar.classList.remove('on'); return; }
-      
-      lists.forEach(p =>
+      let done = 0, failed = 0, skipped = 0;
+
+      if (!lists.length) {
+        bar.classList.remove('on');
+        rebuildCategories();
+        autoStart();
+        return;
+      }
+
+      lists.forEach(p => {
         fetch(p.url, {cache:'no-store'})
-          .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
-          .then(t => { 
-             addChannels(parseM3U(t, p.cat)); 
-             scheduleRender(); 
-             buildTVGuide(); // تحديث قائمة IPTV
+          .then(r => {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.text().then(text => {
+              if (text.length > MAX_PLAYLIST_SIZE) {
+                throw new Error('FILE_TOO_BIG:' + Math.round(text.length / 1024 / 1024) + 'MB');
+              }
+              return text;
+            });
           })
-          .catch(err => { failed++; console.log('فشل جلب: ' + p.url); })
+          .then(t => {
+            const before = allChannels.length;
+            const parsed = parseM3U(t, p.cat);
+            addChannels(parsed);
+            const added = allChannels.length - before;
+            console.log(`✅ ${p.cat}: أُضيفت ${added} قناة (من ${parsed.length} في الملف)`);
+            rebuildCategories();
+            scheduleRender();
+            buildTVGuide();
+          })
+          .catch(err => {
+            if (err.message && err.message.startsWith('FILE_TOO_BIG')) {
+              skipped++;
+              const size = err.message.split(':')[1];
+              console.warn(`⏭️ تم تجاهل ${p.url} (حجم ${size} كبير جداً)`);
+              showToast(`⏭️ تجاهل قائمة كبيرة (${size}): ${p.cat}`, 4000);
+            } else {
+              failed++;
+              console.log('❌ فشل جلب: ' + p.url, err.message);
+            }
+          })
           .finally(() => {
             done++;
             if (done === lists.length) {
               bar.classList.remove('on');
-              if (failed === lists.length) showToast('⚠️ تعذّر جلب القوائم، تحقق من الاتصال');
+              rebuildCategories();
               scheduleRender();
+              buildTVGuide();
+
+              if (allChannels.length > 0) {
+                setTimeout(autoStart, 300);
+              }
+
+              if (failed === lists.length) {
+                showToast('⚠️ تعذّر جلب جميع القوائم، تحقق من الاتصال');
+              } else if (skipped > 0) {
+                showToast(`✅ تم التحميل (${skipped} قائمة كبيرة تم تجاهلها)`, 4000);
+              } else {
+                showToast(`✅ ${allChannels.length} قناة جاهزة`, 2500);
+              }
             }
-          })
-      );
+          });
+      });
     })
     .catch(err => {
       bar.classList.remove('on');
-      showToast('⚠️ ملف channels.json غير موجود');
-      baseChannels = [{name:"التلفزيون السوري",url:"https://svs.itworkscdn.net/syriatvlive/syriatv.smil/playlist_dvr.m3u8",logo:"https://upload.wikimedia.org/wikipedia/ar/thumb/1/1a/Syria_TV_logo.png/200px-Syria_TV_logo.png",cat:"سوريا"}];
+      console.error('channels.json error:', err);
+      showToast('⚠️ ملف channels.json غير موجود أو تالف');
+      baseChannels = [{
+        name: "التلفزيون السوري",
+        url: "https://svs.itworkscdn.net/syriatvlive/syriatv.smil/playlist_dvr.m3u8",
+        logo: "https://upload.wikimedia.org/wikipedia/ar/thumb/1/1a/Syria_TV_logo.png/200px-Syria_TV_logo.png",
+        cat: "سوريا"
+      }];
       addChannels(baseChannels);
+      rebuildCategories();
       scheduleRender();
       buildTVGuide();
     });
 }
 
-// دالة بناء قائمة IPTV
 function buildTVGuide() {
   const catsList = $('guide-cats-list');
   if (!catsList) return;
@@ -624,9 +699,12 @@ searchInput.addEventListener('input', () => {
 function stopYouTube() {
   clearTimeout(ytTimer);
   ytPlaying = false;
-  ytPlayer.src = 'about:blank';
-  ytPlayer.style.display = 'none';
-  ytBar.style.display = 'none';
+  try { ytCmd('stopVideo'); } catch(e) {}
+  setTimeout(() => {
+    ytPlayer.src = 'about:blank';
+    ytPlayer.style.display = 'none';
+    ytBar.style.display = 'none';
+  }, 200);
 }
 function stopHls() { if (hls) { hls.destroy(); hls = null; } }
 
@@ -898,7 +976,6 @@ document.addEventListener('keydown', e => {
     return;
   }
 
-  // منطق التنقل في قائمة IPTV (يمين ويسار)
   if (view === 'tvguide') {
     if (e.key === 'ArrowLeft' && t.classList.contains('guide-item')) {
       e.preventDefault();
@@ -910,13 +987,13 @@ document.addEventListener('keydown', e => {
       e.preventDefault();
       t.click();
     } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-      if (e.key === 'ArrowDown' && t.tagName === 'BUTTON') e.preventDefault(); // منع الخروج من الشاشة
+      if (e.key === 'ArrowDown' && t.tagName === 'BUTTON') e.preventDefault();
       setTimeout(() => { if(document.activeElement) document.activeElement.scrollIntoView({block: 'nearest'}); }, 50);
     } else if (isBack(e)) {
       e.preventDefault();
       const a = dock.querySelector('.active'); if (a) a.focus();
     }
-    return; // لا تكمل لباقي الشاشات
+    return;
   }
 
   const typing = t && t.tagName === 'INPUT' && !t.readOnly;
