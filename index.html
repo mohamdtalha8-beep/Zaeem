@@ -4,24 +4,44 @@
 <meta charset="UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#060914">
+<meta name="theme-color" content="#04071a">
 <title>الزعيم IPTV</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.13/hls.min.js"></script>
 <style>
-:root{--bg:#060914;--s1:#101528;--s2:#1a2244;--line:rgba(255,255,255,.1);--gold:#f0bd4a;--gold2:#ffe29a;--txt:#f5f3ee;--mut:#9aa3b8}
+/* ===== الأساسيات ===== */
+:root{
+  --bg:#04071a;
+  --s1:#0d1738;
+  --s2:#16275e;
+  --line:rgba(255,255,255,.1);
+  --gold:#f5c542;
+  --gold2:#ffe29a;
+  --glow:#2b6bff;
+  --txt:#f5f3ee;
+  --mut:#8fa1c7;
+}
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Cairo',sans-serif;-webkit-tap-highlight-color:transparent}
 html{font-size:16px;height:100%}
 html.tv{font-size:22px}
-body{height:100%;overflow:hidden;color:var(--txt);background:radial-gradient(ellipse at 70% -5%,rgba(40,90,220,.3),transparent 55%),radial-gradient(ellipse at 5% 105%,rgba(240,189,74,.09),transparent 45%),var(--bg)}
+body{
+  height:100%;overflow:hidden;color:var(--txt);
+  background:
+    conic-gradient(from 200deg at 55% 38%, transparent, rgba(43,107,255,.28), transparent 28%),
+    radial-gradient(ellipse at 55% 35%, #0c1a4a, var(--bg) 72%);
+}
 ::-webkit-scrollbar{width:0;height:0}
 button{color:inherit}
+
+/* ===== التخطيط الأساسي ===== */
 #view{flex:1;min-height:0;overflow-y:auto;padding:.4rem 0 1rem;contain:content}
 .rail{display:flex;gap:1rem;overflow-x:auto;padding:.9rem 2rem 1.1rem}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(10.5rem,1fr));gap:1.3rem 1rem;padding:.9rem 2rem 1rem}
-#tv-guide{display:none;flex:1;overflow:hidden;background:#060914;margin-bottom:10px}
+
+/* ===== قائمة IPTV ===== */
+#tv-guide{display:none;flex:1;overflow:hidden;background:#04071a;margin-bottom:10px}
 #tv-guide.active{display:flex}
 .guide-channels{flex:1;display:flex;flex-direction:column;overflow-y:auto;border-left:1px solid var(--line);background:var(--s1)}
 .guide-header{background:#0055ff;padding:12px 20px;display:flex;justify-content:space-between;font-weight:bold;color:#fff;position:sticky;top:0;z-index:2}
@@ -35,19 +55,27 @@ button{color:inherit}
 .guide-cat{padding:12px 20px;border-bottom:1px solid var(--line);cursor:pointer;outline:none;color:var(--mut);font-weight:700;display:flex;align-items:center}
 .guide-cat:hover,.guide-cat:focus{background:#1a2235;color:#fff}
 .guide-cat.active{background:#0055ff;color:#fff}
+
+/* ===== شاشة البداية ===== */
 #splash-screen{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;justify-content:center;align-items:center;background:radial-gradient(circle,#101a3d,#000 72%);transition:opacity .4s}
-.splash-logo{width:150px;border-radius:24px;filter:drop-shadow(0 0 30px rgba(240,189,74,.45))}
+.splash-logo{width:150px;border-radius:24px;filter:drop-shadow(0 0 30px rgba(245,197,66,.45))}
 .splash-title{margin-top:1.2rem;color:var(--gold);font-size:2.2rem;font-weight:900}
 .splash-ver{margin-top:.4rem;color:var(--mut);font-size:.9rem}
+
+/* ===== التطبيق ===== */
 #app{display:none;height:100%;flex-direction:column}
 #app.show{display:flex}
 .top{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 2rem .3rem}
 .brand{color:var(--gold);font-size:1.5rem;font-weight:900}
-.search-box{width:22rem;max-width:100%;padding:.7rem 1.3rem;font-size:1rem;color:var(--txt);background:rgba(16,21,40,.9);border:1px solid var(--line);border-radius:999px;outline:none}
+.search-box{width:22rem;max-width:100%;padding:.7rem 1.3rem;font-size:1rem;color:var(--txt);background:rgba(13,23,56,.9);border:1px solid var(--line);border-radius:999px;outline:none}
 .search-box::placeholder{color:var(--mut)}
-.search-box:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(240,189,74,.28)}
+.search-box:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,197,66,.28)}
+
+/* ===== الصفوف ===== */
 .row{margin-bottom:.8rem}
-.row h2{padding:0 2rem;font-size:1.25rem;font-weight:900}
+.row h2{padding:0 2rem;font-size:1.5rem;font-weight:900;margin-bottom:.1rem}
+
+/* ===== البطاقات ===== */
 .card{flex:0 0 auto;width:11rem;text-align:center;cursor:pointer;outline:none;border-radius:14px;transition:transform .12s ease}
 .card.ep{width:15rem}
 .grid .card,.grid .card.ep{width:auto}
@@ -57,34 +85,134 @@ button{color:inherit}
 .thumb img.cover{width:100%;height:100%;object-fit:cover}
 .badge{position:absolute;right:.45rem;bottom:.45rem;padding:.1rem .65rem;border-radius:999px;background:rgba(0,0,0,.72);color:var(--gold2);font-size:.75rem;font-weight:700}
 .card.live .thumb::after{content:'';position:absolute;top:.5rem;right:.5rem;width:.55rem;height:.55rem;border-radius:50%;background:#ff4d4d;box-shadow:0 0 8px #ff4d4d}
-.cname{margin-top:.5rem;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:#dfe3ee;font-size:.9rem;font-weight:700}
+
+/* اسم العمل: أبيض ومحاذاة يمين */
+.card .cname{
+  text-align:right;
+  margin-top:.4rem;
+  font-size:.95rem;
+  color:#fff;
+  overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+  font-weight:700;
+}
+
+/* نجوم التقييم (إن وُجدت) */
+.stars{color:var(--gold);font-size:.8rem;letter-spacing:2px;text-align:right;margin-bottom:.2rem}
+
 .card:hover .thumb{border-color:var(--gold)}
-.card:focus{transform:scale(1.03);z-index:3}
-.card:focus .thumb{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold),0 6px 16px rgba(240,189,74,.25)}
-.card.poster{width:9rem}
-.card.poster .thumb{aspect-ratio:2/3}
+.card:focus{transform:scale(1.08);z-index:3}
+.card:focus .thumb{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold),0 0 24px var(--glow)}
+
+/* ===== بوسترات الأفلام ===== */
+.card.poster{width:10.5rem}
+.card.poster .thumb{
+  aspect-ratio:2/3;
+  border:0;
+  border-radius:8px;
+  box-shadow:0 6px 18px rgba(0,0,0,.55);
+}
 .card.poster .thumb img{width:100%;height:100%;object-fit:cover}
+.card.poster:focus{transform:scale(1.1)}
+.card.poster:focus .thumb{box-shadow:0 0 0 3px var(--gold),0 0 24px var(--glow)}
 .grid .card.poster{width:auto}
+
+/* ===== إعدادات ===== */
 .settings{padding:1rem 2rem}
 .ver{padding:1rem;text-align:center;color:var(--mut);font-size:.85rem}
+
+/* ===== شرائح التصنيفات ===== */
 .chips{display:flex;gap:.5rem;overflow-x:auto;padding:.5rem 2rem}
 .chip{flex:0 0 auto;padding:.55rem 1.2rem;border:1px solid var(--line);border-radius:999px;background:var(--s1);font-size:.95rem;font-weight:700;color:var(--mut);cursor:pointer;outline:none;transition:transform .1s}
-.chip.active{background:rgba(240,189,74,.16);border-color:var(--gold);color:var(--gold)}
-.chip:focus{background:var(--gold);border-color:var(--gold);color:#14100a;box-shadow:0 0 0 3px rgba(240,189,74,.35)}
+.chip.active{background:rgba(245,197,66,.16);border-color:var(--gold);color:var(--gold)}
+.chip:focus{background:var(--gold);border-color:var(--gold);color:#14100a;box-shadow:0 0 0 3px rgba(245,197,66,.35)}
+
+/* ===== عناصر مساعدة ===== */
 .empty{padding:3rem 2rem;text-align:center;color:var(--gold);font-size:1.1rem;font-weight:700}
 .more-btn{display:block;margin:0 auto 1rem;padding:.7rem 1.6rem;border:1px solid var(--line);border-radius:999px;background:var(--s2);font-size:.95rem;font-weight:700;cursor:pointer;outline:none}
 .more-btn:focus{background:var(--gold);color:#14100a}
 .spinner-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;padding:3rem 2rem;color:var(--gold);font-weight:700}
-.spinner{width:3rem;height:3rem;border:4px solid rgba(240,189,74,.2);border-top-color:var(--gold);border-radius:50%;animation:spin .9s linear infinite}
+.spinner{width:3rem;height:3rem;border:4px solid rgba(245,197,66,.2);border-top-color:var(--gold);border-radius:50%;animation:spin .9s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-bar{position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--gold),transparent);background-size:200% 100%;animation:slide 1.2s linear infinite;z-index:2000;display:none}
 .loading-bar.on{display:block}
 @keyframes slide{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.dock{align-self:center;display:flex;gap:.3rem;padding:.35rem;margin:.3rem 0 max(.7rem,env(safe-area-inset-bottom));border:1px solid var(--line);border-radius:999px;background:rgba(12,17,38,.95)}
-.dock button{display:flex;align-items:center;gap:.5rem;padding:.7rem 1.5rem;border:0;border-radius:999px;background:transparent;color:var(--mut);font-size:1rem;font-weight:700;cursor:pointer;outline:none}
-.dock button.active{background:rgba(240,189,74,.16);color:var(--gold)}
-.dock button:focus{background:var(--gold);color:#14100a;box-shadow:0 0 0 3px rgba(240,189,74,.35)}
-html.tv .dock button{padding:.4rem 1.2rem;font-size:.75rem}
+
+/* ===== الشريط السفلي (Dock) — تصميم الزعيم ===== */
+.dock{
+  align-self:stretch;
+  display:flex;
+  justify-content:center;
+  align-items:flex-end;
+  gap:clamp(.6rem,3vw,3rem);
+  background:transparent;
+  border:0;
+  border-radius:0;
+  padding:.2rem 1rem 0;
+  margin:.2rem 0 max(.7rem,env(safe-area-inset-bottom));
+}
+.dock button, html.tv .dock button{
+  flex-direction:column;
+  gap:.35rem;
+  padding:.5rem .9rem;
+  border-radius:14px;
+  font-size:.95rem;
+  color:#fff;
+  background:transparent;
+  border:0;
+  cursor:pointer;
+  outline:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+}
+.dock button svg{
+  width:2.6rem;
+  height:2.6rem;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:2.2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.dock button.active{background:transparent;color:var(--gold)}
+.dock button:focus{
+  background:rgba(245,197,66,.15);
+  color:var(--gold);
+  transform:scale(1.1);
+  box-shadow:0 0 0 3px var(--gold),0 0 20px var(--glow);
+}
+
+/* ===== شعار الزعيم ===== */
+.zlogo{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  font-weight:900;
+  font-size:2rem;
+  line-height:1.1;
+  color:var(--gold);
+  padding:.3rem 1.1rem;
+  border:3px solid var(--gold);
+  border-radius:14px;
+  background:linear-gradient(160deg,#16307a,#0a1640);
+  box-shadow:0 0 20px rgba(43,107,255,.6);
+  flex-shrink:0;
+}
+.zlogo small{font-size:.38em;color:#fff;letter-spacing:3px}
+
+/* ===== سطر الاشتراك ===== */
+.zsub{
+  text-align:center;
+  color:var(--mut);
+  font-size:.95rem;
+  padding:.3rem 0 max(.6rem, env(safe-area-inset-bottom));
+}
+.zsub b{color:var(--gold)}
+.zsub.expired{color:#ff6b6b}
+.zsub.expired b{color:#ff6b6b}
+
+/* ===== المشغل ===== */
 #player{position:fixed;inset:0;z-index:100;display:none;background:#000;outline:none}
 #player.open{display:block}
 #player video,#player iframe{position:absolute;inset:0;width:100%;height:100%;border:0;object-fit:contain;background:#000}
@@ -95,15 +223,19 @@ html.tv .dock button{padding:.4rem 1.2rem;font-size:.75rem}
 #closeBtn,#favBtn,#extBtn{position:absolute}
 #closeBtn{top:1rem;right:1rem}
 #favBtn{top:1rem;left:1rem}
-#extBtn{top:4rem;left:1rem;color:var(--gold);display:none;}
+#extBtn{top:4rem;left:1rem;color:var(--gold);display:none}
 #favBtn.on{color:var(--gold)}
 #ytBar{display:none;position:absolute;bottom:1.5rem;left:50%;transform:translateX(-50%);gap:.6rem;z-index:3}
 #closeBtn:focus,#favBtn:focus,.pbtn:focus,#extBtn:focus{background:var(--gold);color:#14100a}
 #closeBtn,#favBtn,#ytBar,#extBtn{transition:opacity .3s}
 #player.idle{cursor:none}
 #player.idle #closeBtn,#player.idle #favBtn,#player.idle #ytBar,#player.idle #extBtn,#player.idle #hud:not(.sticky){opacity:0;pointer-events:none}
+
+/* ===== تلفاز ===== */
 html.tv .top,html.tv .row h2{padding-right:2.6rem;padding-left:2.6rem}
 html.tv .rail,html.tv .grid,html.tv .chips{padding-right:2.6rem;padding-left:2.6rem}
+
+/* ===== تجاوب ===== */
 @media(max-width:800px){
   html{font-size:15px}
   .top{flex-direction:column;align-items:stretch;gap:.6rem;padding:max(.8rem,env(safe-area-inset-top)) 1rem .3rem}
@@ -112,8 +244,10 @@ html.tv .rail,html.tv .grid,html.tv .chips{padding-right:2.6rem;padding-left:2.6
   .row h2,.rail,.grid,.chips{padding-right:1rem;padding-left:1rem}
   .card{width:8.6rem}.card.poster{width:7.6rem}.card.ep{width:12rem}
   .grid{grid-template-columns:repeat(3,1fr);gap:1rem .6rem}
-  .dock{width:calc(100% - 1.4rem);justify-content:space-around}
-  .dock button{flex:1;justify-content:center;padding:.6rem .15rem;font-size:.75rem;gap:.2rem}
+  .dock{width:calc(100% - 1.4rem);gap:.2rem;padding:.2rem .4rem 0;margin-bottom:max(.4rem,env(safe-area-inset-bottom))}
+  .dock button{flex:1;padding:.4rem .1rem;font-size:.7rem;gap:.2rem}
+  .dock button svg{width:1.7rem;height:1.7rem}
+  .zlogo{font-size:1.1rem;padding:.2rem .5rem;border-width:2px}
   #hud{max-width:40%;font-size:.8rem;top:3.6rem}
   .guide-cats{width:150px}
 }
@@ -137,7 +271,7 @@ html.tv .rail,html.tv .grid,html.tv .chips{padding-right:2.6rem;padding-left:2.6
     <input type="text" id="searchInput" class="search-box" placeholder="🔍 ابحث عن قناة..." readonly inputmode="search" enterkeyhint="search" autocomplete="off">
   </div>
   <div id="view"></div>
-  
+
   <div id="tv-guide">
     <div class="guide-channels">
       <div class="guide-header">
@@ -171,21 +305,88 @@ html.tv .rail,html.tv .grid,html.tv .chips{padding-right:2.6rem;padding-left:2.6
   <div id="hud"></div>
   <button id="closeBtn">✕ رجوع</button>
   <button id="favBtn">☆ مفضلة</button>
-  
-  <!-- زر المشغل الخارجي لقراءة الترجمات المدمجة -->
   <button id="extBtn">▶ مشغل خارجي (ترجمة)</button>
-
   <div id="ytBar">
     <button class="pbtn" id="ytPlay">▶ تشغيل</button>
     <button class="pbtn" id="ytOpen">↗ فتح في تطبيق يوتيوب</button>
   </div>
-</div> <script>
+</div>
+
+<script>
+/* ===== كشف التلفاز ===== */
 (function(){
   const q = new URLSearchParams(location.search).get('tv');
   const auto = /TV|Tizen|Web0S|AFT|BRAVIA|SMART|Android(?!.*Mobile)/i.test(navigator.userAgent);
   if (q === '1' || (q === null && auto)) document.documentElement.classList.add('tv');
 })();
 
+/* ===== تصميم الزعيم: أيقونات + شعار + سطر اشتراك ===== */
+(function(){
+  'use strict';
+
+  // تاريخ انتهاء الاشتراك 'YYYY-MM-DD'، أو null لإخفاء السطر
+  const SUB_END = null; // مثال: '2027-03-05'
+
+  const ICONS = {
+    home:     ['الرئيسية',  '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>'],
+    channels: ['القنوات',   '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M10 11l5 3-5 3z"/>'],
+    tvguide:  ['قائمة IPTV','<path d="M4 6h16M4 12h16M4 18h10"/>'],
+    movies:   ['أفلام',     '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 8h16M4 13h16M4 18h16"/>'],
+    series:   ['مسلسلات',   '<rect x="3" y="6" width="18" height="14" rx="2"/><path d="M8 2l4 4 4-4"/>'],
+    settings: ['إعدادات',   '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>']
+  };
+
+  const dockEl = document.getElementById('dock');
+  if (!dockEl) return;
+  const btns = Array.from(dockEl.querySelectorAll('button'));
+
+  // 1) ملء الأزرار بأيقونات SVG + نص عربي
+  btns.forEach(function (b) {
+    const key = b.dataset.v || b.dataset.view;
+    const d = key && ICONS[key];
+    if (d) {
+      b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + d[1] +
+                    '</svg><span>' + d[0] + '</span>';
+      if (!b.getAttribute('aria-label')) b.setAttribute('aria-label', d[0]);
+    }
+  });
+
+  // 2) شعار الزعيم في المنتصف
+  if (!dockEl.querySelector('.zlogo')) {
+    const logo = document.createElement('div');
+    logo.className = 'zlogo';
+    logo.setAttribute('aria-hidden', 'true');
+    logo.innerHTML = 'الزعيم<small>4K ULTRA</small>';
+    const middleIndex = Math.ceil(btns.length / 2);
+    const refNode = btns[middleIndex] || null;
+    dockEl.insertBefore(logo, refNode);
+  }
+
+  // 3) سطر الاشتراك
+  if (SUB_END) {
+    const days = Math.ceil((new Date(SUB_END + 'T23:59:59') - new Date()) / 864e5);
+    const sub = document.createElement('div');
+    sub.className = 'zsub' + (days <= 0 ? ' expired' : '');
+    sub.setAttribute('role', 'status');
+    sub.innerHTML = days > 0
+      ? 'سينتهي الاشتراك خلال: <b>' + days + '</b> يوم'
+      : 'انتهى الاشتراك';
+    dockEl.after(sub);
+
+    // تحديث تلقائي يومي
+    setInterval(function () {
+      const subEl = document.querySelector('.zsub');
+      if (!subEl) return;
+      const d2 = Math.ceil((new Date(SUB_END + 'T23:59:59') - new Date()) / 864e5);
+      subEl.classList.toggle('expired', d2 <= 0);
+      subEl.innerHTML = d2 > 0
+        ? 'سينتهي الاشتراك خلال: <b>' + d2 + '</b> يوم'
+        : 'انتهى الاشتراك';
+    }, 864e5);
+  }
+})();
+
+/* ===== منطق التطبيق الأصلي ===== */
 const VERSION = 'v5';
 const $ = id => document.getElementById(id);
 const video = $('videoPlayer'), ytPlayer = $('ytPlayer'), viewEl = $('view'), searchInput = $('searchInput'),
@@ -195,7 +396,7 @@ const video = $('videoPlayer'), ytPlayer = $('ytPlayer'), viewEl = $('view'), se
 
 const PAGE = 60;
 const PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
-  '<svg xmlns="http://www.w3.org/2000/svg" width="70" height="70"><rect width="70" height="70" rx="12" fill="#1a2244"/><text x="35" y="43" font-size="22" font-weight="bold" text-anchor="middle" fill="#f0bd4a" font-family="sans-serif">TV</text></svg>');
+  '<svg xmlns="http://www.w3.org/2000/svg" width="70" height="70"><rect width="70" height="70" rx="12" fill="#16275e"/><text x="35" y="43" font-size="22" font-weight="bold" text-anchor="middle" fill="#f5c542" font-family="sans-serif">TV</text></svg>');
 
 const store = {
   get(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } },
@@ -246,7 +447,7 @@ function rebuildCategories() {
   categories.push(...base, ...dyn);
 }
 
-const MAX_PLAYLIST_SIZE = 15 * 1024 * 1024; 
+const MAX_PLAYLIST_SIZE = 15 * 1024 * 1024;
 
 function addChannels(list) {
   list.forEach(c => {
@@ -280,7 +481,7 @@ function showToast(msg, ms) {
   if (!t) {
     t = document.createElement('div');
     t.id = 'toast';
-    t.style.cssText = 'position:fixed;bottom:5.5rem;left:50%;transform:translateX(-50%);padding:.8rem 1.6rem;border-radius:999px;background:rgba(240,189,74,.95);color:#14100a;font-weight:800;font-size:.95rem;z-index:3000;box-shadow:0 8px 30px rgba(0,0,0,.5);opacity:0;transition:opacity .3s;pointer-events:none;max-width:90vw;text-align:center';
+    t.style.cssText = 'position:fixed;bottom:5.5rem;left:50%;transform:translateX(-50%);padding:.8rem 1.6rem;border-radius:999px;background:rgba(245,197,66,.95);color:#14100a;font-weight:800;font-size:.95rem;z-index:3000;box-shadow:0 8px 30px rgba(0,0,0,.5);opacity:0;transition:opacity .3s;pointer-events:none;max-width:90vw;text-align:center';
     document.body.appendChild(t);
   }
   t.textContent = msg;
@@ -289,16 +490,12 @@ function showToast(msg, ms) {
   t._timer = setTimeout(() => t.style.opacity = '0', ms || 3000);
 }
 
-// زر المشغل الخارجي
 extBtn.onclick = () => {
   const it = curList[curIdx];
   if (!it || !it.url) return;
-  
   let playUrl = it.url;
-  // محاولة فتح الرابط في مشغل خارجي (VLC أو MX Player)
   const isAndroid = /Android/i.test(navigator.userAgent);
   if (isAndroid) {
-    // محاولة استخدام Intent لفتح VLC أو MX Player أو أي مشغل افتراضي
     location.href = playUrl;
   } else {
     window.open(playUrl, '_blank');
@@ -310,7 +507,7 @@ window.addEventListener('load', () => {
   addChannels(recent.map(f => ({...f})));
   render();
   loadAllPlaylists();
-  
+
   setTimeout(() => {
     const sp = $('splash-screen');
     $('app').classList.add('show');
@@ -445,9 +642,9 @@ function buildTVGuide() {
   const catsList = $('guide-cats-list');
   if (!catsList) return;
   catsList.innerHTML = '';
-  
+
   const uniqueCats = ['all', ...new Set(allChannels.map(c => c.cat))];
-  
+
   uniqueCats.forEach((cId, i) => {
     const div = document.createElement('div');
     div.className = 'guide-cat' + (i === 0 ? ' active' : '');
@@ -460,7 +657,7 @@ function buildTVGuide() {
     };
     catsList.appendChild(div);
   });
-  
+
   loadGuideChannels('all');
 }
 
@@ -468,16 +665,16 @@ function loadGuideChannels(catId) {
   const list = $('guide-channels-list');
   if (!list) return;
   list.innerHTML = '';
-  
+
   const channels = catId === 'all' ? allChannels.filter(c => !VOD.includes(c.cat)) : allChannels.filter(c => c.cat === catId);
   const chListForPlay = [...channels];
-  
+
   channels.slice(0, 150).forEach((ch, i) => {
     const div = document.createElement('div');
     div.className = 'guide-item';
     div.tabIndex = 0;
     div.onclick = () => play(ch, chListForPlay);
-    
+
     const num = String(i + 1).padStart(3, '0');
     div.innerHTML = `
       <div class="guide-num">${num}</div>
@@ -621,7 +818,7 @@ function render() {
 
   viewEl.textContent = '';
   dock.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.v === view));
-  
+
   if (view === 'home') {
     addRow('🕘 تابع المشاهدة', recent.map(r => byUrl.get(r.url)).filter(Boolean), chCard);
     addRow('⭐ المفضلة', byCat('fav'), chCard);
@@ -659,7 +856,7 @@ function render() {
     showGrid(allChannels.filter(c => VOD.includes(c.cat) && c.cat !== 'مسلسلات'), chCard, 'جاري جلب الأفلام...');
   } else if (view === 'series') {
     addRow('🎬 مسلسل الإمام أحمد بن حنبل', episodes, epCard);
-    addRow('🎬 مسلسل بقلة ذوق وكثرة غلبة', episodes_baqla, epCard);
+    addRow('🎬 مسلسل بقلة ذكورة وكثرة غلبة', episodes_baqla, epCard);
     showGrid(byCat('مسلسلات'), chCard);
   } else if (view === 'settings') {
     const st = document.createElement('div');
@@ -885,7 +1082,7 @@ function play(item, list) {
   ytPlaying = false;
   updateFav(item);
   wake();
-  
+
   extBtn.style.display = 'none';
 
   if (item.yt) {
@@ -914,12 +1111,11 @@ function play(item, list) {
   stopYouTube();
   video.style.display = 'block';
   video.pause();
-  
-  // إظهار زر المشغل الخارجي فقط للأفلام
+
   if (VOD.includes(item.cat) && item.cat !== 'مسلسلات') {
     extBtn.style.display = 'block';
   }
-  
+
   showHud('جاري التحميل... ' + item.name, true);
   startStream(item);
 }
@@ -939,9 +1135,9 @@ function closePlayer() {
   hud.classList.remove('on', 'sticky');
   playerEl.classList.remove('open', 'idle');
   currentId = -1;
-  
+
   extBtn.style.display = 'none';
-  
+
   let target = lastFocus && lastFocus.isConnected ? lastFocus : null;
   if (favDirty) { favDirty = false; target = null; render(); }
   else if (view === 'home' || view === 'channels') {
@@ -984,7 +1180,7 @@ const isBack = e => e.key === 'Escape' || e.key === 'Backspace' || e.key === 'Go
 
 document.addEventListener('keydown', e => {
   const t = document.activeElement;
-  
+
   if (playerEl.classList.contains('open')) {
     wake();
     if (e.key === 'ArrowDown' || e.key === 'ChannelDown' || e.key === 'PageDown') { e.preventDefault(); zap(1); }
