@@ -215,7 +215,7 @@ const categories = [
   {id:'أطفال',name:'🧸 أطفال'},{id:'دينية',name:'🕌 دينية'},{id:'موسيقى',name:'🎵 موسيقى'},{id:'منوعة',name:'🌟 منوعة'}
 ];
 
-const VOD = ['أفلام', 'مسلسلات'];
+const VOD = ['أفلام', 'أكشن', 'مغامرات', 'كوميديا', 'رعب', 'خيال علمي', 'حرب', 'مسلسلات'];
 const isFav = u => favs.some(f => f.url === u);
 
 function normalizeUrl(u) {
@@ -240,7 +240,7 @@ function rebuildCategories() {
   categories.push(...base, ...dyn);
 }
 
-const MAX_PLAYLIST_SIZE = 3 * 1024 * 1024;
+const MAX_PLAYLIST_SIZE = 15 * 1024 * 1024; // تم الرفع إلى 15 ميغابايت
 
 function addChannels(list) {
   list.forEach(c => {
@@ -316,104 +316,107 @@ function loadAllPlaylists() {
   const bar = $('loadingBar');
   bar.classList.add('on');
 
+  // الروابط المدمجة التي تم جمعها
+  const builtInPlaylists = [
+    { url: 'https://iptv-org.github.io/iptv/languages/ara.m3u', cat: 'عربية' },
+    { url: 'https://aymrgknetzpucldhpkwm.supabase.co/storage/v1/object/public/tmdb/top-movies.m3u', cat: 'أفلام' },
+    { url: 'https://aymrgknetzpucldhpkwm.supabase.co/storage/v1/object/public/tmdb/action-movies.m3u', cat: 'أكشن' },
+    { url: 'https://aymrgknetzpucldhpkwm.supabase.co/storage/v1/object/public/tmdb/adventure-movies.m3u', cat: 'مغامرات' },
+    { url: 'https://aymrgknetzpucldhpkwm.supabase.co/storage/v1/object/public/tmdb/comedy-movies.m3u', cat: 'كوميديا' },
+    { url: 'https://aymrgknetzpucldhpkwm.supabase.co/storage/v1/object/public/tmdb/horror-movies.m3u', cat: 'رعب' },
+    { url: 'https://aymrgknetzpucldhpkwm.supabase.co/storage/v1/object/public/tmdb/science-fiction-movies.m3u', cat: 'خيال علمي' },
+    { url: 'https://aymrgknetzpucldhpkwm.supabase.co/storage/v1/object/public/tmdb/war-movies.m3u', cat: 'حرب' }
+  ];
+
+  const processLists = (cfg) => {
+    CONFIG = cfg;
+    baseChannels = cfg.baseChannels || [];
+    addChannels(baseChannels);
+    rebuildCategories();
+    scheduleRender();
+    guideDirty = true;
+
+    (cfg.series || []).forEach((s, i) => {
+      const eps = s.episodes.map((yt, j) => ({
+        yt,
+        name: s.title.replace(/^🎬\s*/, '') + ' - الحلقة ' + (j+1),
+        thumb: 'https://i.ytimg.com/vi/' + yt + '/hqdefault.jpg'
+      }));
+      if (i === 0) episodes = eps;
+      else if (i === 1) episodes_baqla = eps;
+    });
+    scheduleRender();
+
+    const lists = [...builtInPlaylists, ...(cfg.playlists || [])];
+    let done = 0, failed = 0, skipped = 0;
+
+    if (!lists.length) {
+      bar.classList.remove('on');
+      rebuildCategories();
+      autoStart();
+      return;
+    }
+
+    lists.forEach(p => {
+      fetch(p.url, {cache:'no-store'})
+        .then(r => {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.text().then(text => {
+            if (text.length > MAX_PLAYLIST_SIZE) {
+              throw new Error('FILE_TOO_BIG:' + Math.round(text.length / 1024 / 1024) + 'MB');
+            }
+            return text;
+          });
+        })
+        .then(t => {
+          const before = allChannels.length;
+          const parsed = parseM3U(t, p.cat);
+          addChannels(parsed);
+          const added = allChannels.length - before;
+          console.log(`✅ ${p.cat}: أُضيفت ${added} قناة (من ${parsed.length} في الملف)`);
+          guideDirty = true;
+        })
+        .catch(err => {
+          if (err.message && err.message.startsWith('FILE_TOO_BIG')) {
+            skipped++;
+            const size = err.message.split(':')[1];
+            console.warn(`⏭️ تم تجاهل ${p.url} (حجم ${size} كبير جداً)`);
+            showToast(`⏭️ تجاهل قائمة كبيرة (${size}): ${p.cat}`, 4000);
+          } else {
+            failed++;
+            console.log('❌ فشل جلب: ' + p.url, err.message);
+          }
+        })
+        .finally(() => {
+          done++;
+          if (done === lists.length) {
+            bar.classList.remove('on');
+            rebuildCategories();
+            scheduleRender();
+            guideDirty = true;
+
+            if (allChannels.length > 0) {
+              setTimeout(autoStart, 300);
+            }
+
+            if (failed === lists.length) {
+              showToast('⚠️ تعذّر جلب جميع القوائم، تحقق من الاتصال');
+            } else if (skipped > 0) {
+              showToast(`✅ تم التحميل (${skipped} قائمة كبيرة تم تجاهلها)`, 4000);
+            } else {
+              showToast(`✅ ${allChannels.length} عنصر جاهز`, 2500);
+            }
+          }
+        });
+    });
+  };
+
   fetch('channels.json', {cache:'no-store'})
     .then(r => { if (!r.ok) throw new Error('channels.json'); return r.json(); })
-    .then(cfg => {
-      CONFIG = cfg;
-      baseChannels = cfg.baseChannels || [];
-      addChannels(baseChannels);
-      rebuildCategories();
-      scheduleRender();
-      guideDirty = true;
-
-      (cfg.series || []).forEach((s, i) => {
-        const eps = s.episodes.map((yt, j) => ({
-          yt,
-          name: s.title.replace(/^🎬\s*/, '') + ' - الحلقة ' + (j+1),
-          thumb: 'https://i.ytimg.com/vi/' + yt + '/hqdefault.jpg'
-        }));
-        if (i === 0) episodes = eps;
-        else if (i === 1) episodes_baqla = eps;
-      });
-      scheduleRender();
-
-      const lists = cfg.playlists || [];
-      let done = 0, failed = 0, skipped = 0;
-
-      if (!lists.length) {
-        bar.classList.remove('on');
-        rebuildCategories();
-        autoStart();
-        return;
-      }
-
-      lists.forEach(p => {
-        fetch(p.url, {cache:'no-store'})
-          .then(r => {
-            if (!r.ok) throw new Error('HTTP ' + r.status);
-            return r.text().then(text => {
-              if (text.length > MAX_PLAYLIST_SIZE) {
-                throw new Error('FILE_TOO_BIG:' + Math.round(text.length / 1024 / 1024) + 'MB');
-              }
-              return text;
-            });
-          })
-          .then(t => {
-            const before = allChannels.length;
-            const parsed = parseM3U(t, p.cat);
-            addChannels(parsed);
-            const added = allChannels.length - before;
-            console.log(`✅ ${p.cat}: أُضيفت ${added} قناة (من ${parsed.length} في الملف)`);
-            guideDirty = true;
-          })
-          .catch(err => {
-            if (err.message && err.message.startsWith('FILE_TOO_BIG')) {
-              skipped++;
-              const size = err.message.split(':')[1];
-              console.warn(`⏭️ تم تجاهل ${p.url} (حجم ${size} كبير جداً)`);
-              showToast(`⏭️ تجاهل قائمة كبيرة (${size}): ${p.cat}`, 4000);
-            } else {
-              failed++;
-              console.log('❌ فشل جلب: ' + p.url, err.message);
-            }
-          })
-          .finally(() => {
-            done++;
-            if (done === lists.length) {
-              bar.classList.remove('on');
-              rebuildCategories();
-              scheduleRender();
-              guideDirty = true;
-
-              if (allChannels.length > 0) {
-                setTimeout(autoStart, 300);
-              }
-
-              if (failed === lists.length) {
-                showToast('⚠️ تعذّر جلب جميع القوائم، تحقق من الاتصال');
-              } else if (skipped > 0) {
-                showToast(`✅ تم التحميل (${skipped} قائمة كبيرة تم تجاهلها)`, 4000);
-              } else {
-                showToast(`✅ ${allChannels.length} قناة جاهزة`, 2500);
-              }
-            }
-          });
-      });
-    })
+    .then(cfg => processLists(cfg))
     .catch(err => {
-      bar.classList.remove('on');
-      console.error('channels.json error:', err);
-      showToast('⚠️ ملف channels.json غير موجود أو تالف');
-      baseChannels = [{
-        name: "التلفزيون السوري",
-        url: "https://svs.itworkscdn.net/syriatvlive/syriatv.smil/playlist_dvr.m3u8",
-        logo: "https://upload.wikimedia.org/wikipedia/ar/thumb/1/1a/Syria_TV_logo.png/200px-Syria_TV_logo.png",
-        cat: "سوريا"
-      }];
-      addChannels(baseChannels);
-      rebuildCategories();
-      scheduleRender();
-      guideDirty = true;
+      console.warn('channels.json error:', err);
+      processLists({ baseChannels: [], playlists: [], series: [] });
     });
 }
 
@@ -478,14 +481,16 @@ function parseM3U(text, defaultCat) {
     } else if (/^https?:\/\//i.test(line) && name) {
       let cat = defaultCat;
       const lg = group.toLowerCase();
-      if (/mbc/i.test(name)) cat = 'mbc';
-      else if (lg.includes('news') || name.includes('أخبار') || name.includes('إخبار')) cat = 'أخبار';
-      else if (lg.includes('sport') || name.includes('رياض') || /bein/i.test(name)) cat = 'رياضة';
-      else if (lg.includes('kid') || lg.includes('animation') || name.includes('أطفال') || name.includes('كرتون')) cat = 'أطفال';
-      else if (lg.includes('relig') || name.includes('قرآن') || name.includes('إسلام')) cat = 'دينية';
-      else if (lg.includes('music') || name.includes('أغاني') || name.includes('موسيقى')) cat = 'موسيقى';
-      else if (/series|مسلسل|S\d{1,2}\s?E\d{1,2}/i.test(group + ' ' + name)) cat = 'مسلسلات';
-      else if (lg.includes('movie') || name.includes('أفلام')) cat = 'أفلام';
+      if (!cat || cat === 'منوعة' || cat === 'أفلام') { // لا نتدخل إذا كان القسم محدداً مسبقاً
+        if (/mbc/i.test(name)) cat = 'mbc';
+        else if (lg.includes('news') || name.includes('أخبار') || name.includes('إخبار')) cat = 'أخبار';
+        else if (lg.includes('sport') || name.includes('رياض') || /bein/i.test(name)) cat = 'رياضة';
+        else if (lg.includes('kid') || lg.includes('animation') || name.includes('أطفال') || name.includes('كرتون')) cat = 'أطفال';
+        else if (lg.includes('relig') || name.includes('قرآن') || name.includes('إسلام')) cat = 'دينية';
+        else if (lg.includes('music') || name.includes('أغاني') || name.includes('موسيقى')) cat = 'موسيقى';
+        else if (/series|مسلسل|S\d{1,2}\s?E\d{1,2}/i.test(group + ' ' + name)) cat = 'مسلسلات';
+        else if (lg.includes('movie') || name.includes('أفلام')) cat = 'أفلام';
+      }
       out.push({name, url: line, logo: /^https?:\/\//i.test(logo) ? logo : '', cat});
       name = ''; logo = ''; group = '';
     }
@@ -600,6 +605,12 @@ function render() {
     addRow('🕘 تابع المشاهدة', recent.map(r => byUrl.get(r.url)).filter(Boolean), chCard);
     addRow('⭐ المفضلة', byCat('fav'), chCard);
     addRow('🎬 أحدث الأفلام', byCat('أفلام').slice(0, 12), chCard);
+    addRow('🔥 أكشن', byCat('أكشن').slice(0, 12), chCard);
+    addRow('🗺️ مغامرات', byCat('مغامرات').slice(0, 12), chCard);
+    addRow('😂 كوميديا', byCat('كوميديا').slice(0, 12), chCard);
+    addRow('👻 رعب', byCat('رعب').slice(0, 12), chCard);
+    addRow('🚀 خيال علمي', byCat('خيال علمي').slice(0, 12), chCard);
+    addRow('⚔️ حرب', byCat('حرب').slice(0, 12), chCard);
     addRow('📺 أحدث المسلسلات', byCat('مسلسلات').slice(0, 12), chCard);
     addRow('🎬 مسلسل الإمام أحمد بن حنبل', episodes, epCard);
     addRow('🎬 مسلسل بقلة ذوق وكثرة غلبة', episodes_baqla, epCard);
@@ -624,7 +635,7 @@ function render() {
       cat === 'fav' ? 'لا توجد قنوات مفضلة بعد — افتح قناة واضغط «مفضلة»' :
       allChannels.length ? 'لا توجد نتائج مطابقة' : 'جاري جلب القنوات...');
   } else if (view === 'movies') {
-    showGrid(byCat('أفلام'), chCard, 'جاري جلب الأفلام...');
+    showGrid(allChannels.filter(c => VOD.includes(c.cat) && c.cat !== 'مسلسلات'), chCard, 'جاري جلب الأفلام...');
   } else if (view === 'series') {
     addRow('🎬 مسلسل الإمام أحمد بن حنبل', episodes, epCard);
     addRow('🎬 مسلسل بقلة ذوق وكثرة غلبة', episodes_baqla, epCard);
