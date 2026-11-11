@@ -18,9 +18,9 @@ html.tv{font-size:22px}
 body{height:100%;overflow:hidden;color:var(--txt);background:radial-gradient(ellipse at 70% -5%,rgba(40,90,220,.3),transparent 55%),radial-gradient(ellipse at 5% 105%,rgba(240,189,74,.09),transparent 45%),var(--bg)}
 ::-webkit-scrollbar{width:0;height:0}
 button{color:inherit}
-#view{flex:1;min-height:0;overflow-y:auto;padding:.4rem 0 1rem;scroll-behavior:smooth;transform:translateZ(0);will-change:scroll-position;contain:content}
-.rail{display:flex;gap:1rem;overflow-x:auto;padding:.9rem 2rem 1.1rem;scroll-behavior:smooth;transform:translateZ(0);will-change:scroll-position;contain:content}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(10.5rem,1fr));gap:1.3rem 1rem;padding:.9rem 2rem 1rem;transform:translateZ(0)}
+#view{flex:1;min-height:0;overflow-y:auto;padding:.4rem 0 1rem;contain:content}
+.rail{display:flex;gap:1rem;overflow-x:auto;padding:.9rem 2rem 1.1rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(10.5rem,1fr));gap:1.3rem 1rem;padding:.9rem 2rem 1rem}
 #tv-guide{display:none;flex:1;overflow:hidden;background:#060914;margin-bottom:10px}
 #tv-guide.active{display:flex}
 .guide-channels{flex:1;display:flex;flex-direction:column;overflow-y:auto;border-left:1px solid var(--line);background:var(--s1)}
@@ -48,26 +48,26 @@ button{color:inherit}
 .search-box:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(240,189,74,.28)}
 .row{margin-bottom:.8rem}
 .row h2{padding:0 2rem;font-size:1.25rem;font-weight:900}
-.card{flex:0 0 auto;width:11rem;text-align:center;cursor:pointer;outline:none;border-radius:14px;transition:transform .15s cubic-bezier(0.2, 0.8, 0.2, 1);transform:translateZ(0)}
+.card{flex:0 0 auto;width:11rem;text-align:center;cursor:pointer;outline:none;border-radius:14px;transition:transform .12s ease}
 .card.ep{width:15rem}
 .grid .card,.grid .card.ep{width:auto}
-.thumb{position:relative;display:flex;align-items:center;justify-content:center;aspect-ratio:16/10;overflow:hidden;border-radius:14px;border:1px solid var(--line);background:linear-gradient(160deg,var(--s2),var(--s1));transition:box-shadow .15s,border-color .15s;transform:translateZ(0);backface-visibility:hidden}
+.thumb{position:relative;display:flex;align-items:center;justify-content:center;aspect-ratio:16/10;overflow:hidden;border-radius:14px;border:1px solid var(--line);background:linear-gradient(160deg,var(--s2),var(--s1));transition:border-color .12s}
 .card.ep .thumb{aspect-ratio:16/9}
-.thumb img{width:62%;height:72%;object-fit:contain;transform:translateZ(0)}
+.thumb img{width:62%;height:72%;object-fit:contain}
 .thumb img.cover{width:100%;height:100%;object-fit:cover}
 .badge{position:absolute;right:.45rem;bottom:.45rem;padding:.1rem .65rem;border-radius:999px;background:rgba(0,0,0,.72);color:var(--gold2);font-size:.75rem;font-weight:700}
 .card.live .thumb::after{content:'';position:absolute;top:.5rem;right:.5rem;width:.55rem;height:.55rem;border-radius:50%;background:#ff4d4d;box-shadow:0 0 8px #ff4d4d}
 .cname{margin-top:.5rem;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:#dfe3ee;font-size:.9rem;font-weight:700}
 .card:hover .thumb{border-color:var(--gold)}
-.card:focus{transform:scale(1.06) translateZ(0);z-index:3}
-.card:focus .thumb{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold),0 14px 34px rgba(240,189,74,.3)}
+.card:focus{transform:scale(1.03);z-index:3}
+.card:focus .thumb{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold),0 6px 16px rgba(240,189,74,.25)}
 .card.poster{width:9rem}
 .card.poster .thumb{aspect-ratio:2/3}
 .card.poster .thumb img{width:100%;height:100%;object-fit:cover}
 .grid .card.poster{width:auto}
 .settings{padding:1rem 2rem}
 .ver{padding:1rem;text-align:center;color:var(--mut);font-size:.85rem}
-.chips{display:flex;gap:.5rem;overflow-x:auto;padding:.5rem 2rem;transform:translateZ(0)}
+.chips{display:flex;gap:.5rem;overflow-x:auto;padding:.5rem 2rem}
 .chip{flex:0 0 auto;padding:.55rem 1.2rem;border:1px solid var(--line);border-radius:999px;background:var(--s1);font-size:.95rem;font-weight:700;color:var(--mut);cursor:pointer;outline:none;transition:transform .1s}
 .chip.active{background:rgba(240,189,74,.16);border-color:var(--gold);color:var(--gold)}
 .chip:focus{background:var(--gold);border-color:var(--gold);color:#14100a;box-shadow:0 0 0 3px rgba(240,189,74,.35)}
@@ -80,7 +80,7 @@ button{color:inherit}
 .loading-bar{position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--gold),transparent);background-size:200% 100%;animation:slide 1.2s linear infinite;z-index:2000;display:none}
 .loading-bar.on{display:block}
 @keyframes slide{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.dock{align-self:center;display:flex;gap:.3rem;padding:.35rem;margin:.3rem 0 max(.7rem,env(safe-area-inset-bottom));border:1px solid var(--line);border-radius:999px;background:rgba(12,17,38,.95);transform:translateZ(0)}
+.dock{align-self:center;display:flex;gap:.3rem;padding:.35rem;margin:.3rem 0 max(.7rem,env(safe-area-inset-bottom));border:1px solid var(--line);border-radius:999px;background:rgba(12,17,38,.95)}
 .dock button{display:flex;align-items:center;gap:.5rem;padding:.7rem 1.5rem;border:0;border-radius:999px;background:transparent;color:var(--mut);font-size:1rem;font-weight:700;cursor:pointer;outline:none}
 .dock button.active{background:rgba(240,189,74,.16);color:var(--gold)}
 .dock button:focus{background:var(--gold);color:#14100a;box-shadow:0 0 0 3px rgba(240,189,74,.35)}
@@ -117,7 +117,7 @@ html.tv .rail,html.tv .grid,html.tv .chips{padding-right:2.6rem;padding-left:2.6
   .guide-cats{width:150px}
 }
 @media(max-width:400px){.grid{grid-template-columns:repeat(2,1fr)}}
-@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
@@ -200,6 +200,7 @@ let allChannels = [], shown = PAGE, nextId = 0, hls = null, idx = null;
 let view = 'home', cat = 'all', q = '';
 let currentId = -1, curList = [], curIdx = 0, lastFocus = null, hudTimer = 0, ytTimer = 0, idleTimer = 0;
 let favDirty = false, ytPlaying = false;
+let guideDirty = true;
 let favs = store.get('zaeemFav', []), recent = store.get('zaeemRecent', []);
 const byUrl = new Map();
 const normalizedUrls = new Set();
@@ -323,7 +324,7 @@ function loadAllPlaylists() {
       addChannels(baseChannels);
       rebuildCategories();
       scheduleRender();
-      buildTVGuide();
+      guideDirty = true;
 
       (cfg.series || []).forEach((s, i) => {
         const eps = s.episodes.map((yt, j) => ({
@@ -363,9 +364,7 @@ function loadAllPlaylists() {
             addChannels(parsed);
             const added = allChannels.length - before;
             console.log(`✅ ${p.cat}: أُضيفت ${added} قناة (من ${parsed.length} في الملف)`);
-            rebuildCategories();
-            scheduleRender();
-            buildTVGuide();
+            guideDirty = true;
           })
           .catch(err => {
             if (err.message && err.message.startsWith('FILE_TOO_BIG')) {
@@ -384,7 +383,7 @@ function loadAllPlaylists() {
               bar.classList.remove('on');
               rebuildCategories();
               scheduleRender();
-              buildTVGuide();
+              guideDirty = true;
 
               if (allChannels.length > 0) {
                 setTimeout(autoStart, 300);
@@ -414,7 +413,7 @@ function loadAllPlaylists() {
       addChannels(baseChannels);
       rebuildCategories();
       scheduleRender();
-      buildTVGuide();
+      guideDirty = true;
     });
 }
 
@@ -449,7 +448,7 @@ function loadGuideChannels(catId) {
   const channels = catId === 'all' ? allChannels.filter(c => !VOD.includes(c.cat)) : allChannels.filter(c => c.cat === catId);
   const chListForPlay = [...channels];
   
-  channels.forEach((ch, i) => {
+  channels.slice(0, 150).forEach((ch, i) => {
     const div = document.createElement('div');
     div.className = 'guide-item';
     div.tabIndex = 0;
@@ -458,7 +457,7 @@ function loadGuideChannels(catId) {
     const num = String(i + 1).padStart(3, '0');
     div.innerHTML = `
       <div class="guide-num">${num}</div>
-      <img class="guide-logo" src="${ch.logo || PLACEHOLDER}" onerror="this.src='${PLACEHOLDER}'">
+      <img class="guide-logo" loading="lazy" decoding="async" src="${ch.logo || PLACEHOLDER}" onerror="this.src='${PLACEHOLDER}'">
       <div class="guide-name">${ch.name}</div>
     `;
     list.appendChild(div);
@@ -586,6 +585,7 @@ function render() {
   if (view === 'tvguide') {
     viewEl.style.display = 'none';
     tvGuide.classList.add('active');
+    if (guideDirty) { guideDirty = false; buildTVGuide(); }
     document.querySelectorAll('.guide-cat.active')[0]?.focus();
     return;
   } else {
@@ -599,12 +599,12 @@ function render() {
   if (view === 'home') {
     addRow('🕘 تابع المشاهدة', recent.map(r => byUrl.get(r.url)).filter(Boolean), chCard);
     addRow('⭐ المفضلة', byCat('fav'), chCard);
-    addRow('🎬 أحدث الأفلام', byCat('أفلام').slice(0, 20), chCard);
-    addRow('📺 أحدث المسلسلات', byCat('مسلسلات').slice(0, 20), chCard);
+    addRow('🎬 أحدث الأفلام', byCat('أفلام').slice(0, 12), chCard);
+    addRow('📺 أحدث المسلسلات', byCat('مسلسلات').slice(0, 12), chCard);
     addRow('🎬 مسلسل الإمام أحمد بن حنبل', episodes, epCard);
     addRow('🎬 مسلسل بقلة ذوق وكثرة غلبة', episodes_baqla, epCard);
     categories.slice(1).forEach(c => {
-      if (c.id !== 'fav' && !VOD.includes(c.id)) addRow(c.name, byCat(c.id).slice(0, 20), chCard);
+      if (c.id !== 'fav' && !VOD.includes(c.id)) addRow(c.name, byCat(c.id).slice(0, 12), chCard);
     });
   } else if (view === 'channels') {
     const chips = document.createElement('div');
